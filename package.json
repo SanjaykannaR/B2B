@@ -1,0 +1,17 @@
+{
+  "name": "b2b-logistics",
+  "version": "1.0.0",
+  "description": "Smart B2B Logistics & Delivery Optimization Platform — MERN Stack",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "keywords": ["b2b", "logistics", "mern", "delivery", "fleet-management"],
+  "license": "ISC"
+}
