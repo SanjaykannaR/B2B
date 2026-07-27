@@ -1,8 +1,23 @@
-// This file is for: useAuth hook — read auth state from Redux
-// Module: Frontend Hooks (Module 10)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// What goes here:
-// - Custom hook that returns { user, role, isAuthenticated, loading }
-// - Reads from Redux authSlice using useSelector
-// - Provides typed access to current user and role
+// This file is for: Custom hook to access Redux auth state
+// Module: Frontend Custom Hooks (Module 10)
+// Owner: Developer 2 (Web Frontend Engineer)
+
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
+
+/**
+ * useAuth Hook
+ * Provides an easy interface to read authentication state from the Redux store.
+ * @returns object containing user, role, isAuthenticated, and loading state
+ */
+export const useAuth = () => {
+  const authState = useSelector((state: RootState) => state.auth);
+
+  return {
+    user: authState.user,
+    role: authState.user?.role || null,
+    isAuthenticated: authState.isAuthenticated,
+    loading: authState.loading,
+    error: authState.error,
+  };
+};

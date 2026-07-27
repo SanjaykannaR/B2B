@@ -1,0 +1,137 @@
+# B2B Logistics — Frontend Implementation Checklist
+
+> **Important for all time**: We are only going to work on module [8, 9, 10, 14] only. Do not do other modules.
+> **Stack:** React 18 + TypeScript + Tailwind CSS v4 + Redux Toolkit + Axios + Leaflet + Recharts
+
+---
+
+## Phase 1 — Foundation (Modules 8 + 10)
+> These are dependencies for everything else. Build bottom-up.
+
+### P0 — Module 10: Utilities & Constants (no deps, used everywhere)
+- [x] `src/utils/constants.ts` — Role enums, status enums, status-to-color map, route paths
+- [x] `src/utils/formatters.ts` — formatDate, formatCurrency, formatWeight, formatVolume, formatDistance, formatDuration, formatElapsedTime, formatTrackingId
+- [x] `src/utils/validators.ts` — validateEmail, validatePhone, validateRequired, validatePositiveNumber, validatePassword
+
+### P0 — Module 10: Axios API Instance
+- [x] `src/services/api.ts` — Axios instance, baseURL from `VITE_API_URL`, JWT request interceptor, 401 response interceptor (clear token + redirect `/login`)
+
+### P0 — Module 10: API Service Files (all depend on api.ts)
+- [x] `src/services/authApi.ts` — login, register, getProfile, refreshToken
+- [x] `src/services/vehicleApi.ts` — getVehicles, getAvailableVehicles, getVehicleStats, createVehicle, updateVehicle, updateVehicleStatus, deleteVehicle
+- [x] `src/services/manifestApi.ts` — getManifests, getMyManifests, getDriverManifests, getManifest, createManifest, updateManifest, assignManifest, startTrip, updateStatus, completeDelivery, cancelManifest
+- [x] `src/services/invoiceApi.ts` — getInvoices, getMyInvoices, getInvoice, generateInvoice, markPaid, getInvoiceStats
+- [x] `src/services/analyticsApi.ts` — getFleetUtilization, getRouteEfficiency, getMonthlyCapacity, getDeliveryPerformance, getRevenueSummary
+- [x] `src/services/notificationApi.ts` — getNotifications, markRead, markAllRead, getUnreadCount
+
+### P0 — Module 10: Custom Hooks
+- [x] `src/hooks/useAuth.ts` — reads authSlice from Redux, returns `{ user, role, isAuthenticated, loading }`
+- [x] `src/hooks/useLocalStorage.ts` — generic localStorage hook with JSON serialize/deserialize
+- [x] `src/hooks/useDebounce.ts` — delays value updates (default 300ms) for search inputs
+- [x] `src/hooks/useRecovery.ts` — reads UNIX timestamp from localStorage, computes elapsed time, resumes timer
+
+### P1 — Module 9: Redux Store (depends on Module 10 services)
+- [x] `src/store/authSlice.ts` — state: `{ user, token, isAuthenticated, loading, error }`, thunks: `loginUser`, `loadUser`, `logoutUser`, localStorage JWT persistence
+- [x] `src/store/manifestSlice.ts` — state: `{ manifests[], selectedManifest, filters, pagination }`, reducers: setManifests, selectManifest, setFilters, clearFilters
+- [x] `src/store/vehicleSlice.ts` — state: `{ vehicles[], selectedVehicle, loading }`, reducers: setVehicles, selectVehicle, updateVehicleStatus
+- [x] `src/store/uiSlice.ts` — state: `{ sidebarOpen, modalState, globalLoading }`, reducers: toggleSidebar, openModal, closeModal, setLoading
+- [x] `src/store/store.ts` — `configureStore` combining all 4 slices, export `RootState` & `AppDispatch` types
+
+### P1 — Module 8: App Entry Point (depends on Redux store)
+- [x] `src/main.tsx` — render `<App />` wrapped in `<Provider>`, `<BrowserRouter>`, `<Toaster>`, import `globals.css`
+
+---
+
+## Phase 2 — Layout & Shared Components (Modules 11 + 12)
+**[REMOVED by User: Do not implement Module 11 or 12]**
+
+---
+
+## Phase 3 — Module 14: Admin Pages
+> Depends on Phases 1 + 2. Core admin experience.
+
+### P1 — Admin Dashboard
+- [x] `src/pages/admin/AdminDashboard.tsx` — 4 StatCards (Total Manifests, Active Vehicles, Pending Orders, Overdue) + recent manifests DataTable with StatusBadge + quick action buttons
+
+### P2 — Fleet Monitor
+- [x] `src/components/admin/AddEditVehicleModal.tsx` — vehicle create/edit form (registration, model, make, year, weight, volume, fuel efficiency)
+- [x] `src/components/admin/FleetGrid.tsx` — vehicle DataTable with columns, StatusBadge, Edit/Delete actions
+- [x] `src/pages/admin/FleetMonitor.tsx` — filter tabs (All/Available/In-Transit/Maintenance) + stat summary cards + FleetGrid
+
+### P2 — Manifest Creation Wizard
+- [x] `src/components/admin/ManifestWizard/StepPartner.tsx` — client dropdown, origin/destination addresses, pickup/delivery dates
+- [x] `src/components/admin/ManifestWizard/StepCargo.tsx` — description, weight, volume, item count, hazmat toggle
+- [x] `src/components/admin/ManifestWizard/StepRoute.tsx` — auto-suggested vehicles by capacity, distance/duration display, vehicle selection
+- [x] `src/components/admin/ManifestWizard/WizardContainer.tsx` — 3-step manager, step indicator, localStorage persistence, validation per step, submit to API
+- [x] `src/pages/admin/ManifestCreate.tsx` — renders WizardContainer page wrapper
+
+### P3 — Live Operations
+- [x] `src/components/admin/LiveMap.tsx` — Leaflet map with vehicle markers (color-coded), route polylines, marker popups
+- [x] `src/components/admin/DispatchPanel.tsx` — manifest list for dispatch, driver/vehicle dropdowns, assign action
+- [x] `src/components/admin/ManifestDetailModal.tsx` — full manifest view with ProgressStepper, timeline, action buttons
+- [x] `src/pages/admin/LiveOperations.tsx` — LiveMap + DispatchPanel layout, manifest cards with live trip timers, status action buttons
+
+---
+
+## Build Order (Quick Reference)
+
+```
+1.  constants.ts
+2.  formatters.ts
+3.  validators.ts
+4.  api.ts (Axios instance)
+5.  All 6 API service files
+6.  All 4 hooks
+7.  All 4 Redux slices + store.ts
+8.  main.tsx
+9.  All 8 shared components
+10. Layout: ProtectedRoute → Sidebar → Topbar → AppShell
+11. App.tsx (router)
+12. AdminDashboard
+13. FleetMonitor + FleetGrid + AddEditVehicleModal
+14. ManifestCreate + WizardContainer + 3 wizard steps
+15. LiveOperations + LiveMap + DispatchPanel + ManifestDetailModal
+```
+
+---
+
+### P2 — New Animation Hooks & Shared Components (added during UI rebuild)
+- [x] `src/hooks/useInView.ts` — IntersectionObserver hook for scroll-triggered reveals
+- [x] `src/hooks/useCountUp.ts` — Animated number counter with ease-out cubic
+- [x] `src/components/admin/shared/AnimatedCard.tsx` — Scroll-triggered fade-in-up wrapper
+- [x] `src/components/admin/shared/Skeleton.tsx` — Shimmer loading placeholder
+- [x] `src/components/admin/shared/PageHeader.tsx` — Reusable page header with gradient underline
+- [x] `src/components/admin/shared/StatCard.tsx` — Rewritten: count-up, glow hover, accent orb
+- [x] `src/components/admin/shared/StatusBadge.tsx` — Rewritten: colored pills, pulsing dot
+
+### P2 — Admin UI Rebuild (modern animations + Industrial Twilight theme)
+- [x] `src/globals.css` — Moved from `src/styles/globals.css`. Added keyframes: shimmer, glowPulse, countReveal, barGrow, dotPulse. Added .skeleton, .reveal, .row-glow utilities. Tailwind `@import` must be first line.
+- [x] `src/index.html` — Google Fonts `<link>` tags moved here (not in CSS) to avoid @import warning
+- [x] `src/App.tsx` — Nav bar with design token colors
+- [x] `src/pages/admin/AdminDashboard.tsx` — KPI count-up cards, recent manifests table, status distribution bars
+- [x] `src/pages/admin/FleetMonitor.tsx` — Tab filters with animated underline, summary cards, grid
+- [x] `src/pages/admin/ManifestCreate.tsx` — Ambient gradient blobs, wizard wrapper
+- [x] `src/pages/admin/LiveOperations.tsx` — Split dispatch + map layout, demo trips, auto-refresh
+- [x] `src/components/admin/FleetGrid.tsx` — Row-glow hover, action buttons on hover
+- [x] `src/components/admin/DispatchPanel.tsx` — Trip cards with live timers
+- [x] `src/components/admin/LiveMap.tsx` — Dark CartoDB tiles, truck markers
+- [x] `src/components/admin/ManifestDetailModal.tsx` — Progress stepper, detail grid, action buttons
+- [x] `src/components/admin/AddEditVehicleModal.tsx` — Form with design tokens
+- [x] `src/components/admin/ManifestWizard/WizardContainer.tsx` — Animated progress stepper
+- [x] `src/components/admin/ManifestWizard/StepPartner.tsx` — Origin/dest cards
+- [x] `src/components/admin/ManifestWizard/StepCargo.tsx` — Hazmat toggle
+- [x] `src/components/admin/ManifestWizard/StepRoute.tsx` — Vehicle selection cards
+- [x] Deleted `src/styles/globals.css` (was emptied) and old `components/shared/StatCard.tsx` + `StatusBadge.tsx`
+- [x] Build verified: 0 TypeScript errors, CSS 49.87 KB (gzipped 13.83 KB), JS 474.27 KB
+
+---
+
+## Notes
+
+- **Backend is also stubbed** — no server code is implemented. The frontend API services will return nothing until the backend is built.
+- **Mapbox replaced by Leaflet** — the codebase uses `react-leaflet` (free, no API key). The docs mention Mapbox but the package.json has Leaflet.
+- **All files use TypeScript** (.ts / .tsx) — docs describe JavaScript but codebase is TS.
+- **globals.css is fully implemented** — CSS variables (Industrial Twilight palette), animations, Tailwind v4 integration. `@import "tailwindcss"` MUST be first line.
+- **Google Fonts loaded via `<link>` in index.html**, not CSS @import, to avoid Tailwind v4 ordering warnings.
+- **package.json dependencies are installed** — `node_modules` exists in client.
+- **All work goes to `sanjay` branch only** — never commit to `main`/`master`.

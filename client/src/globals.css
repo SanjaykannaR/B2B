@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 /* ============================================================
    B2B LOGISTICS — GLOBAL DESIGN SYSTEM
    ============================================================
@@ -11,21 +13,6 @@
            var(--font-sans)
            var(--shadow-card)
    ============================================================ */
-
-
-/* ============================================================
-   1. TAILWIND CSS IMPORTS
-   ============================================================ */
-@import "tailwindcss";
-
-
-/* ============================================================
-   2. GOOGLE FONTS
-   ============================================================
-   Inter Variable — Body, headings, UI text
-   IBM Plex Mono — Tracking IDs, KPIs, timestamps, financials
-   ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
 
 /* ============================================================
@@ -439,6 +426,11 @@ table,
   to   { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.5; }
@@ -449,8 +441,66 @@ table,
   to   { transform: rotate(360deg); }
 }
 
-.animate-fade-in     { animation: fadeIn 0.3s var(--transition-smooth); }
-.animate-fade-in-up  { animation: fadeInUp 0.4s var(--transition-smooth); }
-.animate-slide-right { animation: slideInRight 0.3s var(--transition-smooth); }
-.animate-pulse       { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.animate-spin        { animation: spin 1s linear infinite; }
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
+  50%      { box-shadow: 0 0 20px 4px rgba(255, 107, 44, 0.15); }
+}
+
+@keyframes countReveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes barGrow {
+  from { width: 0; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.8); opacity: 0.4; }
+}
+
+.animate-fade-in      { animation: fadeIn 0.3s var(--transition-smooth) both; }
+.animate-fade-in-up   { animation: fadeInUp 0.4s var(--transition-smooth) both; }
+.animate-slide-right  { animation: slideInRight 0.3s var(--transition-smooth) both; }
+.animate-scale-in     { animation: scaleIn 0.25s var(--transition-smooth) both; }
+.animate-pulse        { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-spin         { animation: spin 1s linear infinite; }
+.animate-glow-pulse   { animation: glowPulse 3s ease-in-out infinite; }
+.animate-bar-grow     { animation: barGrow 0.8s var(--transition-smooth) both; }
+
+/* Skeleton shimmer loading effect */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-hover) 25%,
+    var(--color-border-light) 50%,
+    var(--color-surface-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+
+/* Scroll reveal — hidden by default, animated when .is-visible */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s var(--transition-smooth),
+              transform 0.5s var(--transition-smooth);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Row hover glow effect for tables */
+.row-glow:hover {
+  background: linear-gradient(90deg, rgba(255, 107, 44, 0.04), transparent 60%);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+}
