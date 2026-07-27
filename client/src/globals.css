@@ -218,59 +218,8 @@
 
 
 /* ============================================================
-   11. DARK MODE OVERRIDES
-   ============================================================
-   Automatically applied when user's system preference is dark.
-   Can also be toggled via [data-theme="dark"] on <html>.
+   11. DARK MODE — DISABLED (forced light theme)
    ============================================================ */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-surface:        #0F1117;
-    --color-surface-card:   #1A1D2E;
-    --color-surface-hover:  #242840;
-    --color-surface-active: #2E3350;
-    --color-surface-modal:  rgba(0, 0, 0, 0.7);
-
-    --color-border:         #2A2E3F;
-    --color-border-light:   #1F2233;
-    --color-border-focus:   #5B7FB5;
-
-    --color-text-primary:   #E8ECF4;
-    --color-text-secondary: #9CA3B8;
-    --color-text-muted:     #6B7290;
-    --color-text-link:      #7896C2;
-    --color-text-link-hover:#9FB3D4;
-
-    --shadow-card:          0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20);
-    --shadow-card-hover:    0 8px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.20);
-    --shadow-sidebar:       4px 0 12px rgba(0, 0, 0, 0.30);
-    --shadow-modal:         0 24px 48px rgba(0, 0, 0, 0.50);
-  }
-}
-
-/* Manual dark mode toggle support */
-[data-theme="dark"] {
-  --color-surface:        #0F1117;
-  --color-surface-card:   #1A1D2E;
-  --color-surface-hover:  #242840;
-  --color-surface-active: #2E3350;
-  --color-surface-modal:  rgba(0, 0, 0, 0.7);
-
-  --color-border:         #2A2E3F;
-  --color-border-light:   #1F2233;
-  --color-border-focus:   #5B7FB5;
-
-  --color-text-primary:   #E8ECF4;
-  --color-text-secondary: #9CA3B8;
-  --color-text-muted:     #6B7290;
-  --color-text-link:      #7896C2;
-  --color-text-link-hover:#9FB3D4;
-
-  --shadow-card:          0 1px 3px rgba(0, 0, 0, 0.30), 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-card-hover:    0 8px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.20);
-  --shadow-sidebar:       4px 0 12px rgba(0, 0, 0, 0.30);
-  --shadow-modal:         0 24px 48px rgba(0, 0, 0, 0.50);
-}
 
 
 /* ============================================================
@@ -491,4 +440,10 @@
 @keyframes dotPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
   50%      { transform: scale(1.8); opacity: 0.4; }
+}
+
+@keyframes gradientSpin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

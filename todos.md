@@ -126,6 +126,32 @@
 
 ---
 
+### P2 — Navbar Redesign & Theme (2026-07-27)
+- [x] `src/App.tsx` — Flex navbar: logo + nav links with icons + search bar (gradient glow) + settings gear
+- [x] `src/App.tsx` — Active nav state: orange accent bg + glow shadow on current page
+- [x] `src/App.tsx` — Sticky navbar: `sticky top-0 z-50`
+- [x] `src/App.tsx` — Search bar: gradient border on focus, glow box-shadow, expanded width on focus
+- [x] `src/App.tsx` — Settings icon links to `/admin/settings`
+- [x] `src/globals.css` — Forced light theme: removed `@media (prefers-color-scheme: dark)` and `[data-theme="dark"]` blocks
+- [x] `src/globals.css` — Added `@keyframes gradientSpin` for search bar border animation
+
+### P2 — Settings Page (2026-07-27)
+- [x] `src/pages/admin/Settings.tsx` — Profile info: first name, last name, email, phone, company, role badge
+- [x] `src/pages/admin/Settings.tsx` — Change password: current, new, confirm with show/hide toggle + validation
+- [x] `src/pages/admin/Settings.tsx` — Logout button: dispatches logoutUser, redirects to `/login`
+
+### P2 — All Manifests Page (2026-07-27)
+- [x] `src/pages/admin/AllManifests.tsx` — Full manifest table with 9 columns
+- [x] `src/pages/admin/AllManifests.tsx` — Search by tracking ID, client, city, cargo
+- [x] `src/pages/admin/AllManifests.tsx` — Status filter tabs with counts (ALL, Pending, Assigned, In-Transit, Delivered, Delayed, Cancelled)
+- [x] `src/pages/admin/AllManifests.tsx` — HAZ badge on hazardous shipments
+- [x] `src/pages/admin/AllManifests.tsx` — Back button + Export button
+- [x] `src/pages/admin/AdminDashboard.tsx` — "View All" button → `/admin/manifests`
+- [x] `src/pages/admin/AdminDashboard.tsx` — "New Manifest" button → `/admin/manifests/new`
+- [x] `src/App.tsx` — Added routes: `/admin/manifests`, `/admin/settings`
+
+---
+
 ## Notes
 
 - **Backend is also stubbed** — no server code is implemented. The frontend API services will return nothing until the backend is built.

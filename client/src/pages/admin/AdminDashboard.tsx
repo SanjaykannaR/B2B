@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Package, Truck, Clock, AlertTriangle, ArrowRight, Plus, FileDown } from 'lucide-react';
 import { StatCard } from '../../components/admin/shared/StatCard';
 import { StatusBadge } from '../../components/admin/shared/StatusBadge';
@@ -66,13 +67,14 @@ export const AdminDashboard: React.FC = () => {
             </button>
           }
           action={
-            <button
+            <Link
+              to="/admin/manifests/new"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white
                 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shrink-0 whitespace-nowrap"
               style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
             >
               <Plus size={16} /> New Manifest
-            </button>
+            </Link>
           }
         />
       </AnimatedCard>
@@ -108,12 +110,13 @@ export const AdminDashboard: React.FC = () => {
               <h2 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
                 Recent Manifests
               </h2>
-              <button
+              <Link
+                to="/admin/manifests"
                 className="flex items-center gap-1 text-xs font-semibold transition-colors"
                 style={{ color: 'var(--color-accent)' }}
               >
                 View All <ArrowRight size={14} />
-              </button>
+              </Link>
             </div>
 
             <div className="overflow-x-auto">
