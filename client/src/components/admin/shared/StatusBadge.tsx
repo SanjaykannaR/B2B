@@ -31,7 +31,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]
-        font-bold uppercase tracking-wider transition-colors duration-200 ${className}`}
+        font-bold uppercase tracking-wider whitespace-nowrap transition-colors duration-200 ${className}`}
       style={{ color: config.text, background: config.bg }}
     >
       {isActive && (

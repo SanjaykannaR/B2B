@@ -35,7 +35,6 @@ export const AdminDashboard: React.FC = () => {
         const res = await manifestApi.getManifests({ limit: 5 });
         setManifests(res.manifests || res || []);
       } catch {
-        // Backend offline — show demo data so UI is visible
         setManifests(DEMO_MANIFESTS);
       } finally {
         setLoading(false);
@@ -47,8 +46,8 @@ export const AdminDashboard: React.FC = () => {
   const total = STATUS_SEGMENTS.reduce((s, x) => s + x.count, 0);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
-      {/* Header */}
+    <div className="p-5 sm:p-7 lg:p-8 max-w-[1400px] mx-auto space-y-7">
+      {/* ── Header ── */}
       <AnimatedCard>
         <PageHeader
           title="Dashboard"
@@ -56,7 +55,7 @@ export const AdminDashboard: React.FC = () => {
           secondaryAction={
             <button
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                transition-all duration-200 border"
+                transition-all duration-200 border shrink-0"
               style={{
                 background: 'var(--color-surface-card)',
                 borderColor: 'var(--color-border)',
@@ -68,8 +67,8 @@ export const AdminDashboard: React.FC = () => {
           }
           action={
             <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white
-                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shrink-0 whitespace-nowrap"
               style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
             >
               <Plus size={16} /> New Manifest
@@ -78,8 +77,8 @@ export const AdminDashboard: React.FC = () => {
         />
       </AnimatedCard>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <AnimatedCard delay={80}>
           <StatCard title="Total Manifests" value={1248} icon={Package} color="#3B82F6" trend={{ value: '12%', isPositive: true }} />
         </AnimatedCard>
@@ -94,9 +93,9 @@ export const AdminDashboard: React.FC = () => {
         </AnimatedCard>
       </div>
 
-      {/* Bottom Grid: Table + Status Bar */}
+      {/* ── Bottom Grid: Table + Status Sidebar ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Manifests Table — spans 2 cols */}
+        {/* Recent Manifests Table — 2 cols */}
         <AnimatedCard delay={400} className="lg:col-span-2">
           <div
             className="rounded-2xl border overflow-hidden"
@@ -120,12 +119,12 @@ export const AdminDashboard: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ color: 'var(--color-text-muted)' }}>
+                  <tr style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-light)' }}>
                     <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Tracking ID</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Route</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Updated</th>
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Route</th>
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Status</th>
+                    <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,10 +132,10 @@ export const AdminDashboard: React.FC = () => {
                     Array.from({ length: 4 }).map((_, i) => (
                       <tr key={i}>
                         <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
-                        <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
-                        <td className="px-6 py-4"><Skeleton className="h-4 w-32" /></td>
-                        <td className="px-6 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
-                        <td className="px-6 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-5 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
+                        <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
                       </tr>
                     ))
                   ) : manifests.length > 0 ? (
@@ -150,21 +149,21 @@ export const AdminDashboard: React.FC = () => {
                         }}
                       >
                         <td
-                          className="px-6 py-3.5 font-bold"
+                          className="px-6 py-3.5 font-bold whitespace-nowrap"
                           style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}
                         >
                           #{m.trackingId || 'MNF-XX'}
                         </td>
-                        <td className="px-6 py-3.5" style={{ color: 'var(--color-text-primary)' }}>
+                        <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
                           {m.client?.name || 'Unknown'}
                         </td>
-                        <td className="px-6 py-3.5" style={{ color: 'var(--color-text-secondary)' }}>
+                        <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                           {m.origin?.city} → {m.destination?.city}
                         </td>
-                        <td className="px-6 py-3.5">
+                        <td className="px-5 py-3.5">
                           <StatusBadge status={m.status} />
                         </td>
-                        <td className="px-6 py-3.5" style={{ color: 'var(--color-text-muted)' }}>
+                        <td className="px-5 py-3.5 text-right whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
                           {formatDateTime(m.updatedAt)}
                         </td>
                       </tr>
@@ -182,20 +181,20 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </AnimatedCard>
 
-        {/* Status Distribution + Quick Actions */}
-        <AnimatedCard delay={480} className="space-y-6">
+        {/* ── Right Sidebar: Status Distribution + Quick Actions ── */}
+        <AnimatedCard delay={480} className="space-y-5">
           {/* Status Distribution */}
           <div
-            className="rounded-2xl border p-5"
+            className="rounded-2xl border p-6"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
           >
-            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+            <h3 className="text-sm font-bold mb-5" style={{ color: 'var(--color-text-primary)' }}>
               Status Distribution
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {STATUS_SEGMENTS.map((seg) => (
                 <div key={seg.label}>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
                       {seg.label}
                     </span>
@@ -219,13 +218,13 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Quick Actions */}
           <div
-            className="rounded-2xl border p-5"
+            className="rounded-2xl border p-6"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
           >
-            <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
               Quick Actions
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {[
                 { label: 'Create Manifest', icon: Plus, href: '/admin/manifests/new', color: '#3B82F6' },
                 { label: 'Fleet Monitor', icon: Truck, href: '/admin/fleet', color: '#10B981' },
@@ -234,7 +233,7 @@ export const AdminDashboard: React.FC = () => {
                 <a
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 p-2.5 rounded-xl transition-all duration-200
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
                     hover:-translate-x-0.5 group/action"
                   style={{ color: 'var(--color-text-primary)' }}
                   onMouseEnter={(e) => {
@@ -245,13 +244,13 @@ export const AdminDashboard: React.FC = () => {
                   }}
                 >
                   <div
-                    className="p-2 rounded-lg transition-transform duration-200 group-hover/action:scale-110"
+                    className="flex items-center justify-center w-8 h-8 rounded-lg transition-transform duration-200 group-hover/action:scale-110 shrink-0"
                     style={{ background: `${color}15`, color }}
                   >
                     <I size={16} />
                   </div>
                   <span className="text-sm font-semibold">{label}</span>
-                  <ArrowRight size={14} className="ml-auto opacity-0 group-hover/action:opacity-100 transition-opacity"
+                  <ArrowRight size={14} className="ml-auto opacity-0 group-hover/action:opacity-100 transition-opacity shrink-0"
                     style={{ color: 'var(--color-text-muted)' }} />
                 </a>
               ))}

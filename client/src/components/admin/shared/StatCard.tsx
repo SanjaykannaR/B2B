@@ -32,7 +32,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       className="group relative overflow-hidden rounded-2xl border transition-all duration-300
-        hover:-translate-y-0.5 hover:shadow-lg cursor-default"
+        hover:-translate-y-0.5 hover:shadow-lg cursor-default h-full"
       style={{
         background: 'var(--color-surface-card)',
         borderColor: 'var(--color-border)',
@@ -50,15 +50,15 @@ export const StatCard: React.FC<StatCardProps> = ({
       {/* Top accent line */}
       <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${color}, transparent)` }} />
 
-      <div className="p-5">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-wider"
+      <div className="p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-2 min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider leading-none"
                style={{ color: 'var(--color-text-muted)' }}>
               {title}
             </p>
             <div
-              className="text-3xl font-bold tracking-tight"
+              className="text-3xl font-bold tracking-tight leading-none"
               style={{
                 fontFamily: 'var(--font-mono)',
                 color: 'var(--color-text-primary)',
@@ -70,7 +70,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             </div>
 
             {trend && (
-              <div className="flex items-center gap-1 pt-1">
+              <div className="flex items-center gap-1 pt-2">
                 <span
                   className="text-xs font-bold"
                   style={{ color: trend.isPositive ? 'var(--color-success)' : 'var(--color-error)' }}
@@ -87,7 +87,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           {/* Icon orb */}
           <div
             className="p-2.5 rounded-xl transition-all duration-300
-              group-hover:scale-110 group-hover:rotate-3"
+              group-hover:scale-110 group-hover:rotate-3 shrink-0"
             style={{
               background: `${color}15`,
               color,

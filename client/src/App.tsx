@@ -16,22 +16,22 @@ export default function App() {
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
       {/* Top Nav */}
       <nav
-        className="shrink-0 flex items-center gap-6 px-6 py-3 border-b"
+        className="shrink-0 flex items-center gap-8 px-6 py-3.5 border-b"
         style={{
           background: 'var(--color-surface-card)',
           borderColor: 'var(--color-border)',
           boxShadow: 'var(--shadow-xs)',
         }}
       >
-        <span className="text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>
+        <span className="text-lg font-bold tracking-tight shrink-0" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}>
           B2B Logistics
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-1.5">
           {NAV_ITEMS.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors duration-200"
+              className="px-4 py-2 rounded-lg text-xs font-semibold transition-colors duration-200"
               style={{ color: 'var(--color-text-secondary)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = 'var(--color-surface-hover)';

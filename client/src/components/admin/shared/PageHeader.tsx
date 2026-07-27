@@ -18,8 +18,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   secondaryAction,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-      <div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="min-w-0">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight"
             style={{ color: 'var(--color-text-primary)' }}>
           {title}
