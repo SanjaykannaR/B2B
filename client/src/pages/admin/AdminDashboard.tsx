@@ -56,7 +56,7 @@ export const AdminDashboard: React.FC = () => {
           secondaryAction={
             <button
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                transition-all duration-200 border shrink-0"
+                transition-all duration-200 border shrink-0 min-h-[44px]"
               style={{
                 background: 'var(--color-surface-card)',
                 borderColor: 'var(--color-border)',
@@ -70,7 +70,7 @@ export const AdminDashboard: React.FC = () => {
             <Link
               to="/admin/manifests/new"
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white
-                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shrink-0 whitespace-nowrap"
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shrink-0 whitespace-nowrap min-h-[44px]"
               style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
             >
               <Plus size={16} /> New Manifest
@@ -237,7 +237,7 @@ export const AdminDashboard: React.FC = () => {
                   key={href}
                   href={href}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
-                    hover:-translate-x-0.5 group/action"
+                    hover:-translate-x-0.5 group/action min-h-[44px]"
                   style={{ color: 'var(--color-text-primary)' }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'var(--color-surface-hover)';

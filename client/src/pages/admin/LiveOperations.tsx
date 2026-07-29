@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { List, Map as MapIcon } from 'lucide-react';
 import { DispatchPanel } from '../../components/admin/DispatchPanel';
 import { LiveMap } from '../../components/admin/LiveMap';
 import { ManifestDetailModal } from '../../components/admin/ManifestDetailModal';
@@ -40,6 +41,7 @@ export const LiveOperations: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingManifestId, setViewingManifestId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<'dispatch' | 'map'>('dispatch');
 
   useEffect(() => {
     const load = async () => {
@@ -80,34 +82,61 @@ export const LiveOperations: React.FC = () => {
     <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
       {/* Header Bar */}
       <div className="px-4 sm:px-6 py-3 border-b shrink-0" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-card)' }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>Live Operations</h1>
-            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>Live Operations</h1>
+            <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
               {activeManifests.length} active trips &bull; Last updated just now
             </p>
           </div>
-          {loading && (
-            <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-              <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2" style={{ borderColor: 'var(--color-accent)' }} />
-              Refreshing...
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Mobile view toggle — hidden on md+ */}
+            <div className="md:hidden flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
+              <button
+                onClick={() => setMobileView('dispatch')}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[36px]"
+                style={{
+                  background: mobileView === 'dispatch' ? 'var(--color-accent)' : 'var(--color-surface-card)',
+                  color: mobileView === 'dispatch' ? '#fff' : 'var(--color-text-muted)',
+                }}
+              >
+                <List size={14} /> Trips
+              </button>
+              <button
+                onClick={() => setMobileView('map')}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[36px]"
+                style={{
+                  background: mobileView === 'map' ? 'var(--color-accent)' : 'var(--color-surface-card)',
+                  color: mobileView === 'map' ? '#fff' : 'var(--color-text-muted)',
+                }}
+              >
+                <MapIcon size={14} /> Map
+              </button>
             </div>
-          )}
+            {loading && (
+              <div className="hidden sm:flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2" style={{ borderColor: 'var(--color-accent)' }} />
+                Refreshing...
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Dispatch Panel */}
-        <DispatchPanel
-          manifests={activeManifests}
-          onSelect={handleSelect}
-          selectedId={selectedManifestId}
-          onViewDetails={handleViewDetails}
-        />
+        {/* Dispatch Panel — always visible on md+, toggled on mobile */}
+        <div className={`${mobileView === 'dispatch' ? 'flex' : 'hidden'} md:flex flex-shrink-0 h-full`}>
+          <DispatchPanel
+            manifests={activeManifests}
+            onSelect={handleSelect}
+            selectedId={selectedManifestId}
+            onViewDetails={handleViewDetails}
+          />
+        </div>
 
-        {/* Map */}
-        <div className="flex-1 relative h-full">
+        {/* Map — always visible on md+, toggled on mobile */}
+        <div className={`${mobileView === 'map' ? 'block' : 'hidden'} md:block flex-1 relative h-full`}>
           <LiveMap
             manifests={activeManifests}
             selectedId={selectedManifestId}

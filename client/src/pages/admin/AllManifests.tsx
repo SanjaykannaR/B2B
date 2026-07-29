@@ -98,7 +98,7 @@ export const AllManifests: React.FC = () => {
             </div>
           </div>
           <button
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 min-h-[44px]"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
           >
             <Download size={16} /> Export
@@ -115,7 +115,7 @@ export const AllManifests: React.FC = () => {
             <input
               type="text"
               placeholder="Search by tracking ID, client, city, cargo..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none border transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)]"
+              className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none border transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] min-h-[44px]"
               style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -132,7 +132,7 @@ export const AllManifests: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setStatusFilter(tab)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 min-h-[36px]"
                 style={{
                   background: isActive ? 'var(--color-accent)' : 'var(--color-surface-hover)',
                   color: isActive ? '#fff' : 'var(--color-text-secondary)',
@@ -167,13 +167,13 @@ export const AllManifests: React.FC = () => {
                 <tr style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-light)' }}>
                   <th className="px-6 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Tracking ID</th>
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Origin</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Destination</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Cargo</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Weight</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Vehicle</th>
+                  <th className="hidden sm:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Origin</th>
+                  <th className="hidden sm:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Destination</th>
+                  <th className="hidden lg:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Cargo</th>
+                  <th className="hidden md:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Weight</th>
+                  <th className="hidden lg:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Vehicle</th>
                   <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Status</th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Created</th>
+                  <th className="hidden md:table-cell px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -182,13 +182,13 @@ export const AllManifests: React.FC = () => {
                     <tr key={i} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
                       <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-20" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-16" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="hidden sm:table-cell px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="hidden sm:table-cell px-5 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="hidden lg:table-cell px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                      <td className="hidden md:table-cell px-5 py-4"><Skeleton className="h-4 w-16" /></td>
+                      <td className="hidden lg:table-cell px-5 py-4"><Skeleton className="h-4 w-24" /></td>
                       <td className="px-5 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
-                      <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="hidden md:table-cell px-5 py-4"><Skeleton className="h-4 w-24" /></td>
                     </tr>
                   ))
                 ) : filtered.length > 0 ? (
@@ -207,13 +207,13 @@ export const AllManifests: React.FC = () => {
                       <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
                         {m.client?.name || '—'}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                      <td className="hidden sm:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                         {m.origin?.city || '—'}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                      <td className="hidden sm:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                         {m.destination?.city || '—'}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap max-w-[160px] truncate" style={{ color: 'var(--color-text-secondary)' }}>
+                      <td className="hidden lg:table-cell px-5 py-3.5 whitespace-nowrap max-w-[160px] truncate" style={{ color: 'var(--color-text-secondary)' }}>
                         {m.cargoDetails?.description || '—'}
                         {m.cargoDetails?.isHazardous && (
                           <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.08)', color: '#EF4444' }}>
@@ -221,16 +221,16 @@ export const AllManifests: React.FC = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+                      <td className="hidden md:table-cell px-5 py-3.5 whitespace-nowrap" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
                         {m.cargoDetails?.totalWeightKg ? `${m.cargoDetails.totalWeightKg.toLocaleString()} kg` : '—'}
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
+                      <td className="hidden lg:table-cell px-5 py-3.5 whitespace-nowrap text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
                         {m.vehicle?.registrationNumber || '—'}
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={m.status} />
                       </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                      <td className="hidden md:table-cell px-5 py-3.5 whitespace-nowrap text-xs" style={{ color: 'var(--color-text-muted)' }}>
                         {formatDateTime(m.createdAt)}
                       </td>
                     </tr>

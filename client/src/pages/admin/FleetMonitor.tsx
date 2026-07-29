@@ -76,7 +76,7 @@ export const FleetMonitor: React.FC = () => {
             <button
               onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white
-                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg min-h-[44px]"
               style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
             >
               <Plus size={16} /> Add Vehicle
@@ -116,7 +116,7 @@ export const FleetMonitor: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="relative flex-1 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200"
+              className="relative flex-1 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 min-h-[44px]"
               style={{
                 background: activeTab === tab ? 'var(--color-surface-card)' : 'transparent',
                 color: activeTab === tab ? 'var(--color-accent)' : 'var(--color-text-muted)',

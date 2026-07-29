@@ -58,27 +58,27 @@ export const FleetGrid: React.FC<FleetGridProps> = ({ vehicles, loading, onEdit,
                   <td className="px-6 py-3.5 tabular-nums" style={{ color: 'var(--color-text-secondary)' }}>
                     {v.capacity?.weight || 0} kg
                   </td>
-                  <td className="px-6 py-3.5 text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-6 py-3.5 text-right">
+                    <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => onEdit(v)}
-                        className="p-1.5 rounded-lg transition-colors"
+                        className="p-2.5 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         style={{ color: 'var(--color-text-muted)' }}
                         onMouseEnter={(e) => { e.currentTarget.style.color = '#3B82F6'; e.currentTarget.style.background = '#3B82F615'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                         title="Edit"
                       >
-                        <Edit2 size={15} />
+                        <Edit2 size={16} />
                       </button>
                       <button
                         onClick={() => onDelete(v._id || v.id)}
-                        className="p-1.5 rounded-lg transition-colors"
+                        className="p-2.5 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                         style={{ color: 'var(--color-text-muted)' }}
                         onMouseEnter={(e) => { e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.background = '#EF444415'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                         title="Delete"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
