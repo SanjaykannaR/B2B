@@ -124,7 +124,7 @@ export const AllManifests: React.FC = () => {
         </div>
 
         {/* Status Tabs */}
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2 mt-4">
           {STATUS_TABS.map((tab) => {
             const isActive = statusFilter === tab;
             const count = statusCounts[tab] || 0;
