@@ -159,7 +159,7 @@ export default function App() {
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div
-          className="md:hidden border-b animate-fade-in"
+          className="md:hidden border-b animate-fade-in relative z-50"
           style={{
             background: 'var(--color-surface-card)',
             borderColor: 'var(--color-border)',
@@ -200,7 +200,7 @@ export default function App() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative z-0">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-0">
         <Routes>
           <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="/admin" element={<AdminDashboard />} />

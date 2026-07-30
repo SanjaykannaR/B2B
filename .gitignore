@@ -43,3 +43,8 @@ logs/
 # ==============================
 coverage/
 .cache/
+
+# ==============================
+# Project Planning Docs
+# ==============================
+client/src/future.md

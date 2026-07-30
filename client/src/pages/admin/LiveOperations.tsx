@@ -79,7 +79,7 @@ export const LiveOperations: React.FC = () => {
   const viewingManifest = activeManifests.find((m) => (m._id || m.id) === viewingManifestId) || null;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
       {/* Header Bar */}
       <div className="px-4 sm:px-6 py-3 border-b shrink-0" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-card)' }}>
         <div className="flex items-center justify-between gap-3">

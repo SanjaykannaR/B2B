@@ -4,8 +4,8 @@
 
 import axios from 'axios';
 
-// Get base API URL from environment variables, fallback to local development port
-const baseURL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+// Get base API URL from environment variables, fallback to Vite proxy path (/api → localhost:5000)
+const baseURL = (import.meta as any).env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL,
