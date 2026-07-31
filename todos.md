@@ -17,7 +17,7 @@
 - [x] `src/services/api.ts` — Axios instance, baseURL from `VITE_API_URL`, JWT request interceptor, 401 response interceptor (clear token + redirect `/login`)
 
 ### P0 — Module 10: API Service Files (all depend on api.ts)
-- [x] `src/services/authApi.ts` — login, register, getProfile, refreshToken
+- [x] `src/services/authApi.ts` — login, register, getProfile, refreshToken, updateProfile (PUT /users/:id, local fallback)
 - [x] `src/services/vehicleApi.ts` — getVehicles, getAvailableVehicles, getVehicleStats, createVehicle, updateVehicle, updateVehicleStatus, deleteVehicle
 - [x] `src/services/manifestApi.ts` — getManifests, getMyManifests, getDriverManifests, getManifest, createManifest, updateManifest, assignManifest, startTrip, updateStatus, completeDelivery, cancelManifest
 - [x] `src/services/invoiceApi.ts` — getInvoices, getMyInvoices, getInvoice, generateInvoice, markPaid, getInvoiceStats
@@ -31,7 +31,7 @@
 - [x] `src/hooks/useRecovery.ts` — reads UNIX timestamp from localStorage, computes elapsed time, resumes timer
 
 ### P1 — Module 9: Redux Store (depends on Module 10 services)
-- [x] `src/store/authSlice.ts` — state: `{ user, token, isAuthenticated, loading, error }`, thunks: `loginUser`, `loadUser`, `logoutUser`, localStorage JWT persistence
+- [x] `src/store/authSlice.ts` — state: `{ user, token, isAuthenticated, loading, error }`, thunks: `loginUser`, `loadUser`, `logoutUser`, reducer: `updateUser` (profile save), localStorage JWT persistence
 - [x] `src/store/manifestSlice.ts` — state: `{ manifests[], selectedManifest, filters, pagination }`, reducers: setManifests, selectManifest, setFilters, clearFilters
 - [x] `src/store/vehicleSlice.ts` — state: `{ vehicles[], selectedVehicle, loading }`, reducers: setVehicles, selectVehicle, updateVehicleStatus
 - [x] `src/store/uiSlice.ts` — state: `{ sidebarOpen, modalState, globalLoading }`, reducers: toggleSidebar, openModal, closeModal, setLoading
@@ -149,6 +149,40 @@
 - [x] `src/pages/admin/AdminDashboard.tsx` — "View All" button → `/admin/manifests`
 - [x] `src/pages/admin/AdminDashboard.tsx` — "New Manifest" button → `/admin/manifests/new`
 - [x] `src/App.tsx` — Added routes: `/admin/manifests`, `/admin/settings`
+
+---
+
+### P2 — Scoped Plan Items 8/9/14 + Settings API + Navbar UX (2026-07-31)
+> From `client/src/future-my-module.md` (Developer 2 scope). Committed as `2a01172` on `sanjay`.
+
+**Item 14 — Replace window.confirm() with Modal** ✅
+- [x] `src/components/shared/ConfirmModal.tsx` — Fully implemented (was a Module 12 stub): `isOpen, onConfirm, onCancel, title, message, confirmText?, variant?` (danger/default), Escape-to-close, Enter-to-confirm, focus on confirm
+- [x] `src/pages/admin/FleetMonitor.tsx` — `pendingDelete` state + `<ConfirmModal variant="danger" />`; no `window.confirm` remains in codebase
+
+**Item 9 — Row Click → Detail Modal on All Manifests** ✅
+- [x] `src/pages/admin/AllManifests.tsx` — `selected` state + row `onClick`
+- [x] `src/components/admin/ManifestDetailModal.tsx` — rendered read-only (no `onAction`); cargo fallback `cargoDetails.* → cargo.* → top-level` for description & weight
+
+**Item 8 — Pagination on All Tables** ✅
+- [x] `src/pages/admin/AllManifests.tsx` — page-size selector (10/25/50/100), Prev/Next, "Page X of Y", "Showing X–Y of Z", reset-to-page-1 on search/filter change
+- [x] `src/pages/admin/FleetMonitor.tsx` — same footer + local `useState` pagination, tab change resets page
+- [ ] ⚠️ API-readiness gap: AllManifests sends hardcoded `page: 1` + limit; vehicleApi gets no page/limit — revisit when backend lands
+
+**Item 10 — Make Settings Page API-Real** (partially done)
+- [x] `src/services/authApi.ts` — `updateProfile(data, userId?)` → `PUT /users/:id`, try/catch + local fallback
+- [x] `src/store/authSlice.ts` — `updateUser` reducer (merges + persists localStorage)
+- [x] `src/pages/admin/Settings.tsx` — `handleProfileSave` wired to API + dispatch; demo-mode fallback works
+- [ ] ⏳ **Blocked:** `changePassword()` → `PATCH /auth/change-password` — needs Developer 1 to implement endpoint (client-side validation already in place)
+
+**Navbar UX (App.tsx)**
+- [x] Notification bell + unread badge + dropdown (demo data, API-ready via `notificationApi`), mark-read / mark-all-read, closes on route change
+- [x] Search bar widened: mobile 140px / sm 240px / md 300px / lg 380px (was collapsing to ~110px via `md:w-auto`)
+- [x] Logo: black badge + orange `PackageSearch` icon + orange pin dot (tracking style); **clickable → `/admin`**
+- [x] Dashboard KPI cards clickable: `StatCard` gained optional `to` prop → wraps in router `<Link>` (cursor-pointer, hover lift/glow kept; no "View details" footer per user preference)
+  - Total Manifests → `/admin/manifests` · Active Vehicles → `/admin/fleet` · Pending Orders → `/admin/manifests` · Alerts/Delayed → `/admin/live`
+- [x] `src/components/admin/shared/StatCard.tsx` — optional `to` prop + Link wrapper (design unchanged when not navigable)
+
+**Verified:** `npx tsc --noEmit` passes (0 errors) after all changes.
 
 ---
 
