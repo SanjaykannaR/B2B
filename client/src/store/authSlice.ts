@@ -72,6 +72,11 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.error = null;
     },
+    // Merges updated profile fields into the current user and persists to localStorage
+    updateUser: (state, action: PayloadAction<any>) => {
+      state.user = { ...(state.user || {}), ...action.payload };
+      localStorage.setItem('user', JSON.stringify(state.user));
+    },
     clearError: (state) => {
       state.error = null;
     },
@@ -113,5 +118,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logoutUser, clearError } = authSlice.actions;
+export const { logoutUser, clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;

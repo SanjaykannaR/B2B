@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Filter, Package, Download } from 'lucide-react';
+import { ArrowLeft, Search, Package, Download } from 'lucide-react';
 import { StatusBadge } from '../../components/admin/shared/StatusBadge';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
+import { ManifestDetailModal } from '../../components/admin/ManifestDetailModal';
 import * as manifestApi from '../../services/manifestApi';
 import { formatDateTime } from '../../utils/formatters';
 
@@ -27,14 +28,22 @@ export const AllManifests: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [selected, setSelected] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const STATUS_TABS: StatusFilter[] = ['ALL', 'PENDING', 'ASSIGNED', 'IN_TRANSIT', 'DELIVERED', 'DELAYED', 'CANCELLED'];
+
+  // Reset to page 1 whenever the search or status filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await manifestApi.getManifests({ limit: 50 });
+        const res = await manifestApi.getManifests({ page: 1, limit: pageSize });
         const data = res.manifests || res || [];
         setManifests(data.length > 0 ? data : DEMO_MANIFESTS);
       } catch {
@@ -44,7 +53,7 @@ export const AllManifests: React.FC = () => {
       }
     };
     load();
-  }, []);
+  }, [pageSize]);
 
   const filtered = useMemo(() => {
     let result = manifests;
@@ -72,6 +81,13 @@ export const AllManifests: React.FC = () => {
     });
     return counts;
   }, [manifests]);
+
+  // Pagination (client-side slice over the filtered set)
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageItems = filtered.slice(start, start + pageSize);
 
   return (
     <div className="p-5 sm:p-7 lg:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -191,12 +207,13 @@ export const AllManifests: React.FC = () => {
                       <td className="hidden md:table-cell px-5 py-4"><Skeleton className="h-4 w-24" /></td>
                     </tr>
                   ))
-                ) : filtered.length > 0 ? (
-                  filtered.map((m, i) => (
+                ) : pageItems.length > 0 ? (
+                  pageItems.map((m, i) => (
                     <tr
                       key={m._id || m.trackingId}
                       className="row-glow transition-colors cursor-pointer"
                       style={{ borderBottom: '1px solid var(--color-border-light)', animationDelay: `${i * 40}ms` }}
+                      onClick={() => setSelected(m)}
                     >
                       <td
                         className="px-6 py-3.5 font-bold whitespace-nowrap"
@@ -247,8 +264,59 @@ export const AllManifests: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination footer */}
+          <div
+            className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 border-t"
+            style={{ borderColor: 'var(--color-border-light)' }}
+          >
+            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+              Showing {total === 0 ? 0 : start + 1}–{Math.min(start + pageSize, total)} of {total}
+            </p>
+            <div className="flex items-center gap-3">
+              <select
+                value={pageSize}
+                onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[36px]"
+                style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                aria-label="Page size"
+              >
+                {[10, 25, 50, 100].map((n) => (
+                  <option key={n} value={n}>{n} / page</option>
+                ))}
+              </select>
+              <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+                Page {safePage} of {totalPages}
+              </span>
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setPage(safePage - 1)}
+                  disabled={safePage <= 1}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage(safePage + 1)}
+                  disabled={safePage >= totalPages}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </AnimatedCard>
+
+      {/* Row click → detail modal (read-only) */}
+      <ManifestDetailModal
+        isOpen={!!selected}
+        onClose={() => setSelected(null)}
+        manifest={selected}
+      />
     </div>
   );
 };

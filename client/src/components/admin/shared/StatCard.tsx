@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { useCountUp } from '../../../hooks/useCountUp';
 
@@ -9,11 +10,14 @@ interface StatCardProps {
   color?: string;
   trend?: { value: string; isPositive: boolean };
   delay?: number;
+  /** Optional route to navigate to when the card is clicked */
+  to?: string;
 }
 
 /**
  * StatCard — KPI card with count-up animation and hover glow.
  * Dark glass-morphism card with accent-colored icon orb.
+ * When `to` is provided, the card becomes a clickable link.
  */
 export const StatCard: React.FC<StatCardProps> = ({
   title,
@@ -22,6 +26,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   color = 'var(--color-accent)',
   trend,
   delay = 0,
+  to,
 }) => {
   const numericValue = typeof value === 'number' ? value : parseInt(String(value).replace(/,/g, ''), 10);
   const displayCount = useCountUp(numericValue, 1200);
@@ -29,10 +34,10 @@ export const StatCard: React.FC<StatCardProps> = ({
     ? displayCount.toLocaleString()
     : value;
 
-  return (
+  const card = (
     <div
-      className="group relative overflow-hidden rounded-2xl border transition-all duration-300
-        hover:-translate-y-0.5 hover:shadow-lg cursor-default h-full"
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300
+        hover:-translate-y-0.5 hover:shadow-lg h-full ${to ? 'cursor-pointer' : 'cursor-default'}`}
       style={{
         background: 'var(--color-surface-card)',
         borderColor: 'var(--color-border)',
@@ -99,4 +104,10 @@ export const StatCard: React.FC<StatCardProps> = ({
       </div>
     </div>
   );
+
+  return to ? (
+    <Link to={to} className="block h-full" aria-label={title}>
+      {card}
+    </Link>
+  ) : card;
 };

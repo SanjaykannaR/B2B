@@ -82,16 +82,16 @@ export const AdminDashboard: React.FC = () => {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <AnimatedCard delay={80}>
-          <StatCard title="Total Manifests" value={1248} icon={Package} color="#3B82F6" trend={{ value: '12%', isPositive: true }} />
+          <StatCard title="Total Manifests" value={1248} icon={Package} color="#3B82F6" trend={{ value: '12%', isPositive: true }} to="/admin/manifests" />
         </AnimatedCard>
         <AnimatedCard delay={160}>
-          <StatCard title="Active Vehicles" value={34} icon={Truck} color="#10B981" trend={{ value: '4%', isPositive: true }} />
+          <StatCard title="Active Vehicles" value={34} icon={Truck} color="#10B981" trend={{ value: '4%', isPositive: true }} to="/admin/fleet" />
         </AnimatedCard>
         <AnimatedCard delay={240}>
-          <StatCard title="Pending Orders" value={12} icon={Clock} color="#F59E0B" trend={{ value: '8%', isPositive: false }} />
+          <StatCard title="Pending Orders" value={12} icon={Clock} color="#F59E0B" trend={{ value: '8%', isPositive: false }} to="/admin/manifests" />
         </AnimatedCard>
         <AnimatedCard delay={320}>
-          <StatCard title="Alerts / Delayed" value={3} icon={AlertTriangle} color="#EF4444" />
+          <StatCard title="Alerts / Delayed" value={3} icon={AlertTriangle} color="#EF4444" to="/admin/live" />
         </AnimatedCard>
       </div>
 

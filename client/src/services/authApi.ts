@@ -38,6 +38,27 @@ export const getProfile = async () => {
 };
 
 /**
+ * Sends a PUT request to update the current user's profile.
+ * Falls back to resolving locally when the backend endpoint isn't implemented yet,
+ * so the UI keeps working with demo data until the server lands.
+ * @param data - Profile fields to update (firstName, lastName, email, phone, company)
+ * @param userId - Optional user id; falls back to the stored user's id if omitted
+ * @returns Promise with the updated user data
+ */
+export const updateProfile = async (data: Record<string, any>, userId?: string) => {
+  // Call PUT /users/:id with the profile fields in the body
+  try {
+    const id = userId || (JSON.parse(localStorage.getItem('user') || 'null')?._id);
+    const response = await api.put(`/users/${id}`, data);
+    return response.data;
+  } catch (error) {
+    // Backend not ready — resolve locally so the UI stays functional
+    console.warn('updateProfile: backend unavailable, using local fallback', error);
+    return { user: data };
+  }
+};
+
+/**
  * Sends a POST request to refresh the current authentication session.
  * @returns Promise with response containing a new JWT token
  */

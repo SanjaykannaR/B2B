@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Shield, Lock, Save, LogOut, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { logoutUser } from '../../store/authSlice';
+import { logoutUser, updateUser } from '../../store/authSlice';
+import { updateProfile } from '../../services/authApi';
 import type { RootState } from '../../store/store';
 
 const inputCls = `w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200
@@ -30,9 +31,18 @@ export const Settings: React.FC = () => {
   const [passwordSaved, setPasswordSaved] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  const handleProfileSave = () => {
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 2000);
+  const handleProfileSave = async () => {
+    try {
+      const payload = { firstName, lastName, email, phone, company };
+      const userId = user?._id || user?.id;
+      const saved = await updateProfile(payload, userId);
+      // Persist updated fields into redux + localStorage (API returns user in response.user or response.data.user)
+      dispatch(updateUser({ ...payload, ...(saved?.user || saved?.data?.user || {}) }));
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2000);
+    } catch (e) {
+      console.error('Failed to save profile', e);
+    }
   };
 
   const handlePasswordSave = () => {

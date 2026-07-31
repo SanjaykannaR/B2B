@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { FleetGrid } from '../../components/admin/FleetGrid';
 import { AddEditVehicleModal } from '../../components/admin/AddEditVehicleModal';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { PageHeader } from '../../components/admin/shared/PageHeader';
 import * as vehicleApi from '../../services/vehicleApi';
@@ -22,10 +23,14 @@ export const FleetMonitor: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const tabs: TabType[] = ['ALL', 'AVAILABLE', 'IN_TRANSIT', 'MAINTENANCE'];
 
   useEffect(() => {
+    setPage(1); // reset pagination when the tab changes
     const load = async () => {
       try {
         setLoading(true);
@@ -52,11 +57,15 @@ export const FleetMonitor: React.FC = () => {
     } catch (e) { console.error(e); throw e; }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Delete this vehicle?')) {
-      try { await vehicleApi.deleteVehicle(id); setActiveTab((t) => t); }
-      catch (e) { console.error(e); }
-    }
+  const handleDelete = (id: string) => {
+    setPendingDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setPendingDelete(null);
+    try { await vehicleApi.deleteVehicle(pendingDelete); setActiveTab((t) => t); }
+    catch (e) { console.error(e); }
   };
 
   const stats = {
@@ -65,6 +74,13 @@ export const FleetMonitor: React.FC = () => {
     inTransit: vehicles.filter((v) => v.status === 'IN_TRANSIT').length,
     maintenance: vehicles.filter((v) => v.status === 'MAINTENANCE').length,
   };
+
+  // Pagination (client-side slice; stats above use the full list)
+  const total = vehicles.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageVehicles = vehicles.slice(start, start + pageSize);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
@@ -132,11 +148,55 @@ export const FleetMonitor: React.FC = () => {
       {/* Grid */}
       <AnimatedCard delay={280}>
         <FleetGrid
-          vehicles={vehicles}
+          vehicles={pageVehicles}
           loading={loading}
           onEdit={(v) => { setEditingVehicle(v); setIsModalOpen(true); }}
           onDelete={handleDelete}
         />
+
+        {/* Pagination footer */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 border-t"
+          style={{ borderColor: 'var(--color-border-light)' }}
+        >
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Showing {total === 0 ? 0 : start + 1}–{Math.min(start + pageSize, total)} of {total}
+          </p>
+          <div className="flex items-center gap-3">
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+              className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[36px]"
+              style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+              aria-label="Page size"
+            >
+              {[10, 25, 50, 100].map((n) => (
+                <option key={n} value={n}>{n} / page</option>
+              ))}
+            </select>
+            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              Page {safePage} of {totalPages}
+            </span>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setPage(safePage - 1)}
+                disabled={safePage <= 1}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+              >
+                Prev
+              </button>
+              <button
+                onClick={() => setPage(safePage + 1)}
+                disabled={safePage >= totalPages}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
       </AnimatedCard>
 
       <AddEditVehicleModal
@@ -144,6 +204,16 @@ export const FleetMonitor: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         initialData={editingVehicle}
+      />
+
+      <ConfirmModal
+        isOpen={!!pendingDelete}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Vehicle"
+        message="Are you sure you want to delete this vehicle? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   );

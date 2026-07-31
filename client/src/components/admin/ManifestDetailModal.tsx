@@ -99,10 +99,10 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
               { title: 'Cargo Details', icon: Package, content: (
                 <div className="space-y-2">
                   <div><p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Description</p>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{manifest.cargo?.description || manifest.description || 'General Cargo'}</p></div>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{manifest.cargoDetails?.description || manifest.cargo?.description || manifest.description || 'General Cargo'}</p></div>
                   <div className="flex gap-4">
                     <div><p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Weight</p>
-                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{formatWeight(manifest.cargo?.weight || manifest.weight)}</p></div>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{formatWeight(manifest.cargoDetails?.totalWeightKg || manifest.cargo?.weight || manifest.weight)}</p></div>
                     <div><p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>Volume</p>
                     <p className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{formatVolume(manifest.cargo?.volume || manifest.volume)}</p></div>
                   </div>
@@ -141,27 +141,29 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div
-          className="p-4 border-t flex justify-end gap-2 shrink-0"
-          style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface)' }}
-        >
-          {manifest.status === 'PENDING' && (
-            <ActionBtn onClick={() => handle('assign')} color="#3B82F6" icon={Truck} label="Assign Vehicle" />
-          )}
-          {manifest.status === 'ASSIGNED' && (
-            <ActionBtn onClick={() => handle('start')} color="#10B981" icon={Play} label="Start Trip" />
-          )}
-          {['IN_TRANSIT', 'DELAYED'].includes(manifest.status) && (
-            <>
-              <ActionBtn onClick={() => handle('delay')} color="#F59E0B" icon={AlertTriangle} label="Report Delay" />
-              <ActionBtn onClick={() => handle('complete')} color="#10B981" icon={CheckCircle} label="Complete" />
-            </>
-          )}
-          {['PENDING', 'ASSIGNED'].includes(manifest.status) && (
-            <ActionBtn onClick={() => handle('cancel')} color="#EF4444" icon={XCircle} label="Cancel" variant="outline" />
-          )}
-        </div>
+        {/* Footer Actions — only shown when an onAction handler is provided (read-only views omit it) */}
+        {onAction && (
+          <div
+            className="p-4 border-t flex justify-end gap-2 shrink-0"
+            style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface)' }}
+          >
+            {manifest.status === 'PENDING' && (
+              <ActionBtn onClick={() => handle('assign')} color="#3B82F6" icon={Truck} label="Assign Vehicle" />
+            )}
+            {manifest.status === 'ASSIGNED' && (
+              <ActionBtn onClick={() => handle('start')} color="#10B981" icon={Play} label="Start Trip" />
+            )}
+            {['IN_TRANSIT', 'DELAYED'].includes(manifest.status) && (
+              <>
+                <ActionBtn onClick={() => handle('delay')} color="#F59E0B" icon={AlertTriangle} label="Report Delay" />
+                <ActionBtn onClick={() => handle('complete')} color="#10B981" icon={CheckCircle} label="Complete" />
+              </>
+            )}
+            {['PENDING', 'ASSIGNED'].includes(manifest.status) && (
+              <ActionBtn onClick={() => handle('cancel')} color="#EF4444" icon={XCircle} label="Cancel" variant="outline" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
