@@ -1,6 +1,6 @@
-# My Module — Scoped Work Plan (Items 8, 9, 10, 14)
+# My Module — Scoped Work Plan (Items 8, 9, 10, 14, 15)
 
-> Last updated: Jul 31, 2026
+> Last updated: Aug 1, 2026
 > Derived from `future.md` — scoped to MY module only (Developer 2 scope)
 > EXCLUDED: Analytics (item 4) and all other items — owned by other developers
 
@@ -14,6 +14,7 @@
 | 9 | Row Click → Detail Modal on All Manifests | ~0.5 day | ✅ Done |
 | 10 | Make Settings Page API-Real | ~0.5-1 day | ⬜ Pending — only item left |
 | 14 | Replace `window.confirm()` with Modal | ~0.25-0.5 day | ✅ Done |
+| 15 | Swiggy/Zomato-style Animated Live Ops Map | ~2-3h | ✅ Done + smoke-tested 16/16 |
 
 > Status verified against code: Jul 31, 2026
 
@@ -75,7 +76,42 @@
 - [x] Replace `window.confirm('Delete this vehicle?')` (FleetMonitor line 56) with `pendingDelete` state + `<ConfirmModal variant="danger" />`
   - Done: `pendingDelete` state + `<ConfirmModal variant="danger" />` in FleetMonitor; no `window.confirm` remains in code
 
----
+## Item 15 — Swiggy/Zomato-style Animated Live Ops Map (NEW)
+
+**Files:** `client/src/components/admin/LiveMap.tsx` (rewrite), `VehicleLayer.tsx` (new), `RouteLayer.tsx` (new), `TripInfoCard.tsx` (new), `client/src/utils/geo.ts` (new), `client/src/pages/admin/LiveOperations.tsx` (simulate prop), `client/src/globals.css` (+map keyframes)
+
+**Goal:** Replace static jumping truck markers with a Swiggy/Zomato-style live tracking view. **No new npm packages** — Leaflet + CSS keyframes + one shared `requestAnimationFrame` loop.
+
+**Todo:**
+- [x] **Phase 1 — Animated vehicle markers** (`VehicleLayer.tsx`)
+  - `L.divIcon` truck glyph + pulsing status ring (IN_TRANSIT=violet, DELAYED=red) replacing the flaticon image icon
+  - One shared rAF loop lerps every truck from last-known → target position (ease-in-out, duration scaled by distance) — trucks glide between 30s polls instead of jumping
+  - Heading rotation: truck glyph `rotate()`s toward direction of travel (bearing from prev→next)
+  - Origin = small static dot, destination = pulsing radial dot (`@keyframes pulse-ring`)
+  - Demo simulation: when data is `mock-*` (no real GPS), targets advance along the bezier route so the map is always alive
+- [x] **Phase 2 — Animated route lines** (`RouteLayer.tsx`)
+  - Base faint polyline (origin→destination) + bright dashed overlay with flowing `stroke-dashoffset` animation (`@keyframes dash-flow`)
+  - Real roads via OSRM public API (`geometries=geojson`, no key, module-level cache, 4s AbortController timeout); fallback = quadratic bezier through a perpendicular control point
+  - Selected trip: route glows full; others dim to ~40% opacity
+- [x] **Phase 3 — Camera follow + selection UX** (`LiveMap.tsx` follow state)
+  - Selecting a trip (dispatch card or marker click) → `flyTo` truck; when follow is on, map pans with the truck (threshold-gated, not per-frame)
+  - Follow toggle button (paper-plane); clicking map unlocks
+- [x] **Phase 4 — ETA / trip info overlay card** (`TripInfoCard.tsx`)
+  - Floating glass card (top-left of map): tracking ID + StatusBadge, client, vehicle, animated progress bar (haversine origin→current / origin→dest), ETA (remaining km ÷ 40 km/h demo speed), View Details → (reuses `ManifestDetailModal`)
+  - No selection → fleet summary (n trucks on road, n delayed)
+- [x] **Phase 5 — Polish & performance**
+  - `prefers-reduced-motion`: disable dash-flow, pulse rings, follow pan
+  - Imperative marker position updates (no React re-render per frame); markers created once, `setLatLng` per frame
+  - Marker tooltip = tracking ID (hover); marker click → select (no Leaflet popup — card shows details)
+- [x] **Bug found + fixed during smoke test:** map container had `height: 0` — the map wrapper used `md:block` + `h-full`, and percentage heights against flex-derived parents collapse to 0 in Chrome/Edge. Fixed by mirroring the dispatch panel pattern: `md:block` → `md:flex` (LiveOperations.tsx). Map tiles now actually render.
+
+**Gotchas:**
+- Leaflet renders polylines as SVG → animate `stroke-dashoffset` in CSS; `!important` on `stroke-dasharray` to beat Leaflet inline styles
+- `pathOptions.className` + `interactive: false` on polylines so routes never intercept clicks
+- Position updates must be imperative (refs), never `setState` per frame
+- Coordinate convention everywhere: `[lng, lat]` from API — convert to `[lat, lng]` at the Leaflet boundary
+
+**Verification (headless Edge smoke test, `map-smoke`):** 16/16 assertions pass — markers render + move + rotate, routes flow, pins pulse, fleet card → trip card on selection, progress bar + ETA, follow toggle, no JS errors.
 
 ## Suggested Order
 

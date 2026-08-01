@@ -136,10 +136,12 @@ export const LiveOperations: React.FC = () => {
         </div>
 
         {/* Map — always visible on md+, toggled on mobile */}
-        <div className={`${mobileView === 'map' ? 'block' : 'hidden'} md:block flex-1 relative h-full`}>
+        <div className={`${mobileView === 'map' ? 'flex' : 'hidden'} md:flex flex-1 relative h-full min-w-0`}>
           <LiveMap
             manifests={activeManifests}
             selectedId={selectedManifestId}
+            simulate={activeManifests.length > 0 && activeManifests.every((m) => String(m._id || m.id).startsWith('mock-'))}
+            onSelect={handleSelect}
             onViewDetails={handleViewDetails}
           />
 

@@ -447,3 +447,122 @@
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+
+/* ============================================================
+   15. LIVE MAP ANIMATIONS — Swiggy/Zomato style (Item 15)
+   ============================================================ */
+.leaflet-div-icon.vehicle-marker-wrap {
+  background: transparent;
+  border: none;
+}
+
+.vehicle-tooltip {
+  background: rgba(15, 27, 51, 0.92) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+.vehicle-tooltip::before { display: none !important; }
+
+/* Animated truck marker: colored pulse blob + rotatable glyph */
+.vehicle-marker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  --vehicle-color: #8B5CF6;
+}
+
+.vehicle-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--vehicle-color);
+  opacity: 0.22;
+}
+
+.vehicle-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--vehicle-color);
+  animation: ring-expand 2.2s ease-out infinite;
+}
+
+.vehicle-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vehicle-color);
+  filter: drop-shadow(0 3px 8px rgba(15, 27, 51, 0.7));
+  will-change: transform;
+}
+
+/* Origin / destination pins */
+.origin-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #64748B;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+}
+
+.dest-marker {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10B981;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+.dest-marker::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid #10B981;
+  animation: dest-ping 2s ease-out infinite;
+}
+
+/* Flowing route dashes — the "light running along the road" effect */
+.route-flow {
+  stroke-dasharray: 3 12 !important;
+  stroke-linecap: round;
+  animation: dash-flow 1.4s linear infinite;
+}
+
+@keyframes ring-expand {
+  0%   { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes dest-ping {
+  0%   { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -15; }
+}
+
+/* Accessibility: calm it down for reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .route-flow { animation: none !important; }
+  .vehicle-pulse::after { animation: none !important; opacity: 0.3; }
+  .dest-marker::after { animation: none !important; opacity: 0.4; }
+}
