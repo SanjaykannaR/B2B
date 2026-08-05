@@ -1,5 +1,12 @@
 # B2B Logistics — Project Notes
 
+## Session: 2026-08-01 — Admin backend module number + gitignored task file
+
+- User asked which backend module powers the Admin Pages (Module 14)
+- Answer: **Module 4 (Backend Routes)** + Module 5 (Controllers) + Module 3 (Models) — all built by Dev 1
+- Created `D:\BtwoB\backend-task.md` with the mapping table (Module 14 ↔ backend modules 1–7)
+- Added `backend-task.md` to `.gitignore` — file stays local, not in git repo (verified via `git check-ignore`)
+
 ## Session: 2026-07-31 — Module plan verification + Item 10 (updateProfile) + notification bell
 
 ### Verified against code (future-my-module.md items)

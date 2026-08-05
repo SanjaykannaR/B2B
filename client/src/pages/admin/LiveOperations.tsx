@@ -12,7 +12,9 @@ const DEMO_TRIPS = [
     origin: { city: 'Mumbai', coordinates: [72.8777, 19.0760] },
     destination: { city: 'Delhi', coordinates: [77.1025, 28.7041] },
     currentLocation: { coordinates: [75.8573, 21.1458] },
-    vehicle: { registrationNumber: 'MH-12-AB-1234', make: 'Tata' },
+    vehicle: { registrationNumber: 'MH-12-AB-1234', make: 'Tata Ace Gold' },
+    driver: { name: 'Ramesh Patil', phone: '+91 98765 43210' },
+    cargoDetails: { description: '200 LED TVs — Fragile', totalWeightKg: 4000, isHazardous: false },
     updatedAt: new Date(Date.now() - 3600000).toISOString(),
   },
   {
@@ -21,7 +23,9 @@ const DEMO_TRIPS = [
     origin: { city: 'Chennai', coordinates: [80.2707, 13.0827] },
     destination: { city: 'Bangalore', coordinates: [77.5946, 12.9716] },
     currentLocation: { coordinates: [78.4867, 13.0827] },
-    vehicle: { registrationNumber: 'TN-07-EF-9012', make: 'Eicher' },
+    vehicle: { registrationNumber: 'TN-07-EF-9012', make: 'Eicher Pro 2049' },
+    driver: { name: 'Suresh Kumar', phone: '+91 87654 32109' },
+    cargoDetails: { description: '500 Cartons — Packaged Food', totalWeightKg: 8500, isHazardous: false },
     updatedAt: new Date(Date.now() - 7200000).toISOString(),
   },
   {
@@ -30,7 +34,10 @@ const DEMO_TRIPS = [
     origin: { city: 'Pune', coordinates: [73.8567, 18.5204] },
     destination: { city: 'Ahmedabad', coordinates: [72.5714, 23.0225] },
     currentLocation: { coordinates: [73.2, 19.8] },
-    vehicle: { registrationNumber: 'GJ-06-IJ-7890', make: 'Tata' },
+    vehicle: { registrationNumber: 'GJ-06-IJ-7890', make: 'Tata Prima LX' },
+    driver: { name: 'Mohammed Khan', phone: '+91 54321 09876' },
+    cargoDetails: { description: 'Industrial Machine Parts', totalWeightKg: 12000, isHazardous: true },
+    delayReason: 'Heavy rainfall near Nashik — road blocked, waiting for clearance',
     updatedAt: new Date(Date.now() - 14400000).toISOString(),
   },
 ];
@@ -94,7 +101,7 @@ export const LiveOperations: React.FC = () => {
             <div className="md:hidden flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
               <button
                 onClick={() => setMobileView('dispatch')}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[36px]"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[44px]"
                 style={{
                   background: mobileView === 'dispatch' ? 'var(--color-accent)' : 'var(--color-surface-card)',
                   color: mobileView === 'dispatch' ? '#fff' : 'var(--color-text-muted)',
@@ -104,7 +111,7 @@ export const LiveOperations: React.FC = () => {
               </button>
               <button
                 onClick={() => setMobileView('map')}
-                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[36px]"
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[44px]"
                 style={{
                   background: mobileView === 'map' ? 'var(--color-accent)' : 'var(--color-surface-card)',
                   color: mobileView === 'map' ? '#fff' : 'var(--color-text-muted)',

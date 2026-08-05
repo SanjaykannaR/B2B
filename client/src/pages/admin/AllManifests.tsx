@@ -148,7 +148,7 @@ export const AllManifests: React.FC = () => {
               <button
                 key={tab}
                 onClick={() => setStatusFilter(tab)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 min-h-[36px]"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 min-h-[44px]"
                 style={{
                   background: isActive ? 'var(--color-accent)' : 'var(--color-surface-hover)',
                   color: isActive ? '#fff' : 'var(--color-text-secondary)',
@@ -277,7 +277,7 @@ export const AllManifests: React.FC = () => {
               <select
                 value={pageSize}
                 onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-                className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[36px]"
+                className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[44px]"
                 style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 aria-label="Page size"
               >
@@ -292,7 +292,7 @@ export const AllManifests: React.FC = () => {
                 <button
                   onClick={() => setPage(safePage - 1)}
                   disabled={safePage <= 1}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
                 >
                   Prev
@@ -300,7 +300,7 @@ export const AllManifests: React.FC = () => {
                 <button
                   onClick={() => setPage(safePage + 1)}
                   disabled={safePage >= totalPages}
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
                 >
                   Next

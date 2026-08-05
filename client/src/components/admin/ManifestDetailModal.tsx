@@ -39,7 +39,7 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
             </h2>
             <StatusBadge status={manifest.status} />
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full transition-colors"
+          <button onClick={onClose} className="p-2.5 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             style={{ color: 'var(--color-text-muted)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
@@ -174,7 +174,7 @@ const ActionBtn: React.FC<{ onClick: () => void; color: string; icon: React.FC<a
 }) => (
   <button
     onClick={onClick}
-    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 hover:-translate-y-0.5"
+    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 hover:-translate-y-0.5 min-h-[44px]"
     style={variant === 'solid' ? {
       background: color, color: '#fff', boxShadow: `0 4px 14px ${color}40`,
     } : {

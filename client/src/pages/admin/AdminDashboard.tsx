@@ -123,22 +123,22 @@ export const AdminDashboard: React.FC = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-light)' }}>
-                    <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Tracking ID</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Route</th>
+                    <th className="px-5 sm:px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Tracking ID</th>
+                    <th className="hidden sm:table-cell px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
+                    <th className="hidden md:table-cell px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Route</th>
                     <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Status</th>
-                    <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">Updated</th>
+                    <th className="hidden lg:table-cell px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     Array.from({ length: 4 }).map((_, i) => (
                       <tr key={i}>
-                        <td className="px-6 py-4"><Skeleton className="h-4 w-24" /></td>
-                        <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
-                        <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-5 sm:px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="hidden sm:table-cell px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="hidden md:table-cell px-5 py-4"><Skeleton className="h-4 w-32" /></td>
                         <td className="px-5 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
-                        <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="hidden lg:table-cell px-5 py-4"><Skeleton className="h-4 w-28" /></td>
                       </tr>
                     ))
                   ) : manifests.length > 0 ? (
@@ -152,28 +152,28 @@ export const AdminDashboard: React.FC = () => {
                         }}
                       >
                         <td
-                          className="px-6 py-3.5 font-bold whitespace-nowrap"
+                          className="px-5 sm:px-6 py-3.5 font-bold whitespace-nowrap"
                           style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}
                         >
                           #{m.trackingId || 'MNF-XX'}
                         </td>
-                        <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
+                        <td className="hidden sm:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
                           {m.client?.name || 'Unknown'}
                         </td>
-                        <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                        <td className="hidden md:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                           {m.origin?.city} → {m.destination?.city}
                         </td>
                         <td className="px-5 py-3.5">
                           <StatusBadge status={m.status} />
                         </td>
-                        <td className="px-5 py-3.5 text-right whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
+                        <td className="hidden lg:table-cell px-5 py-3.5 text-right whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
                           {formatDateTime(m.updatedAt)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-16 text-center" style={{ color: 'var(--color-text-muted)' }}>
+                      <td colSpan={5} className="px-5 sm:px-6 py-16 text-center" style={{ color: 'var(--color-text-muted)' }}>
                         No recent manifests found.
                       </td>
                     </tr>

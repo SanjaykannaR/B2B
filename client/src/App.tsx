@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Truck, Radio, FilePlus, Search, Settings, Menu, X, Bell, CheckCheck, PackageSearch } from 'lucide-react';
+import { LayoutDashboard, Truck, Radio, FilePlus, Search, Settings, Menu, X, Bell, CheckCheck, PackageSearch, ClipboardList } from 'lucide-react';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { FleetMonitor } from './pages/admin/FleetMonitor';
 import { LiveOperations } from './pages/admin/LiveOperations';
 import { ManifestCreate } from './pages/admin/ManifestCreate';
 import { Settings as SettingsPage } from './pages/admin/Settings';
 import { AllManifests } from './pages/admin/AllManifests';
+import { ClientRequests } from './pages/admin/ClientRequests';
 import * as notificationApi from './services/notificationApi';
 
 const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/fleet', label: 'Fleet', icon: Truck },
   { to: '/admin/live', label: 'Live Ops', icon: Radio },
+  { to: '/admin/requests', label: 'Requests', icon: ClipboardList },
   { to: '/admin/manifests/new', label: 'Create Manifest', icon: FilePlus },
 ];
 
@@ -61,7 +63,7 @@ export default function App() {
     to === '/admin' ? pathname === '/admin' : pathname.startsWith(to);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
       {/* Top Nav */}
       <nav
         className="shrink-0 relative flex items-center px-4 sm:px-6 py-3.5 border-b gap-3 sm:gap-6 sticky top-0 z-50"
@@ -101,7 +103,7 @@ export default function App() {
               style={{ background: 'var(--color-accent)', borderColor: 'var(--color-surface-card)' }}
             />
           </div>
-          <span className="text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+          <span className="hidden sm:inline text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
             B2B Logistics
           </span>
         </Link>
@@ -332,13 +334,14 @@ export default function App() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-0">
+      <main className="flex-1 h-full overflow-y-auto overflow-x-hidden relative z-0">
         <Routes>
           <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/fleet" element={<FleetMonitor />} />
           <Route path="/admin/live" element={<LiveOperations />} />
           <Route path="/admin/manifests" element={<AllManifests />} />
+          <Route path="/admin/requests" element={<ClientRequests />} />
           <Route path="/admin/manifests/new" element={<ManifestCreate />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
         </Routes>

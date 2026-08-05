@@ -91,7 +91,7 @@ export const Settings: React.FC = () => {
 
       {/* Profile Info */}
       <div
-        className="rounded-2xl border p-6 space-y-5"
+        className="rounded-2xl border p-4 sm:p-6 space-y-5"
         style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
       >
         <div className="flex items-center gap-3 pb-3 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
@@ -184,7 +184,7 @@ export const Settings: React.FC = () => {
         <div className="flex justify-end">
           <button
             onClick={handleProfileSave}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all duration-200"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all duration-200 min-h-[44px]"
             style={{
               background: profileSaved ? 'var(--color-success)' : 'var(--color-accent)',
               boxShadow: profileSaved ? '0 2px 8px rgba(16,185,129,0.3)' : '0 2px 8px rgba(255,107,44,0.3)',
@@ -198,7 +198,7 @@ export const Settings: React.FC = () => {
 
       {/* Change Password */}
       <div
-        className="rounded-2xl border p-6 space-y-5"
+        className="rounded-2xl border p-4 sm:p-6 space-y-5"
         style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
       >
         <div className="flex items-center gap-3 pb-3 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
@@ -234,11 +234,11 @@ export const Settings: React.FC = () => {
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2"
+                className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 style={{ color: 'var(--color-text-muted)' }}
                 onClick={() => setShowCurrent(!showCurrent)}
               >
-                {showCurrent ? <EyeOff size={14} /> : <Eye size={14} />}
+                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
@@ -259,11 +259,11 @@ export const Settings: React.FC = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center"
                   style={{ color: 'var(--color-text-muted)' }}
                   onClick={() => setShowNew(!showNew)}
                 >
-                  {showNew ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -289,7 +289,7 @@ export const Settings: React.FC = () => {
         <div className="flex justify-end">
           <button
             onClick={handlePasswordSave}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-semibold text-white transition-all duration-200"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all duration-200 min-h-[44px]"
             style={{
               background: passwordSaved ? 'var(--color-success)' : '#8B5CF6',
               boxShadow: passwordSaved ? '0 2px 8px rgba(16,185,129,0.3)' : '0 2px 8px rgba(139,92,246,0.3)',
@@ -303,7 +303,7 @@ export const Settings: React.FC = () => {
 
       {/* Logout */}
       <div
-        className="rounded-2xl border p-6"
+        className="rounded-2xl border p-4 sm:p-6"
         style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}
       >
         <div className="flex items-center justify-between">
@@ -313,7 +313,7 @@ export const Settings: React.FC = () => {
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all duration-200"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all duration-200 min-h-[44px]"
             style={{
               background: 'var(--color-error)',
               boxShadow: '0 2px 8px rgba(239,68,68,0.3)',

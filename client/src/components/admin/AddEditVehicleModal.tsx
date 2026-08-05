@@ -53,7 +53,7 @@ export const AddEditVehicleModal: React.FC<AddEditVehicleModalProps> = ({ isOpen
           <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
             {initialData ? 'Edit Vehicle' : 'Add New Vehicle'}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-full transition-colors"
+          <button onClick={onClose} className="p-2.5 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             style={{ color: 'var(--color-text-muted)' }}>
             <X size={18} />
           </button>
@@ -72,7 +72,7 @@ export const AddEditVehicleModal: React.FC<AddEditVehicleModalProps> = ({ isOpen
               placeholder="e.g. MH-12-AB-1234" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Make</label>
               <input type="text" required className={inputCls}
@@ -87,7 +87,7 @@ export const AddEditVehicleModal: React.FC<AddEditVehicleModalProps> = ({ isOpen
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Weight (kg)</label>
               <input type="number" min="0" required className={`${inputCls} tabular-nums`}
@@ -105,12 +105,12 @@ export const AddEditVehicleModal: React.FC<AddEditVehicleModalProps> = ({ isOpen
           {/* Footer */}
           <div className="flex justify-end gap-2 pt-4" style={{ borderTop: '1px solid var(--color-border-light)' }}>
             <button type="button" onClick={onClose}
-              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors min-h-[44px]"
               style={{ color: 'var(--color-text-secondary)' }}>
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 min-h-[44px]"
               style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}>
               {loading ? 'Saving...' : 'Save Vehicle'}
             </button>

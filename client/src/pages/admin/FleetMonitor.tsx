@@ -8,11 +8,11 @@ import { PageHeader } from '../../components/admin/shared/PageHeader';
 import * as vehicleApi from '../../services/vehicleApi';
 
 const DEMO_VEHICLES = [
-  { _id: 'v1', registrationNumber: 'MH-12-AB-1234', make: 'Tata', model: 'Ace Gold', year: 2024, status: 'AVAILABLE', capacity: { weight: 2500, volume: 8 }, fuelEfficiency: 12 },
-  { _id: 'v2', registrationNumber: 'DL-01-CD-5678', make: 'Mahindra', model: 'Blazo X', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 16000, volume: 48 }, fuelEfficiency: 6 },
-  { _id: 'v3', registrationNumber: 'TN-07-EF-9012', make: 'Eicher', model: 'Pro 2049', year: 2025, status: 'MAINTENANCE', capacity: { weight: 5000, volume: 18 }, fuelEfficiency: 10 },
-  { _id: 'v4', registrationNumber: 'KA-05-GH-3456', make: 'Ashok Leyland', model: 'Dost+', year: 2024, status: 'AVAILABLE', capacity: { weight: 1500, volume: 6 }, fuelEfficiency: 14 },
-  { _id: 'v5', registrationNumber: 'GJ-06-IJ-7890', make: 'Tata', model: 'Prima LX', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 25000, volume: 70 }, fuelEfficiency: 4 },
+  { _id: 'v1', registrationNumber: 'MH-12-AB-1234', make: 'Tata', model: 'Ace Gold', year: 2024, status: 'AVAILABLE', capacity: { weight: 2500, volume: 8 }, fuelEfficiency: 12, driver: { name: 'Ramesh Patil', phone: '+91 98765 43210', license: 'MH-12-2024-001' } },
+  { _id: 'v2', registrationNumber: 'DL-01-CD-5678', make: 'Mahindra', model: 'Blazo X', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 16000, volume: 48 }, fuelEfficiency: 6, driver: { name: 'Suresh Kumar', phone: '+91 87654 32109', license: 'DL-01-2023-045' } },
+  { _id: 'v3', registrationNumber: 'TN-07-EF-9012', make: 'Eicher', model: 'Pro 2049', year: 2025, status: 'MAINTENANCE', capacity: { weight: 5000, volume: 18 }, fuelEfficiency: 10, driver: { name: 'Anil Sharma', phone: '+91 76543 21098', license: 'TN-07-2025-012' } },
+  { _id: 'v4', registrationNumber: 'KA-05-GH-3456', make: 'Ashok Leyland', model: 'Dost+', year: 2024, status: 'AVAILABLE', capacity: { weight: 1500, volume: 6 }, fuelEfficiency: 14, driver: { name: 'Venkat Reddy', phone: '+91 65432 10987', license: 'KA-05-2024-078' } },
+  { _id: 'v5', registrationNumber: 'GJ-06-IJ-7890', make: 'Tata', model: 'Prima LX', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 25000, volume: 70 }, fuelEfficiency: 4, driver: { name: 'Mohammed Khan', phone: '+91 54321 09876', license: 'GJ-06-2023-033' } },
 ];
 
 type TabType = 'ALL' | 'AVAILABLE' | 'IN_TRANSIT' | 'MAINTENANCE';
@@ -152,6 +152,10 @@ export const FleetMonitor: React.FC = () => {
           loading={loading}
           onEdit={(v) => { setEditingVehicle(v); setIsModalOpen(true); }}
           onDelete={handleDelete}
+          onRequestDriver={(v) => {
+            // TODO: open send request modal or call API
+            alert(`Request sent to driver: ${v.driver?.name || 'Unknown'} (${v.registrationNumber})`);
+          }}
         />
 
         {/* Pagination footer */}
@@ -166,7 +170,7 @@ export const FleetMonitor: React.FC = () => {
             <select
               value={pageSize}
               onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[36px]"
+                className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[44px]"
               style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
               aria-label="Page size"
             >
@@ -181,15 +185,15 @@ export const FleetMonitor: React.FC = () => {
               <button
                 onClick={() => setPage(safePage - 1)}
                 disabled={safePage <= 1}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
-              >
-                Prev
-              </button>
-              <button
-                onClick={() => setPage(safePage + 1)}
-                disabled={safePage >= totalPages}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[36px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage(safePage + 1)}
+                  disabled={safePage >= totalPages}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
               >
                 Next
