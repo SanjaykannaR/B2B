@@ -186,6 +186,39 @@
 
 ---
 
+### P2 — Client Requests Page + Fleet Driver Details + Responsive Fixes + Live Map (2026-08-05)
+> Committed across multiple commits on `sanjay` branch.
+
+**Client Requests Page**
+- [x] `src/pages/admin/ClientRequests.tsx` — KPI cards, search, status tabs, data table, pagination, action buttons
+- [x] `src/components/admin/ClientRequestDetailModal.tsx` — two-column modal with client info + goods details + action buttons
+- [x] `src/App.tsx` — Added `Requests` nav item with `ClipboardList` icon, route at `/admin/requests`
+
+**Fleet Driver Details**
+- [x] `src/pages/admin/FleetMonitor.tsx` — Updated `DEMO_VEHICLES` with driver name/phone/license
+- [x] `src/components/admin/FleetGrid.tsx` — Driver column (avatar+name+phone) + Send Request + Contact by Phone buttons
+
+**Responsive Fixes (12+ files)**
+- [x] Nav overflow: logo hidden on `<sm`
+- [x] Tables: responsive column hiding on AdminDashboard, FleetGrid
+- [x] All touch targets bumped to 44px minimum
+- [x] Settings card padding, password toggle sizing
+- [x] Modal close buttons, AddEditVehicleModal grid stacking
+- [x] LiveMap follow button, TripInfoCard close button
+
+**Live Map Fixes**
+- [x] `src/components/admin/VehicleLayer.tsx` — 3D SVG truck with status-colored glow, ping-pong simulation (no teleport), per-frame smooth movement
+- [x] `src/components/admin/RouteLayer.tsx` — Canvas renderer (routes survive zoom), parallel OSRM fetch, bezier fallback
+- [x] `src/components/admin/LiveMap.tsx` — `markerZoomAnimation={false}`, removed flyTo and auto-follow on selection
+- [x] `src/globals.css` — Section 15: `.truck-marker-3d`, `.truck-glow`, `.truck-pulse-ring`, `.truck-icon-3d`, `.truck-delay-badge`, `.truck-popup`, `.route-flow`, `.route-glow`, keyframe animations
+- [x] Trucks follow exact OSRM road routes via shared `routeCache`
+- [x] Zoomend handler refreshes glyph rotation after zoom
+- [x] Route lines stay visible with flowing animation at any zoom
+
+**Verified:** `npx tsc --noEmit` clean, `npx vite build` clean.
+
+---
+
 ## Notes
 
 - **Backend is also stubbed** — no server code is implemented. The frontend API services will return nothing until the backend is built.
