@@ -9,7 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import { VehicleLayer } from './VehicleLayer';
 import { RouteLayer } from './RouteLayer';
 import { TripInfoCard } from './TripInfoCard';
-import { toLeaflet, type LatLng } from '../../utils/geo';
+import { type LatLng } from '../../utils/geo';
 import { LocateFixed } from 'lucide-react';
 
 interface LiveMapProps {
@@ -23,23 +23,8 @@ interface LiveMapProps {
 
 const CENTER: [number, number] = [20.5937, 78.9629]; // India overview
 
-/* Fly to the selected truck (once per selection change). */
-const MapController: React.FC<{
-  selected: any | null;
-  positionRef: React.MutableRefObject<Record<string, LatLng>>;
-}> = ({ selected, positionRef }) => {
-  const map = useMap();
-  useEffect(() => {
-    const id = selected?._id || selected?.id;
-    if (!id) return;
-    const pos =
-      positionRef.current[id] ??
-      toLeaflet(selected?.currentLocation?.coordinates) ??
-      toLeaflet(selected?.origin?.coordinates);
-    if (pos) map.flyTo([pos.lat, pos.lng], 13, { duration: 1.2 });
-  }, [selected, map, positionRef]);
-  return null;
-};
+/* No flyTo on selection — map stays where user left it. */
+const MapController: React.FC = () => null;
 
 /* Smoothly follow the selected truck while follow mode is on. */
 const FollowController: React.FC<{
@@ -88,10 +73,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
   const [follow, setFollow] = useState(false);
   const selected = manifests.find((m) => (m._id || m.id) === selectedId) || null;
 
-  // Selecting a trip auto-enables follow mode
-  useEffect(() => {
-    setFollow(!!selectedId);
-  }, [selectedId]);
+  // Selecting a trip does NOT auto-follow — map stays where user left it.
 
   const handleSelect = useCallback((mnf: any) => onSelect?.(mnf), [onSelect]);
   const handleMapClick = useCallback(() => setFollow(false), []);
@@ -117,7 +99,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         zoomControl={false}
         markerZoomAnimation={false}
       >
-        <MapController selected={selected} positionRef={positionRef} />
+        <MapController />
         <FollowController
           follow={follow}
           selectedId={selectedId}
