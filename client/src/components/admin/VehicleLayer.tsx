@@ -193,14 +193,29 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
   /* ---------- pause during zoom to prevent projection mismatch ---------- */
   useEffect(() => {
     const onZoomStart = () => { isZoomingRef.current = true; };
-    const onZoomEnd = () => { isZoomingRef.current = false; };
+    const onZoomEnd = () => {
+      isZoomingRef.current = false;
+      // Refresh glyph refs & recalc rotation after zoom (marker DOM may have shifted)
+      for (const state of trucksRef.current.values()) {
+        state.glyph = state.marker.getElement()?.querySelector('.truck-icon-3d') as HTMLElement | null;
+        if (state.glyph && state.route && simulate) {
+          const pt = pointAtProgress(state.route, state.simProgress);
+          const ptNext = pointAtProgress(state.route, Math.min(1, state.simProgress + state.direction * 0.003));
+          const angle = bearing(pt, ptNext);
+          const tiltX = Math.abs(Math.sin((angle * Math.PI) / 180)) * 8;
+          const sel = selectedRef.current;
+          const id = getId(state.manifest);
+          state.glyph.style.transform = `rotate(${angle}deg) perspective(200px) rotateX(${tiltX}deg)${id === sel ? ' scale(1.15)' : ''}`;
+        }
+      }
+    };
     map.on('zoomstart', onZoomStart);
     map.on('zoomend', onZoomEnd);
     return () => {
       map.off('zoomstart', onZoomStart);
       map.off('zoomend', onZoomEnd);
     };
-  }, [map]);
+  }, [map, simulate]);
 
   /* ---------- create / remove markers when manifests change ---------- */
   useEffect(() => {

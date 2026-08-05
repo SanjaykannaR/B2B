@@ -6,10 +6,11 @@
 // falls back to a quadratic bezier curve when offline.
 // Routes shown INSTANTLY via bezier, then upgraded to real roads in parallel.
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Polyline, Marker } from 'react-leaflet';
 import { makeDestIcon, makeOriginIcon } from './VehicleLayer';
 import { bezierRoute } from '../../utils/geo';
+import L from 'leaflet';
 
 interface RouteLayerProps {
   manifests: any[];
@@ -43,7 +44,7 @@ const fetchRoute = async (o: [number, number], d: [number, number]): Promise<[nu
       `https://router.project-osrm.org/route/v1/driving/${o[0]},${o[1]};${d[0]},${d[1]}` +
       '?overview=full&geometries=geojson&alternatives=false';
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 3000); // 3s timeout (down from 4)
+    const timer = setTimeout(() => ctrl.abort(), 3000);
     const res = await fetch(url, { signal: ctrl.signal });
     clearTimeout(timer);
     const json = await res.json();
@@ -63,6 +64,8 @@ const fetchRoute = async (o: [number, number], d: [number, number]): Promise<[nu
 export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId }) => {
   const [routes, setRoutes] = useState<Record<string, [number, number][]>>({});
   const upgradingRef = useRef(false);
+  // Canvas renderer — persists through zoom, no SVG recreation
+  const routeRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,7 +77,6 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
       const o = mnf.origin?.coordinates as [number, number] | undefined;
       const d = mnf.destination?.coordinates as [number, number] | undefined;
       if (Array.isArray(o) && Array.isArray(d) && o.length === 2 && d.length === 2) {
-        // Use cached OSRM if available, else bezier
         const key = `${o[0].toFixed(4)},${o[1].toFixed(4)}|${d[0].toFixed(4)},${d[1].toFixed(4)}`;
         const cached = routeCache.get(key);
         fallbacks[id] = cached || bezierRoute(o, d);
@@ -83,7 +85,7 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
     if (!cancelled) setRoutes(fallbacks);
 
     // Phase 2: Fetch ALL OSRM routes in PARALLEL (non-blocking, updates as each resolves)
-    if (upgradingRef.current) return; // already upgrading from previous render
+    if (upgradingRef.current) return;
     upgradingRef.current = true;
 
     const pairs: { id: string; o: [number, number]; d: [number, number] }[] = [];
@@ -96,7 +98,6 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
       }
     }
 
-    // Fire all fetches simultaneously, update state as each resolves
     Promise.all(
       pairs.map(async ({ id, o, d }) => {
         const route = await fetchRoute(o, d);
@@ -136,12 +137,14 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
         const status = (mnf.status || '').toUpperCase();
         const colors = getRouteColors(mnf.status);
         const isDelayed = status === 'DELAYED';
+        const flowClass = isDelayed ? 'route-flow route-flow-delayed' : 'route-flow';
 
         return (
           <React.Fragment key={id}>
             {/* Base route (faint, always visible) */}
             <Polyline
               positions={positions}
+              renderer={routeRenderer}
               pathOptions={{
                 color: colors.base,
                 weight: isSelected ? 6 : 4,
@@ -153,12 +156,13 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
             {/* Flowing light overlay — the "Swiggy" effect */}
             <Polyline
               positions={positions}
+              renderer={routeRenderer}
+              className={flowClass}
               pathOptions={{
                 color: colors.flow,
                 weight: isSelected ? 4 : 2.5,
                 opacity: isSelected ? 1 : 0.65,
                 lineCap: 'round',
-                className: isDelayed ? 'route-flow route-flow-delayed' : 'route-flow',
                 interactive: false,
               }}
             />
@@ -166,12 +170,13 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
             {isDelayed && isSelected && (
               <Polyline
                 positions={positions}
+                renderer={routeRenderer}
+                className="route-glow"
                 pathOptions={{
                   color: '#EF4444',
                   weight: 10,
                   opacity: 0.15,
                   lineCap: 'round',
-                  className: 'route-glow',
                   interactive: false,
                 }}
               />
