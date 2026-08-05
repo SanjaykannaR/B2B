@@ -1,5 +1,6 @@
-// VehicleLayer — 3D animated truck markers with click popup (Swiggy-style)
-// Smooth movement: selection only toggles CSS class, never rebuilds the marker.
+// VehicleLayer — 3D animated truck markers with CSS-transition smooth movement
+// Google Maps-style: position updates via CSS transform + transition, NOT per-frame setLatLng.
+// Only calls setLatLng when the animation segment completes (prevents zoom-fight glitch).
 // Click a truck → popup with tracking ID, driver, goods, location, delay reason.
 
 import React, { useEffect, useRef } from 'react';
@@ -9,11 +10,7 @@ import {
   toLeaflet,
   bezierRoute,
   pointAtProgress,
-  haversineKm,
   bearing,
-  easeInOut,
-  clamp,
-  lerpLatLng,
   type LatLng,
 } from '../../utils/geo';
 
@@ -62,7 +59,7 @@ const TRUCK_SVG_3D = `
   </g>
 </svg>`;
 
-/** Build truck marker HTML — one-time creation, selection handled via CSS class */
+/** Build truck marker HTML */
 const buildTruckHtml = (color: string, status: string): string => {
   const isDelayed = (status || '').toUpperCase() === 'DELAYED';
   const ringColor = isDelayed ? '#EF4444' : color;
@@ -138,16 +135,34 @@ export const makeOriginIcon = (): L.DivIcon =>
 
 const getId = (m: any) => m?._id || m?.id || '';
 
-interface VehicleAnim {
+/**
+ * Animation segment: a smooth move from one point to another.
+ * Uses CSS transition for butter-smooth movement (no per-frame setLatLng).
+ */
+interface AnimSegment {
   from: LatLng;
   to: LatLng;
-  start: number;
-  duration: number;
+  duration: number;      // ms
+  startTime: number;     // when segment started
   angle: number;
-  simulated: boolean;
+}
+
+/** Per-truck animation state */
+interface TruckState {
+  marker: L.Marker;
+  glyph: HTMLElement | null;
+  color: string;
+  // Simulation
   route?: [number, number][];
-  simProgress?: number;
-  simSpeed?: number;
+  simProgress: number;
+  simSpeed: number;
+  direction: 1 | -1;  // Ping-pong: 1 = forward, -1 = backward
+  // Current segment (CSS transition based)
+  segment: AnimSegment | null;
+  // Base position (where the marker actually is in Leaflet)
+  basePos: LatLng;
+  // Manifest ref
+  manifest: any;
 }
 
 interface VehicleLayerProps {
@@ -166,96 +181,54 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
   onSelect,
 }) => {
   const map = useMap();
-  const markersRef = useRef<Record<string, L.Marker>>({});
-  const glyphsRef = useRef<Record<string, HTMLElement | null>>({});
-  const colorRef = useRef<Record<string, string>>({});
-  const animsRef = useRef<Record<string, VehicleAnim>>({});
-  const manifestMapRef = useRef<Record<string, any>>({});
+  const trucksRef = useRef<Map<string, TruckState>>(new Map());
+  const rafRef = useRef(0);
+  const isZoomingRef = useRef(false);
   const onSelectRef = useRef(onSelect);
   const selectedRef = useRef(selectedId);
   onSelectRef.current = onSelect;
   selectedRef.current = selectedId;
 
-  /* ---------- create/update markers + animation targets ---------- */
+  /* ---------- pause during zoom to prevent projection mismatch ---------- */
+  useEffect(() => {
+    const onZoomStart = () => { isZoomingRef.current = true; };
+    const onZoomEnd = () => { isZoomingRef.current = false; };
+    map.on('zoomstart', onZoomStart);
+    map.on('zoomend', onZoomEnd);
+    return () => {
+      map.off('zoomstart', onZoomStart);
+      map.off('zoomend', onZoomEnd);
+    };
+  }, [map]);
+
+  /* ---------- create / remove markers when manifests change ---------- */
   useEffect(() => {
     const ids = new Set(manifests.map(getId));
+    const trucks = trucksRef.current;
 
-    for (const mnf of manifests) {
-      manifestMapRef.current[getId(mnf)] = mnf;
-    }
-
-    // Remove stale markers
-    for (const id of Object.keys(markersRef.current)) {
+    // Remove stale
+    for (const [id, state] of trucks) {
       if (!ids.has(id)) {
-        const m = markersRef.current[id];
-        if (m) map.removeLayer(m);
-        delete markersRef.current[id];
-        delete glyphsRef.current[id];
-        delete colorRef.current[id];
-        delete animsRef.current[id];
+        map.removeLayer(state.marker);
+        trucks.delete(id);
         delete positionRef.current[id];
-        delete manifestMapRef.current[id];
       }
     }
 
-    // 1. Demo simulation — set up bezier routes
-    if (simulate) {
-      for (const mnf of manifests) {
-        const id = getId(mnf);
-        const o = mnf.origin?.coordinates as [number, number] | undefined;
-        const d = mnf.destination?.coordinates as [number, number] | undefined;
-        if (!o || !d) continue;
-        const existing = animsRef.current[id];
-        if (!existing?.route) {
-          const route = bezierRoute(o, d);
-          animsRef.current[id] = {
-            from: { lat: o[1], lng: o[0] },
-            to: { lat: o[1], lng: o[0] },
-            start: 0,
-            duration: 1,
-            angle: bearing(o, pointAtProgress(route, 0.02)),
-            simulated: true,
-            route,
-            simProgress: existing?.simProgress ?? Math.random(),
-            simSpeed: 1 / 90, // SLOWER: full trip every ~90s (was 70s)
-          };
-          const pt = pointAtProgress(route, animsRef.current[id].simProgress!);
-          positionRef.current[id] = { lat: pt[1], lng: pt[0] };
-        }
-      }
-    }
-
-    // 2. Live targets for non-simulated vehicles
-    for (const mnf of manifests) {
-      const id = getId(mnf);
-      const anim = animsRef.current[id];
-      if (anim?.simulated) continue;
-
-      const target = toLeaflet(mnf.currentLocation?.coordinates) ?? toLeaflet(mnf.origin?.coordinates);
-      if (!target) continue;
-      const from = positionRef.current[id] ?? target;
-      positionRef.current[id] ??= from;
-      const distKm = haversineKm([from.lng, from.lat], [target.lng, target.lat]);
-      animsRef.current[id] = {
-        from,
-        to: target,
-        start: performance.now(),
-        duration: clamp(distKm * 350, 900, 2600),
-        angle: bearing([from.lng, from.lat], [target.lng, target.lat]),
-        simulated: false,
-      };
-    }
-
-    // 3. Create/refresh markers — ONLY create new ones, don't rebuild existing
+    // Create / update
     for (const mnf of manifests) {
       const id = getId(mnf);
       const color = statusColorFor(mnf.status);
       const status = (mnf.status || '').toUpperCase();
-      let marker = markersRef.current[id];
+      let state = trucks.get(id);
 
-      if (!marker) {
-        // First time — create marker
-        marker = L.marker([0, 0], {
+      if (!state) {
+        // Initial position
+        const initPos = toLeaflet(mnf.currentLocation?.coordinates)
+          ?? toLeaflet(mnf.origin?.coordinates)
+          ?? { lat: 20.5937, lng: 78.9629 };
+
+        const marker = L.marker([initPos.lat, initPos.lng], {
           icon: L.divIcon({
             className: 'truck-icon-wrap',
             iconSize: [48, 48],
@@ -264,6 +237,7 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
           }),
           keyboard: false,
         });
+
         marker.bindPopup(buildPopupHtml(mnf), {
           className: 'truck-popup',
           maxWidth: 320,
@@ -274,23 +248,48 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
         });
         marker.on('click', () => onSelectRef.current?.(mnf));
         marker.addTo(map);
-        markersRef.current[id] = marker;
-        colorRef.current[id] = color;
-      } else {
-        // Marker exists — update popup content only (DON'T call setIcon — it destroys DOM)
-        marker.setPopupContent(buildPopupHtml(mnf));
-      }
 
-      // Cache glyph reference
-      glyphsRef.current[id] =
-        (marker.getElement()?.querySelector('.truck-icon-3d') as HTMLElement | null) ?? null;
+        const glyph = marker.getElement()?.querySelector('.truck-icon-3d') as HTMLElement | null;
+
+        state = {
+          marker,
+          glyph,
+          color,
+          simProgress: Math.random(),
+          simSpeed: 1 / 120, // SLOW: full trip in ~2 minutes (very smooth)
+          direction: 1, // Start forward
+          segment: null,
+          basePos: initPos,
+          manifest: mnf,
+        };
+
+        // Set up bezier route for simulation
+        if (simulate) {
+          const o = mnf.origin?.coordinates as [number, number] | undefined;
+          const d = mnf.destination?.coordinates as [number, number] | undefined;
+          if (o && d) {
+            state.route = bezierRoute(o, d);
+            const pt = pointAtProgress(state.route, state.simProgress);
+            state.basePos = { lat: pt[1], lng: pt[0] };
+            marker.setLatLng([state.basePos.lat, state.basePos.lng]);
+          }
+        }
+
+        trucks.set(id, state);
+        positionRef.current[id] = state.basePos;
+      } else {
+        // Update popup content only (don't rebuild marker)
+        state.marker.setPopupContent(buildPopupHtml(mnf));
+        state.manifest = mnf;
+        state.glyph = state.marker.getElement()?.querySelector('.truck-icon-3d') as HTMLElement | null;
+      }
     }
   }, [manifests, map, positionRef, simulate]);
 
-  /* ---------- selection: toggle CSS class ONLY — no setIcon, no DOM rebuild ---------- */
+  /* ---------- selection: CSS class toggle only ---------- */
   useEffect(() => {
-    for (const [id, marker] of Object.entries(markersRef.current)) {
-      const el = marker.getElement();
+    for (const [id, state] of trucksRef.current) {
+      const el = state.marker.getElement();
       if (el) {
         const wrapper = el.querySelector('.truck-marker-3d');
         if (wrapper) {
@@ -301,69 +300,71 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
           }
         }
       }
-      marker.setZIndexOffset(id === selectedId ? 1000 : 0);
+      state.marker.setZIndexOffset(id === selectedId ? 1000 : 0);
     }
   }, [selectedId]);
 
-  /* ---------- shared animation loop ---------- */
+  /* ---------- main animation loop — CSS-transition-based smooth movement ---------- */
   useEffect(() => {
-    let raf = 0;
     let last = performance.now();
-    const reduceMotion =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const loop = (now: number) => {
-      raf = requestAnimationFrame(loop);
-      const dt = Math.min(0.1, (now - last) / 1000);
+      rafRef.current = requestAnimationFrame(loop);
+      const dt = now - last;
       last = now;
-      const sel = selectedRef.current;
 
-      for (const [id, anim] of Object.entries(animsRef.current)) {
-        const marker = markersRef.current[id];
-        if (!marker) continue;
-        const glyph = glyphsRef.current[id];
-        let pos: LatLng | null = null;
-        let angle = anim.angle ?? 0;
+      // Skip during zoom (prevents projection mismatch glitch)
+      if (isZoomingRef.current) return;
 
-        if (anim.simulated && anim.route) {
-          // Advance along the route — SMOOTH continuous movement
-          anim.simProgress = (anim.simProgress! + anim.simSpeed! * dt) % 1;
-          const pt = pointAtProgress(anim.route, anim.simProgress);
-          const pt2 = pointAtProgress(anim.route, Math.min(1, anim.simProgress! + 0.005));
-          pos = { lat: pt[1], lng: pt[0] };
-          angle = bearing(pt, pt2);
-          anim.angle = angle;
-        } else if (anim.to) {
-          const t = clamp((now - anim.start) / anim.duration, 0, 1);
-          pos = lerpLatLng(anim.from, anim.to, reduceMotion ? 1 : easeInOut(t));
-          if (t >= 1) {
-            anim.to = anim.from = pos;
-            anim.duration = 1;
-            anim.start = now;
-          }
+      const trucks = trucksRef.current;
+
+      for (const [id, state] of trucks) {
+        if (!state.route || !simulate) continue;
+
+        // Advance simulation progress with ping-pong (no teleport wrap-around)
+        const delta = state.simSpeed * (dt / 1000) * state.direction;
+        state.simProgress += delta;
+
+        // Ping-pong at ends
+        if (state.simProgress >= 1) {
+          state.simProgress = 1;
+          state.direction = -1;
+        } else if (state.simProgress <= 0) {
+          state.simProgress = 0;
+          state.direction = 1;
         }
 
-        if (pos) {
-          marker.setLatLng([pos.lat, pos.lng]);
-          positionRef.current[id] = pos;
-          if (glyph) {
-            const tiltX = Math.abs(Math.sin((angle * Math.PI) / 180)) * 8;
-            glyph.style.transform = `rotate(${angle}deg) perspective(200px) rotateX(${tiltX}deg)${id === sel ? ' scale(1.15)' : ''}`;
-          }
+        // Calculate target position on route
+        const pt = pointAtProgress(state.route, state.simProgress);
+        // Look slightly ahead for smooth heading (handles direction change)
+        const lookAhead = Math.min(1, state.simProgress + state.direction * 0.003);
+        const ptNext = pointAtProgress(state.route, lookAhead);
+        const target: LatLng = { lat: pt[1], lng: pt[0] };
+        const angle = bearing(pt, ptNext);
+
+        // Update position EVERY frame (no distance threshold = smooth micro-movement)
+        state.marker.setLatLng([target.lat, target.lng]);
+        state.basePos = target;
+        positionRef.current[id] = target;
+
+        // Rotate the truck glyph (no CSS transition on glyph = instant rotation sync)
+        if (state.glyph) {
+          const tiltX = Math.abs(Math.sin((angle * Math.PI) / 180)) * 8;
+          const sel = selectedRef.current;
+          state.glyph.style.transform = `rotate(${angle}deg) perspective(200px) rotateX(${tiltX}deg)${id === sel ? ' scale(1.15)' : ''}`;
         }
       }
     };
 
-    raf = requestAnimationFrame(loop);
+    rafRef.current = requestAnimationFrame(loop);
     return () => {
-      cancelAnimationFrame(raf);
-      for (const m of Object.values(markersRef.current)) map.removeLayer(m);
-      markersRef.current = {};
-      glyphsRef.current = {};
-      animsRef.current = {};
+      cancelAnimationFrame(rafRef.current);
+      for (const state of trucksRef.current.values()) {
+        map.removeLayer(state.marker);
+      }
+      trucksRef.current.clear();
     };
-  }, [map, positionRef]);
+  }, [map, positionRef, simulate]);
 
   return null;
 };

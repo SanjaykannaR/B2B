@@ -450,13 +450,17 @@
 
 
 /* ============================================================
-   15. LIVE MAP ANIMATIONS — Swiggy/Zomato style (Item 15)
+   15. LIVE MAP ANIMATIONS — 3D Truck + Swiggy-style (Item 15)
    ============================================================ */
-.leaflet-div-icon.vehicle-marker-wrap {
+
+/* Leaflet div icon reset */
+.leaflet-div-icon.vehicle-marker-wrap,
+.leaflet-div-icon.truck-icon-wrap {
   background: transparent;
   border: none;
 }
 
+/* ── Tooltip (hover on truck) ── */
 .vehicle-tooltip {
   background: rgba(15, 27, 51, 0.92) !important;
   color: #fff !important;
@@ -470,47 +474,124 @@
 }
 .vehicle-tooltip::before { display: none !important; }
 
-/* Animated truck marker: colored pulse blob + rotatable glyph */
-.vehicle-marker {
+/* ── 3D Truck marker ── */
+.truck-marker-3d {
   position: relative;
-  width: 40px;
-  height: 40px;
-  --vehicle-color: #8B5CF6;
-}
-
-.vehicle-pulse {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 32px;
-  height: 32px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: var(--vehicle-color);
-  opacity: 0.22;
-}
-
-.vehicle-pulse::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid var(--vehicle-color);
-  animation: ring-expand 2.2s ease-out infinite;
-}
-
-.vehicle-glyph {
-  position: absolute;
-  inset: 0;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--vehicle-color);
-  filter: drop-shadow(0 3px 8px rgba(15, 27, 51, 0.7));
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.truck-marker-3d:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+.truck-marker-3d.selected {
+  transform: scale(1.2);
+  z-index: 20;
+}
+
+/* Glow under the truck — colored by status */
+.truck-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--glow-color, rgba(139,92,246,0.3));
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* Pulsing ring around the truck */
+.truck-pulse-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid var(--ring-color, #8B5CF6);
+  animation: truck-ring-pulse 2s ease-out infinite;
+  pointer-events: none;
+}
+
+/* The 3D truck SVG container */
+.truck-icon-3d {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
   will-change: transform;
 }
 
-/* Origin / destination pins */
+/* Delay badge "!" on top of truck */
+.truck-delay-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #EF4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 0 0 2px rgba(15,27,51,0.8), 0 2px 6px rgba(239,68,68,0.5);
+  animation: delay-badge-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes truck-ring-pulse {
+  0%   { transform: translate(-50%, -50%) scale(0.7); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+
+@keyframes delay-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.2); }
+}
+
+/* ── Popup (click on truck) ── */
+.truck-popup .leaflet-popup-content-wrapper {
+  background: #fff !important;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05) !important;
+  overflow: hidden;
+}
+.truck-popup .leaflet-popup-content {
+  margin: 12px !important;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.5;
+}
+.truck-popup .leaflet-popup-tip {
+  background: #fff !important;
+  box-shadow: none !important;
+}
+.truck-popup .leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  font-size: 20px !important;
+  padding: 8px !important;
+  top: 4px !important;
+  right: 4px !important;
+}
+.truck-popup .leaflet-popup-close-button:hover {
+  color: #1e293b !important;
+}
+
+/* ── Origin / destination pins ── */
 .origin-marker {
   width: 12px;
   height: 12px;
@@ -539,11 +620,35 @@
   animation: dest-ping 2s ease-out infinite;
 }
 
-/* Flowing route dashes — the "light running along the road" effect */
+/* ── Flowing route dashes — the "light running along the road" effect ── */
 .route-flow {
   stroke-dasharray: 3 12 !important;
   stroke-linecap: round;
   animation: dash-flow 1.4s linear infinite;
+}
+
+/* Delayed route: red flowing dashes with faster pulse */
+.route-flow-delayed {
+  stroke-dasharray: 6 8 !important;
+  animation: dash-flow-delayed 0.9s linear infinite;
+}
+
+/* Route glow for delayed trucks */
+.route-glow {
+  animation: route-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dash-flow {
+  to { stroke-dashoffset: -15; }
+}
+
+@keyframes dash-flow-delayed {
+  to { stroke-dashoffset: -14; }
+}
+
+@keyframes route-glow-pulse {
+  0%, 100% { opacity: 0.1; }
+  50%      { opacity: 0.25; }
 }
 
 @keyframes ring-expand {
@@ -556,13 +661,12 @@
   100% { transform: scale(1.9); opacity: 0; }
 }
 
-@keyframes dash-flow {
-  to { stroke-dashoffset: -15; }
-}
-
-/* Accessibility: calm it down for reduced-motion users */
+/* ── Accessibility: calm it down for reduced-motion users ── */
 @media (prefers-reduced-motion: reduce) {
-  .route-flow { animation: none !important; }
-  .vehicle-pulse::after { animation: none !important; opacity: 0.3; }
+  .route-flow,
+  .route-flow-delayed,
+  .route-glow { animation: none !important; }
+  .truck-pulse-ring { animation: none !important; opacity: 0.3; }
+  .truck-delay-badge { animation: none !important; }
   .dest-marker::after { animation: none !important; opacity: 0.4; }
 }
