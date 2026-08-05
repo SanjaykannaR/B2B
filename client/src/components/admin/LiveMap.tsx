@@ -115,6 +115,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         scrollWheelZoom
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
+        markerZoomAnimation={false}
       >
         <MapController selected={selected} positionRef={positionRef} />
         <FollowController
@@ -142,7 +143,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         onClick={() => setFollow((f) => !f)}
         disabled={!selectedId}
         title={follow ? 'Stop following truck' : 'Follow selected truck'}
-        className="absolute top-3 right-3 z-[1100] p-2.5 rounded-full transition-all duration-200 disabled:opacity-40"
+        className="absolute top-3 right-3 z-[1100] p-3 rounded-full transition-all duration-200 disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center"
         style={{
           background: follow ? 'var(--color-accent)' : 'rgba(15,27,51,0.85)',
           color: '#fff',
@@ -154,7 +155,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       </button>
 
       {/* Trip info / fleet summary card */}
-      <div className="absolute top-3 left-3 z-[1100] w-[280px] max-w-[calc(100%-24px)]">
+      <div className="absolute top-3 left-3 z-[1100] w-[220px] sm:w-[280px] max-w-[calc(100%-24px)]">
         <TripInfoCard
           manifest={selected}
           fleet={fleet}

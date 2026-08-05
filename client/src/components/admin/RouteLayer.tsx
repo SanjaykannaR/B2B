@@ -30,7 +30,7 @@ const getRouteColors = (status?: string) =>
   ROUTE_COLORS[(status || '').toUpperCase()] || { base: '#475569', flow: '#94A3B8', glow: 'rgba(148,163,184,0.2)' };
 
 /** Module-level route cache — survives remounts, avoids OSRM refetch storms. */
-const routeCache = new Map<string, [number, number][]>();
+export const routeCache = new Map<string, [number, number][]>();
 
 const fetchRoute = async (o: [number, number], d: [number, number]): Promise<[number, number][]> => {
   const key = `${o[0].toFixed(4)},${o[1].toFixed(4)}|${d[0].toFixed(4)},${d[1].toFixed(4)}`;

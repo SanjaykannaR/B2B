@@ -13,6 +13,7 @@ import {
   bearing,
   type LatLng,
 } from '../../utils/geo';
+import { routeCache } from './RouteLayer';
 
 /** Status → marker color */
 export const statusColorFor = (status?: string): string => {
@@ -263,12 +264,14 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
           manifest: mnf,
         };
 
-        // Set up bezier route for simulation
+        // Set up route for simulation — prefer cached OSRM route (same as RouteLayer)
         if (simulate) {
           const o = mnf.origin?.coordinates as [number, number] | undefined;
           const d = mnf.destination?.coordinates as [number, number] | undefined;
           if (o && d) {
-            state.route = bezierRoute(o, d);
+            const key = `${o[0].toFixed(4)},${o[1].toFixed(4)}|${d[0].toFixed(4)},${d[1].toFixed(4)}`;
+            const cachedRoute = routeCache.get(key);
+            state.route = cachedRoute || bezierRoute(o, d); // Use OSRM if available, else bezier fallback
             const pt = pointAtProgress(state.route, state.simProgress);
             state.basePos = { lat: pt[1], lng: pt[0] };
             marker.setLatLng([state.basePos.lat, state.basePos.lng]);
