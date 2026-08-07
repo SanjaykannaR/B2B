@@ -1,8 +1,29 @@
-// This file is for: Role-based access control middleware
-// Module: Backend Middleware (Module 2)
-// Owner: Developer 1 (Backend Engineer)
-//
-// What goes here:
-// - Takes array of allowed roles: roleGuard(['admin', 'executive'])
-// - Checks req.user.role against allowed roles
-// - Returns 403 Forbidden if user's role is not in the allowed list
+import { NextFunction, Request, Response } from 'express';
+import { sendError } from '../utils/ApiResponse';
+
+/**
+ * Role-based access control. Pass the allowed roles:
+ *   roleGuard('admin')  roleGuard('admin', 'executive')
+ *
+ * Requirement: the ADMIN role has FULL access to every page — the admin
+ * passes for any allowed-role list. Everyone else must be in the list.
+ */
+export const roleGuard =
+  (...allowedRoles: string[]) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const role = req.user?.role;
+    if (!role) {
+      return sendError(res, 401, 'Not authorized.');
+    }
+    if (role === 'admin') {
+      return next();
+    }
+    if (allowedRoles.includes(role)) {
+      return next();
+    }
+    return sendError(
+      res,
+      403,
+      `Forbidden. Role '${role}' is not allowed to access this resource.`,
+    );
+  };

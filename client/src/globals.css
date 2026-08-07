@@ -460,6 +460,12 @@
   border: none;
 }
 
+/* Light Google-Maps-style canvas (empty tile areas) */
+.leaflet-container {
+  background: #E8EAEF;
+  font-family: var(--font-sans);
+}
+
 /* ── Tooltip (hover on truck) ── */
 .vehicle-tooltip {
   background: rgba(15, 27, 51, 0.92) !important;

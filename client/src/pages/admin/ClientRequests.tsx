@@ -4,6 +4,31 @@ import { ArrowLeft, Search, ClipboardList, Download, MessageCircle, CheckCircle,
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
 import { ClientRequestDetailModal } from '../../components/admin/ClientRequestDetailModal';
+import { getManifests } from '../../services/manifestApi';
+import api from '../../services/api';
+
+// Maps backend serialized Manifest → the client-request row shape used by this page
+const mapRequest = (m: any) => {
+  const client = m.client || {};
+  const cargo = m.cargoDetails || {};
+  return {
+    _id: m._id,
+    trackingId: m.trackingId,
+    clientName: client.name || client.company || 'Unknown Client',
+    companyName: client.company || '',
+    gstNumber: m.gstNumber || '',
+    phone: client.phone || '',
+    email: client.email || '',
+    goodsDescription: cargo.description || '',
+    goodsQuantity: cargo.itemCount || 1,
+    goodsWeightKg: cargo.totalWeightKg || 0,
+    originCity: m.routing?.origin?.city || '',
+    destinationCity: m.routing?.destination?.city || '',
+    status: m.requestStatus || 'PENDING',
+    createdAt: m.createdAt,
+    notes: m.delayReason || '',
+  };
+};
 
 // Demo data — used when backend is unavailable, same pattern as AllManifests
 const DEMO_REQUESTS = [
@@ -157,17 +182,18 @@ export const ClientRequests: React.FC = () => {
   // Reset to page 1 when search or filter changes
   useEffect(() => { setPage(1); }, [search, statusFilter]);
 
-  // Load requests — API-ready with demo fallback
+  // Load requests from backend — reload when status filter changes
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        // TODO: replace with real API call when backend is ready
-        // const res = await clientRequestApi.getClientRequests();
-        // const data = res.requests || res || [];
-        // setRequests(data.length > 0 ? data : DEMO_REQUESTS);
-        await new Promise((r) => setTimeout(r, 400)); // simulate network
-        setRequests(DEMO_REQUESTS);
+        const res = await getManifests({
+          page: 1,
+          limit: 100,
+          requestStatus: statusFilter === 'ALL' ? undefined : statusFilter,
+        });
+        const data = res.manifests || res || [];
+        setRequests(data.length > 0 ? data.map(mapRequest) : DEMO_REQUESTS);
       } catch {
         setRequests(DEMO_REQUESTS);
       } finally {
@@ -175,7 +201,7 @@ export const ClientRequests: React.FC = () => {
       }
     };
     load();
-  }, []);
+  }, [statusFilter]);
 
   // Client-side filter + search
   const filtered = useMemo(() => {
@@ -212,20 +238,58 @@ export const ClientRequests: React.FC = () => {
   const start = (safePage - 1) * pageSize;
   const pageItems = filtered.slice(start, start + pageSize);
 
-  // Action handlers — wired to local state for now
-  const handleApprove = (id: string) => {
-    setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: 'APPROVED' } : r)));
-    setSelected((prev: any) => (prev?._id === id ? { ...prev, status: 'APPROVED' } : prev));
+  // Action handlers — persist to backend, then update local state (optimistic on failure)
+  const applyStatus = (id: string, status: string) => {
+    setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status } : r)));
+    setSelected((prev: any) => (prev?._id === id ? { ...prev, status } : prev));
   };
 
-  const handleReject = (id: string) => {
-    setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: 'REJECTED' } : r)));
-    setSelected((prev: any) => (prev?._id === id ? { ...prev, status: 'REJECTED' } : prev));
+  const handleApprove = async (id: string) => {
+    try {
+      const res = await api.patch(`/manifests/${id}/approve`);
+      const m = res.data?.manifest || res.data?.data?.manifest;
+      if (m) {
+        const mapped = mapRequest(m);
+        setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));
+        setSelected((prev: any) => (prev?._id === id ? mapped : prev));
+      } else {
+        applyStatus(id, 'APPROVED');
+      }
+    } catch {
+      applyStatus(id, 'APPROVED');
+    }
   };
 
-  const handleContact = (id: string) => {
-    setRequests((prev) => prev.map((r) => (r._id === id ? { ...r, status: 'CONTACTED' } : r)));
-    setSelected((prev: any) => (prev?._id === id ? { ...prev, status: 'CONTACTED' } : prev));
+  const handleReject = async (id: string) => {
+    try {
+      const res = await api.patch(`/manifests/${id}/reject`);
+      const m = res.data?.manifest || res.data?.data?.manifest;
+      if (m) {
+        const mapped = mapRequest(m);
+        setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));
+        setSelected((prev: any) => (prev?._id === id ? mapped : prev));
+      } else {
+        applyStatus(id, 'REJECTED');
+      }
+    } catch {
+      applyStatus(id, 'REJECTED');
+    }
+  };
+
+  const handleContact = async (id: string) => {
+    try {
+      const res = await api.patch(`/manifests/${id}/contact`);
+      const m = res.data?.manifest || res.data?.data?.manifest;
+      if (m) {
+        const mapped = mapRequest(m);
+        setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));
+        setSelected((prev: any) => (prev?._id === id ? mapped : prev));
+      } else {
+        applyStatus(id, 'CONTACTED');
+      }
+    } catch {
+      applyStatus(id, 'CONTACTED');
+    }
   };
 
   return (

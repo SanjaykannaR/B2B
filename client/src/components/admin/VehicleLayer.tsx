@@ -252,6 +252,7 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
             html: buildTruckHtml(color, status),
           }),
           keyboard: false,
+          autoPan: false,
         });
 
         marker.bindPopup(buildPopupHtml(mnf), {
@@ -322,7 +323,30 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
     }
   }, [selectedId]);
 
-  /* ---------- main animation loop — CSS-transition-based smooth movement ---------- */
+  /* ---------- keep trucks on upgraded OSRM roads (bezier → real route) ---------- */
+  useEffect(() => {
+    if (!simulate) return;
+    const iv = setInterval(() => {
+      for (const state of trucksRef.current.values()) {
+        if (!state.manifest) continue;
+        const o = state.manifest.origin?.coordinates as [number, number] | undefined;
+        const d = state.manifest.destination?.coordinates as [number, number] | undefined;
+        if (!Array.isArray(o) || !Array.isArray(d) || o.length !== 2 || d.length !== 2) continue;
+        const key = `${o[0].toFixed(4)},${o[1].toFixed(4)}|${d[0].toFixed(4)},${d[1].toFixed(4)}`;
+        const cached = routeCache.get(key);
+        if (cached && cached !== state.route) {
+          state.route = cached;
+          const pt = pointAtProgress(cached, state.simProgress);
+          state.basePos = { lat: pt[1], lng: pt[0] };
+          state.marker.setLatLng([state.basePos.lat, state.basePos.lng]);
+          state.glyph = state.marker.getElement()?.querySelector('.truck-icon-3d') as HTMLElement | null;
+        }
+      }
+    }, 2500);
+    return () => clearInterval(iv);
+  }, [simulate]);
+
+  /* ---------- main animation loop — per-frame smooth movement ---------- */
   useEffect(() => {
     let last = performance.now();
 

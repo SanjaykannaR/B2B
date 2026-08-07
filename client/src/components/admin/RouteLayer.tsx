@@ -6,11 +6,10 @@
 // falls back to a quadratic bezier curve when offline.
 // Routes shown INSTANTLY via bezier, then upgraded to real roads in parallel.
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Polyline, Marker } from 'react-leaflet';
 import { makeDestIcon, makeOriginIcon } from './VehicleLayer';
 import { bezierRoute } from '../../utils/geo';
-import L from 'leaflet';
 
 interface RouteLayerProps {
   manifests: any[];
@@ -64,8 +63,6 @@ const fetchRoute = async (o: [number, number], d: [number, number]): Promise<[nu
 export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId }) => {
   const [routes, setRoutes] = useState<Record<string, [number, number][]>>({});
   const upgradingRef = useRef(false);
-  // Canvas renderer — persists through zoom, no SVG recreation
-  const routeRenderer = useMemo(() => L.canvas({ padding: 0.5 }), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -141,14 +138,24 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
 
         return (
           <React.Fragment key={id}>
+            {/* White casing — makes the route pop on the light tile layer */}
+            <Polyline
+              positions={positions}
+              pathOptions={{
+                color: '#FFFFFF',
+                weight: (isSelected ? 6 : 4) + 2.5,
+                opacity: 0.9,
+                lineCap: 'round',
+                interactive: false,
+              }}
+            />
             {/* Base route (faint, always visible) */}
             <Polyline
               positions={positions}
-              renderer={routeRenderer}
               pathOptions={{
                 color: colors.base,
                 weight: isSelected ? 6 : 4,
-                opacity: isSelected ? 0.6 : 0.3,
+                opacity: isSelected ? 0.6 : 0.35,
                 lineCap: 'round',
                 interactive: false,
               }}
@@ -156,7 +163,6 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
             {/* Flowing light overlay — the "Swiggy" effect */}
             <Polyline
               positions={positions}
-              renderer={routeRenderer}
               className={flowClass}
               pathOptions={{
                 color: colors.flow,
@@ -170,8 +176,7 @@ export const RouteLayer: React.FC<RouteLayerProps> = ({ manifests, selectedId })
             {isDelayed && isSelected && (
               <Polyline
                 positions={positions}
-                renderer={routeRenderer}
-                className="route-glow"
+                  className="route-glow"
                 pathOptions={{
                   color: '#EF4444',
                   weight: 10,

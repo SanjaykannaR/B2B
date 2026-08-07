@@ -1,22 +1,54 @@
-// This file is for: Express app entry point — server.js
-// Module: Backend Configuration & Server Setup (Module 1)
-// Owner: Developer 1 (Backend Engineer)
-//
-// What goes here:
-// - Load dotenv config
-// - Import and call db.js to connect MongoDB
-// - Create Express app
-// - Enable CORS (using config/cors.js)
-// - Enable JSON body parsing (limit: 10mb)
-// - Register all API routes:
-//     /api/auth          → auth.routes.js
-//     /api/users         → user.routes.js
-//     /api/vehicles      → vehicle.routes.js
-//     /api/manifests     → manifest.routes.js
-//     /api/invoices      → invoice.routes.js
-//     /api/analytics     → analytics.routes.js
-//     /api/notifications → notification.routes.js
-// - Health check: GET /api/health
-// - Global error handler middleware
-// - Start overdueSweep cron job
-// - Listen on PORT (default 5000)
+import express from 'express';
+import cors from 'cors';
+import { connectDB } from './config/db';
+import env from './config/env';
+import { corsOptions } from './config/cors';
+import { startOverdueSweep } from './cron/overdueSweep';
+import { errorHandler } from './middleware/errorHandler';
+import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import vehicleRoutes from './routes/vehicle.routes';
+import manifestRoutes, { deliveryRequestRouter } from './routes/manifest.routes';
+import invoiceRoutes from './routes/invoice.routes';
+import notificationRoutes from './routes/notification.routes';
+import analyticsRoutes from './routes/analytics.routes';
+
+const app = express();
+
+// ── Core middleware ───────────────────────────────────────────────
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// ── Health check ──────────────────────────────────────────────────
+app.get('/api/health', (_req, res) => {
+  res.json({ success: true, message: 'OK', data: { status: 'up' } });
+});
+
+// ── API routes ────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/manifests', manifestRoutes);
+app.use('/api/delivery-requests', deliveryRequestRouter);
+app.use('/api/invoices', invoiceRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// ── Central error handler (must be last) ──────────────────────────
+app.use(errorHandler);
+
+const start = async () => {
+  try {
+    await connectDB();
+    app.listen(env.port, () => {
+      console.log(`[server] API listening on http://localhost:${env.port} (${env.nodeEnv})`);
+    });
+    startOverdueSweep();
+  } catch (err) {
+    console.error('[server] Failed to start:', err);
+    process.exit(1);
+  }
+};
+
+start();
