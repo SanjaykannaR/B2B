@@ -1,5 +1,461 @@
-// This file is for: OrderForm — bulk freight request form for clients
-// Module: Client Pages (Module 15)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// Fields: origin, destination, cargo description, weight, volume, item count, hazmat, pickup/delivery dates
+import { useState, useEffect } from 'react';
+import { MapPin, Calendar, Truck, ChevronRight, ShieldCheck, CheckCircle2, Navigation, PackageSearch, Clock, RefreshCw, AlertTriangle, Hash } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
+import type { RootState } from '../../store/store';
+import { createManifest, Manifest, GeoPoint } from '../../services/manifestApi';
+
+interface FormState {
+  origin: string;
+  destination: string;
+  description: string;
+  weight: string;
+  volume: string;
+  itemCount: string;
+  hazardous: boolean;
+  pickupDate: string;
+  windowClose: string;
+}
+
+const INITIAL_FORM: FormState = {
+  origin: '',
+  destination: '',
+  description: '',
+  weight: '',
+  volume: '',
+  itemCount: '1',
+  hazardous: false,
+  pickupDate: '',
+  windowClose: '',
+};
+
+const formatINR = (amount: number) => '₹' + amount.toLocaleString('en-IN');
+
+function haversineKm(a: GeoPoint, b: GeoPoint): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLng = toRad(b.longitude - a.longitude);
+  const la1 = toRad(a.latitude);
+  const la2 = toRad(b.latitude);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+async function geocode(query: string): Promise<GeoPoint | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { display_name?: string; lat?: string; lon?: string }[];
+    if (!Array.isArray(data) || data.length === 0 || !data[0]?.lat || !data[0]?.lon) return null;
+    return {
+      name: data[0].display_name ?? query,
+      latitude: parseFloat(data[0].lat),
+      longitude: parseFloat(data[0].lon),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export default function OrderForm() {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [animateIn, setAnimateIn] = useState(false);
+  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [route, setRoute] = useState<{ origin: GeoPoint; destination: GeoPoint; distanceKm: number; estimatedDurationMinutes: number } | null>(null);
+  const [created, setCreated] = useState<Manifest | null>(null);
+
+  useEffect(() => {
+    setAnimateIn(true);
+  }, []);
+
+  const setField = (key: keyof FormState, value: string | boolean) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const nextStep = () => {
+    setStep((s) => Math.min(s + 1, 4));
+  };
+
+  const prevStep = () => {
+    setStep((s) => Math.max(s - 1, 1));
+  };
+
+  // Geocode addresses before showing the quote in step 3
+  const goToQuote = async () => {
+    if (!form.origin.trim() || !form.destination.trim()) {
+      toast.error('Please enter both pickup and delivery addresses.');
+      return;
+    }
+    setIsGeocoding(true);
+    try {
+      const [origin, destination] = await Promise.all([geocode(form.origin), geocode(form.destination)]);
+      if (!origin || !destination) {
+        toast.error('Could not locate one of the addresses. Try a more specific address (e.g. "Chicago, IL").');
+        return;
+      }
+      const distanceKm = haversineKm(origin, destination);
+      setRoute({
+        origin,
+        destination,
+        distanceKm,
+        estimatedDurationMinutes: Math.round(distanceKm),
+      });
+      setStep(3);
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!route) return;
+
+    const weight = parseFloat(form.weight);
+    const volume = parseFloat(form.volume);
+    const itemCount = parseInt(form.itemCount, 10);
+
+    if (!form.description.trim()) {
+      toast.error('Please describe your cargo.');
+      return;
+    }
+    if (isNaN(weight) || weight <= 0) {
+      toast.error('Cargo weight must be a positive number.');
+      return;
+    }
+    if (isNaN(volume) || volume <= 0) {
+      toast.error('Cargo volume must be a positive number.');
+      return;
+    }
+    if (isNaN(itemCount) || itemCount < 1) {
+      toast.error('Item count must be at least 1.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const manifest = await createManifest({
+        client: user?.id,
+        cargoDetails: {
+          description: form.description.trim(),
+          weight,
+          volume,
+          itemCount,
+          hazardous: form.hazardous,
+        },
+        routing: { origin: route.origin, destination: route.destination },
+        scheduledPickup: form.pickupDate ? new Date(form.pickupDate).toISOString() : undefined,
+        scheduledDeliveryWindowClose: form.windowClose ? new Date(form.windowClose).toISOString() : undefined,
+      });
+      setCreated(manifest);
+      toast.success('Manifest created successfully.');
+      setStep(4);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to create shipment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setForm(INITIAL_FORM);
+    setRoute(null);
+    setCreated(null);
+    setStep(1);
+  };
+
+  const getStepClass = (stepNum: number) => {
+    if (step === stepNum) return "opacity-100 translate-x-0 relative z-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+    if (step > stepNum) return "opacity-0 -translate-x-16 absolute inset-0 pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+    return "opacity-0 translate-x-16 absolute inset-0 pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+  };
+
+  const inputClass = "w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all duration-300 font-medium placeholder:text-slate-400";
+
+  return (
+    <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 transform ${animateIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+
+      {/* Premium Header */}
+      <div className="mb-10 flex flex-col items-center text-center">
+        <div className="inline-flex items-center space-x-2 bg-orange-50 border border-orange-100 rounded-full px-5 py-1.5 mb-4 shadow-sm">
+          <Truck className="w-4 h-4 text-orange-500" />
+          <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Enterprise Freight</span>
+        </div>
+        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Create Shipment</h2>
+        <p className="text-slate-500 text-lg max-w-lg">Enter logistics details below to instantly route your cargo and generate a tracking ID.</p>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-12 relative overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)]">
+
+        {/* Sleek Progress Line */}
+        <div className="mb-16 relative">
+          <div className="flex justify-between relative z-10 mb-2">
+            {['Routing', 'Cargo Specs', 'Scheduling'].map((label, idx) => (
+              <span key={idx} className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${step === idx + 1 ? 'text-orange-500' : step > idx + 1 ? 'text-slate-900' : 'text-slate-400'}`}>
+                {label}
+              </span>
+            ))}
+          </div>
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+            <div
+              className="absolute top-0 left-0 h-full bg-orange-500 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              style={{ width: `${Math.min(((step - 1) / 2) * 100, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Forms Container */}
+        <div className="relative min-h-[400px]">
+
+          {/* STEP 1: ROUTE */}
+          <div className={getStepClass(1)}>
+            <div className="space-y-8">
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Pickup Address</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Navigation className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input type="text" required placeholder="e.g. 123 Factory Row, Chicago IL" className={inputClass}
+                    value={form.origin} onChange={(e) => setField('origin', e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Delivery Address</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <MapPin className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input type="text" required placeholder="e.g. 456 Warehouse Ave, Detroit MI" className={inputClass}
+                    value={form.destination} onChange={(e) => setField('destination', e.target.value)} />
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <button type="button" onClick={() => { setStep(2); }} className="group flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-orange-500/30 hover:-translate-y-1">
+                  Continue to Cargo <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 2: CARGO */}
+          <div className={getStepClass(2)}>
+            <div className="space-y-8">
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Cargo Description</label>
+                <input type="text" required placeholder="e.g. Automotive components, palletized" className={inputClass}
+                  value={form.description} onChange={(e) => setField('description', e.target.value)} />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Total Weight</label>
+                  <div className="relative">
+                    <input type="number" min="0" step="any" placeholder="0.00" className={inputClass}
+                      value={form.weight} onChange={(e) => setField('weight', e.target.value)} />
+                    <span className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 font-bold text-sm pointer-events-none">kg</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Total Volume</label>
+                  <div className="relative">
+                    <input type="number" min="0" step="any" placeholder="0.00" className={inputClass}
+                      value={form.volume} onChange={(e) => setField('volume', e.target.value)} />
+                    <span className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 font-bold text-sm pointer-events-none">m³</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Item Count</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Hash className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input type="number" min="1" step="1" placeholder="1" className={inputClass}
+                      value={form.itemCount} onChange={(e) => setField('itemCount', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              <label className="flex items-start space-x-4 p-6 rounded-2xl border-2 border-slate-100 bg-white cursor-pointer hover:border-orange-500 hover:bg-orange-50/30 transition-all duration-300 group shadow-sm hover:shadow-md">
+                <div className="relative flex items-center justify-center mt-0.5">
+                  <input type="checkbox" checked={form.hazardous} onChange={(e) => setField('hazardous', e.target.checked)}
+                    className="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" />
+                  <ShieldCheck className="w-4 h-4 text-white absolute opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" />
+                </div>
+                <div>
+                  <p className="text-sm font-extrabold text-slate-900 group-hover:text-orange-600 transition-colors">Hazardous Materials (HAZMAT)</p>
+                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">Check this box if your shipment contains specialized or dangerous goods requiring certified handling.</p>
+                </div>
+              </label>
+
+              <div className="flex items-center justify-between pt-4">
+                <button type="button" onClick={prevStep} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-lg">
+                  Go Back
+                </button>
+                <button type="button" onClick={goToQuote} disabled={isGeocoding}
+                  className="group flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-60 disabled:hover:translate-y-0">
+                  {isGeocoding ? (
+                    <span className="flex items-center">Locating addresses <RefreshCw className="w-5 h-5 ml-2 animate-spin" /></span>
+                  ) : (
+                    <span className="flex items-center">Continue <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" /></span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 3: SCHEDULE & SUMMARY */}
+          <div className={getStepClass(3)}>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Requested Pickup Date</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Calendar className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input type="datetime-local" className={inputClass}
+                      value={form.pickupDate} onChange={(e) => setField('pickupDate', e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Delivery Window Close</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Clock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input type="datetime-local" className={inputClass}
+                      value={form.windowClose} onChange={(e) => setField('windowClose', e.target.value)} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Premium Dark Order Summary Card */}
+              <div className="bg-[#0f172a] rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                  <Truck className="w-48 h-48 -mt-16 -mr-16" />
+                </div>
+                <h4 className="font-extrabold text-lg mb-6 flex items-center relative z-10">
+                  <Clock className="w-5 h-5 mr-3 text-orange-500" />
+                  Estimated Logistics Profile
+                </h4>
+
+                <div className="space-y-4 relative z-10">
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                    <span className="text-slate-400 font-medium">Route</span>
+                    <span className="font-mono font-bold text-sm text-right">{form.origin} → {form.destination}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                    <span className="text-slate-400 font-medium">Est. Transport Distance</span>
+                    <span className="font-mono font-bold text-lg">{route ? `${route.distanceKm.toFixed(0)} km` : '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                    <span className="text-slate-400 font-medium">Est. Duration</span>
+                    <span className="font-mono font-bold text-lg">
+                      {route ? `${Math.floor(route.estimatedDurationMinutes / 60)}h ${route.estimatedDurationMinutes % 60}m` : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+                    <span className="text-slate-400 font-medium">Cargo Weight</span>
+                    <span className="font-mono font-bold text-lg">{form.weight ? `${form.weight} kg` : '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="font-bold text-slate-300 uppercase tracking-widest text-xs">Total Quote</span>
+                    <span className="text-orange-500 font-bold text-3xl tabular-nums font-mono">
+                      {route && form.weight ? formatINR(Math.round(route.distanceKm * (parseFloat(form.weight) / 1000) * 5 + route.distanceKm * 2)) : '—'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {form.hazardous && (
+                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-bold">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>HAZMAT flagged — certified driver required.</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-4">
+                <button type="button" onClick={prevStep} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-lg">
+                  Go Back
+                </button>
+                <button type="submit" disabled={isSubmitting} className="group flex items-center bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0">
+                  {isSubmitting ? (
+                    <span className="flex items-center">Processing <RefreshCw className="w-5 h-5 ml-2 animate-spin" /></span>
+                  ) : (
+                    <span className="flex items-center">Confirm Dispatch <CheckCircle2 className="w-5 h-5 ml-2 group-hover:scale-110 transition-transform" /></span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* STEP 4: SUCCESS */}
+          <div className={getStepClass(4)}>
+            <div className="text-center py-12 px-4">
+              <div className="relative w-full h-32 mx-auto mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-transparent via-orange-500/5 to-transparent flex items-center justify-center">
+                <div
+                  className="absolute bottom-10 flex flex-col items-center justify-end"
+                  style={{
+                    transform: step === 4 ? 'translateX(0px)' : 'translateX(-200px)',
+                    opacity: step === 4 ? 1 : 0,
+                    transition: 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s',
+                  }}
+                >
+                  <div className="relative">
+                    <Truck className="w-16 h-16 text-orange-500 drop-shadow-lg" />
+                    <div className="absolute top-1/2 right-full mr-2 w-32 h-1 bg-gradient-to-l from-orange-500/40 to-transparent rounded-full -translate-y-1/2"></div>
+                  </div>
+                </div>
+
+                <div
+                  className="absolute bottom-[2.75rem] ml-12 bg-white rounded-full p-1 shadow-lg"
+                  style={{
+                    transform: step === 4 ? 'scale(1)' : 'scale(0)',
+                    opacity: step === 4 ? 1 : 0,
+                    transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s',
+                  }}
+                >
+                  <CheckCircle2 className="w-6 h-6 text-green-500" />
+                </div>
+              </div>
+
+              <h3 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Dispatch Confirmed</h3>
+              <p className="text-slate-500 text-lg mb-10 max-w-md mx-auto leading-relaxed">
+                Your freight request has been securely logged and is awaiting driver assignment.
+              </p>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 inline-block mb-12 shadow-inner">
+                <p className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest mb-2">Secure Tracking ID</p>
+                <p className="font-mono text-slate-900 text-2xl font-bold tracking-widest">{created?.trackingId ?? '—'}</p>
+              </div>
+
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={resetForm}
+                  className="text-sm font-extrabold text-orange-500 hover:text-orange-600 transition-colors uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-orange-50"
+                >
+                  Schedule Another Shipment
+                </button>
+                <a
+                  href="/client/track"
+                  className="text-sm font-extrabold text-slate-900 transition-colors uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-slate-100"
+                >
+                  Track It
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}

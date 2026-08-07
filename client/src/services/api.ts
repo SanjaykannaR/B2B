@@ -1,9 +1,34 @@
-// This file is for: Axios instance with base URL, JWT interceptor, 401 auto-redirect
-// Module: Frontend API Services (Module 10)
-// Owner: Developer 2 (Web Frontend Engineer)
-//
-// What goes here:
-// - Create Axios instance with baseURL from VITE_API_URL
-// - Request interceptor: attach JWT token from localStorage to Authorization header
-// - Response interceptor: on 401, clear token and redirect to /login
-// - Export configured axios instance
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('b2b_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => {
+    // Unwrap the backend's { success, data } envelope so callers receive the payload directly.
+    const body = response.data;
+    if (body && typeof body === 'object' && body.success === true && 'data' in body) {
+      response.data = body.data;
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('b2b_token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
