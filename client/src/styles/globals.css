@@ -64,6 +64,8 @@
     background-color: var(--color-primary-dark);
     color: var(--color-text-inverse);
     min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -121,8 +123,9 @@
 
 /* ── Mobile (≤640px) ── */
 @media (max-width: 640px) {
-  .dash-table { min-width: 520px; }
+  .dash-table { min-width: 560px; }
   .dash-table-cell { padding: 12px; }
+  .dash-shipment-table { min-width: 640px; }
 }
 
 /* ── Tablet (641px–1024px) ── */

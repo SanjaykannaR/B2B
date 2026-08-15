@@ -2,14 +2,15 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   Search, Package, MapPin, Navigation,
   Calendar, CheckCircle2, Clock, AlertTriangle,
-  Truck, FileText, Hash, ShieldCheck, PackageSearch, Activity, RefreshCw
+  Truck, FileText, Hash, ShieldCheck, X
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import ClientNavbar from '../../components/client/ClientNavbar';
 import toast from 'react-hot-toast';
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getMyManifests, Manifest } from '../../services/manifestApi';
+import { getErrorMessage } from '../../services/errorMessage';
 
 interface ShipmentView {
   id: string;
@@ -90,8 +91,8 @@ function toShipmentView(m: Manifest): ShipmentView {
 }
 
 export default function TrackShipment() {
-  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [shipments, setShipments] = useState<ShipmentView[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -104,7 +105,7 @@ export default function TrackShipment() {
       setShipments(views);
       setActiveId((prev) => prev && views.some((v) => v.id === prev) ? prev : (views[0]?.id ?? null));
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to load shipments.');
+      toast.error(getErrorMessage(err, 'Failed to load shipments.'));
     } finally {
       setLoading(false);
     }
@@ -125,74 +126,53 @@ export default function TrackShipment() {
     <div className="min-h-screen bg-[#f5f6f8] text-slate-700 font-sans flex flex-col">
 
       {/* ── Global Navbar ── */}
-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-[100] shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
-              <PackageSearch className="w-5 h-5 text-orange-500" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
-            </div>
-          </div>
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-            <button onClick={() => navigate('/dashboard')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <Activity className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button onClick={() => navigate('/track')} className="text-orange-500 flex items-center space-x-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>Live Tracking</span>
-            </button>
-            <button onClick={() => navigate('/client-invoices')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <FileText className="w-4 h-4" />
-              <span>Billing</span>
-            </button>
-            
-            {/* Actions */}
-            <div className="flex items-center space-x-6 border-l border-slate-200 pl-6">
-              <button
-                onClick={() => window.location.reload()}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden lg:inline">Refresh</span>
-              </button>
-              <button
-                onClick={() => navigate('/place-order')}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <Package className="w-4 h-4" />
-                <span>New Shipment</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <ClientNavbar active="track" />
 
       {/* Main Layout Area */}
-      <div className="flex-1 flex flex-col md:flex-row relative">
+      <div className="flex-1 flex flex-col lg:flex-row relative">
         {/* LEFT PANEL: SEARCH & LIST */}
-        <div className="track-list-panel w-full md:w-96 bg-white border-r border-slate-200 flex flex-col h-[calc(100vh-76px)] sticky top-[76px] z-50">
+        <div className="track-list-panel w-full lg:w-96 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col max-h-[50vh] lg:max-h-[calc(100vh-76px)] lg:sticky lg:top-[76px] z-50">
 
-          <div className="p-6 border-b border-slate-200 bg-white z-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Track Shipments</h1>
+          <div className="p-4 border-b border-slate-200 bg-white z-6 flex items-center justify-between">
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Track Shipments</h1>
 
-            <div className="relative group w-[46px] focus-within:w-full max-w-[260px] h-[46px] transition-all duration-300 ease-in-out">
-              <div className="absolute inset-y-0 left-0 flex items-center justify-center w-[46px] h-[46px] pointer-events-none z-10">
-                <Search className="h-5 w-5 text-slate-500 group-focus-within:text-orange-500 transition-colors" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search ID..."
-                className="absolute right-0 w-full h-full bg-white border border-slate-200 rounded-full pl-11 pr-4 text-sm text-slate-900 placeholder-transparent focus:placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text shadow-sm hover:shadow-md hover:border-slate-300"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-48 sm:w-60 md:w-64' : 'w-10'}`}>
+              {searchOpen ? (
+                <div className="relative w-full">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Search ID or destination..."
+                    className="w-full h-10 pl-10 pr-9 text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-full shadow-sm outline-none placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); } }}
+                    onBlur={() => setSearchOpen(false)}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(true)}
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-orange-600 hover:border-orange-500 shadow-sm transition-all duration-300"
+                  aria-label="Open search"
+                  title="Search shipments"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -216,7 +196,12 @@ export default function TrackShipment() {
               return (
                 <div
                   key={shipment.id}
-                  onClick={() => setActiveId(shipment.id)}
+                  onClick={() => {
+                    setActiveId(shipment.id);
+                    if (window.innerWidth < 1024) {
+                      document.getElementById('track-details-panel')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                   className={`p-4 rounded-xl cursor-pointer transition-all duration-300 border ${isSelected
                     ? 'bg-accent/10 border-accent/50 shadow-[0_0_15px_rgba(249,115,22,0.1)]'
                     : 'bg-white border-slate-300 hover:border-slate-400 hover:bg-slate-100'
@@ -225,7 +210,7 @@ export default function TrackShipment() {
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center space-x-2">
                       <Hash className={`w-4 h-4 ${isSelected ? 'text-accent' : 'text-slate-500'}`} />
-                      <span className={`font-bold ${isSelected ? 'text-slate-900' : 'text-slate-200'}`}>
+                      <span className={`font-bold ${isSelected ? 'text-slate-900' : 'text-slate-700'}`}>
                         {shipment.id}
                       </span>
                     </div>
@@ -252,14 +237,14 @@ export default function TrackShipment() {
         </div>
 
         {/* RIGHT PANEL: DETAILS */}
-        <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative">
+        <div id="track-details-panel" className="flex-1 overflow-y-auto bg-[#f5f6f8] relative">
           <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none"></div>
 
           {activeShipment ? (
-            <div className="max-w-4xl mx-auto p-6 md:p-12 relative z-10">
+            <div className="max-w-4xl mx-auto p-5 md:p-12 relative z-10">
 
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-10 pb-5 md:pb-6 border-b border-slate-200">
                 <div>
                   <h2 className="text-sm font-bold text-accent uppercase tracking-widest mb-1">Manifest Details</h2>
                   <div className="flex items-center space-x-3">
@@ -274,15 +259,15 @@ export default function TrackShipment() {
               </div>
 
               {/* Progress Stepper */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-8 shadow-xl overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-8 mb-6 md:mb-8 shadow-xl overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
                 <h3 className="text-lg font-bold text-slate-900 mb-6">Delivery Progress</h3>
                 <ProgressStepper currentStatus={activeShipment.status} />
               </div>
 
               {/* Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
                 {/* Route Info */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm">
                   <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-200">
                     <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400">
                       <MapPin className="w-5 h-5" />
@@ -329,7 +314,7 @@ export default function TrackShipment() {
                 {/* Cargo & Assignment Info */}
                 <div className="flex flex-col gap-6">
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm flex-1">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm flex-1">
                     <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-200">
                       <div className="bg-accent/20 p-2 rounded-lg text-accent">
                         <Package className="w-5 h-5" />
@@ -358,7 +343,7 @@ export default function TrackShipment() {
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm">
                     <div className="flex items-center space-x-3 mb-4">
                       <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400">
                         <ShieldCheck className="w-5 h-5" />
@@ -388,11 +373,11 @@ export default function TrackShipment() {
               </div>
 
               {/* Bottom Grid: Activity & Map */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
 
                 {/* Activity Timeline */}
-                <div className="bg-slate-100 border border-slate-200 rounded-2xl p-8 backdrop-blur-sm">
-                  <h3 className="text-lg font-bold text-slate-900 mb-8">Activity Log</h3>
+                <div className="bg-slate-100 border border-slate-200 rounded-2xl p-5 md:p-8 backdrop-blur-sm">
+                  <h3 className="text-lg font-bold text-slate-900 mb-6 md:mb-8">Activity Log</h3>
                   <div className="space-y-8 relative z-0">
                     <div className="absolute left-6 top-6 bottom-6 w-px bg-slate-300 -translate-x-1/2 z-[-1]"></div>
 
@@ -428,7 +413,7 @@ export default function TrackShipment() {
                 </div>
 
                 {/* Live GPS Tracking */}
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl min-h-[400px] flex flex-col relative">
+                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl min-h-[400px] flex flex-col relative hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
                   <div className="p-6 border-b border-slate-200 flex items-center justify-between z-10 bg-white">
                     <div className="flex items-center space-x-3">
                       <div className="bg-accent/20 p-2 rounded-lg text-accent">
@@ -452,7 +437,7 @@ export default function TrackShipment() {
 
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 py-32">
+            <div className="h-full flex flex-col items-center justify-center text-slate-500 py-16 md:py-32">
               <Package className="w-16 h-16 mb-4 opacity-20" />
               <p className="text-lg font-bold text-slate-700">Select a shipment to view details</p>
               <p className="text-sm mt-1">Shipments appear here after you place an order.</p>
@@ -468,10 +453,6 @@ export default function TrackShipment() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        @media (max-width: 767px) {
-          .track-list-panel { height: 50vh; }
-        }
       `}} />
     </div>
   );

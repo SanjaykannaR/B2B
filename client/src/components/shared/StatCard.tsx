@@ -2,7 +2,7 @@ import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: string | number;
   icon: LucideIcon;
   trend?: string;
   isPositive?: boolean;
@@ -22,7 +22,7 @@ export default function StatCard({ title, value, icon: Icon, trend, isPositive, 
   const theme = themeConfig[colorTheme];
 
   return (
-    <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl ${theme.shadow} ${theme.border} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default`}>
+    <div className={`bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl ${theme.shadow} ${theme.border} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default`}>
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
         <Icon className={`w-10 h-12 ${theme.icon} group-hover:-rotate-6 transition-transform duration-300`} />
       </div>

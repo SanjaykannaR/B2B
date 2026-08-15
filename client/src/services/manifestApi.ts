@@ -76,6 +76,11 @@ export async function getMyManifests(params?: { page?: number; limit?: number })
   return data;
 }
 
+export async function getAllManifests(params?: { page?: number; limit?: number; status?: string }): Promise<Paginated<Manifest>> {
+  const { data } = await api.get<Paginated<Manifest>>('/manifests', { params });
+  return data;
+}
+
 export async function getManifest(id: string): Promise<Manifest> {
   const { data } = await api.get<Manifest>(`/manifests/${id}`);
   return data;

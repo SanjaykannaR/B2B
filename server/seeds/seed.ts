@@ -103,9 +103,14 @@ async function runSeeds(): Promise<void> {
     console.error('\n❌ Seed failed:', (err as Error).message);
     process.exitCode = 1;
   } finally {
-    await mongoose.disconnect();
-    console.log('\nMongoDB disconnected.');
+    if (require.main === module) {
+      await mongoose.disconnect();
+      console.log('\nMongoDB disconnected.');
+    }
   }
 }
 
-runSeeds();
+export { runSeeds };
+if (require.main === module) {
+  runSeeds();
+}

@@ -5,6 +5,7 @@ export interface Column<T> {
   accessor?: keyof T;
   render?: (item: T) => ReactNode;
   align?: 'left' | 'center' | 'right';
+  hiddenOnMobile?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -18,7 +19,7 @@ interface DataTableProps<T> {
 export default function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No data found', emptyIcon }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="p-12 text-center flex flex-col items-center bg-white border border-slate-200 rounded-2xl shadow-sm animate-dashPopIn">
+      <div className="p-8 md:p-12 text-center flex flex-col items-center bg-white border border-slate-200 rounded-2xl shadow-sm animate-dashPopIn">
         {emptyIcon}
         <p className="text-slate-500 mt-2 font-medium">{emptyMessage}</p>
       </div>
@@ -32,7 +33,7 @@ export default function DataTable<T>({ columns, data, onRowClick, emptyMessage =
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
               {columns.map((col, i) => (
-                <th key={i} className={`dash-table-cell p-4 text-xs font-bold text-slate-600 uppercase tracking-wider ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
+                <th key={i} className={`dash-table-cell p-4 text-xs font-bold text-slate-600 uppercase tracking-wider ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.hiddenOnMobile ? 'hidden md:table-cell' : ''}`}>
                   {col.header}
                 </th>
               ))}
@@ -47,7 +48,7 @@ export default function DataTable<T>({ columns, data, onRowClick, emptyMessage =
                 style={{ animationDelay: `${rowIdx * 0.05}s` }}
               >
                 {columns.map((col, colIdx) => (
-                  <td key={colIdx} className={`dash-table-cell p-4 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
+                  <td key={colIdx} className={`dash-table-cell p-4 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.hiddenOnMobile ? 'hidden md:table-cell' : ''}`}>
                     {col.render ? col.render(row) : (col.accessor ? String(row[col.accessor]) : null)}
                   </td>
                 ))}

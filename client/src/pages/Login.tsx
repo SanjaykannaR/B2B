@@ -23,14 +23,25 @@ const DEMO_ACCOUNTS = [
 const loginStyles = `
 /* ── Mobile (≤640px) ── */
 @media (max-width: 640px) {
-  .login-brand { padding: 20px; }
-  .login-brand h1 { font-size: 24px; }
+  .login-brand { padding: 16px 20px 20px; }
+  .login-brand h1 { font-size: 24px; line-height: 1.25; }
   .login-brand p { font-size: 13px; }
   .login-brand-stats { gap: 12px; }
+  .login-brand-stats > div:first-child { min-width: 0; }
   .login-form-wrap { padding: 24px 0; }
   .login-form-wrap h2 { font-size: 22px; }
   .login-demo-grid { grid-template-columns: 1fr; }
   .login-quote { display: none; }
+}
+
+/* ── Small mobile (≤400px) ── */
+@media (max-width: 400px) {
+  .login-brand { height: 44vh !important; }
+  .login-brand-stats { gap: 10px; }
+  .login-brand-stats .text-2xl { font-size: 20px; }
+  .login-brand-stats .text-xs { font-size: 10px; }
+  .login-form-wrap { padding: 20px 0; }
+  .login-form-wrap .flex.justify-between { flex-wrap: wrap; gap: 8px; }
 }
 
 /* ── Tablet (641px–1024px) ── */
@@ -55,19 +66,16 @@ export default function Login() {
   const navigate = useNavigate();
   const { isAuthenticated, loading, error, user } = useSelector((state: RootState) => state.auth);
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    try { return localStorage.getItem('b2b_remember_email') || ''; } catch { return ''; }
+  });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(() => {
+    try { return !!localStorage.getItem('b2b_remember_email'); } catch { return false; }
+  });
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const emailRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('b2b_remember_email');
-      if (saved) { setEmail(saved); setRemember(true); }
-    } catch {}
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -125,7 +133,7 @@ export default function Login() {
       <style>{loginStyles}</style>
 
       {/* ── Brand Panel ── */}
-      <div className="login-brand relative flex-none h-[40vh] lg:h-auto lg:flex-[1.5] p-6 lg:p-12 flex flex-col justify-between overflow-hidden animate-[dashFadeIn_1s_ease-out_both]">
+      <div className="login-brand relative flex-none h-[40vh] lg:h-auto lg:flex-[1.5] p-5 lg:p-12 flex flex-col justify-between overflow-hidden animate-[dashFadeIn_1s_ease-out_both]">
         <img
           src="/truck-bg.jpg"
           alt="Logistics Trucks"
@@ -141,18 +149,18 @@ export default function Login() {
         </div>
 
         <div className="relative z-10 max-w-[460px]">
-          <div className="flex items-center gap-2 text-accent-light text-[11px] font-bold tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-accent-light text-[11px] font-bold tracking-widest mb-2 md:mb-3">
             <span className="w-6 h-px bg-accent-light" />
             CLIENT · DRIVER · ADMIN · EXECUTIVE
           </div>
-          <h1 className="text-3xl lg:text-[40px] leading-tight font-extrabold tracking-tight text-white mb-2">
+          <h1 className="text-3xl lg:text-[40px] leading-tight font-extrabold tracking-tight text-white mb-1.5 md:mb-2">
             Freight visibility,<br />the moment <span className="text-accent">it matters.</span>
           </h1>
           <p className="text-white/55 text-sm leading-relaxed max-w-[400px]">
             One login, four workspaces. Track shipments in real time, dispatch drivers, and reconcile invoices.
           </p>
 
-          <div className="login-brand-stats flex gap-6 pt-5">
+          <div className="login-brand-stats flex gap-6 pt-4 md:pt-5">
             <StatItem value="42" label="Active shipments" />
             <div className="w-px bg-white/12" />
             <StatItem value="99.8%" label="Platform uptime" />
@@ -170,7 +178,8 @@ export default function Login() {
       </div>
 
       {/* ── Form Panel ── */}
-      <div className="flex-1 bg-white flex items-center justify-center p-6 lg:p-8 overflow-y-auto">
+      <div className="flex-1 bg-white overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center p-6 lg:p-8">
         <div className="login-form-wrap w-full max-w-[400px] animate-[dashPopIn_0.6s_ease-out_both]">
           <div className="text-accent text-[11px] font-bold tracking-widest mb-1.5">WELCOME BACK</div>
           <h2 className="text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-1">Sign in to your account</h2>
@@ -277,6 +286,7 @@ export default function Login() {
               ))}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

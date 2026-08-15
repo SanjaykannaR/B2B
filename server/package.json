@@ -10,16 +10,16 @@
     "seed": "ts-node seeds/seed.ts"
   },
   "dependencies": {
-    "express": "^4.21.1",
-    "mongoose": "^8.9.2",
-    "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "express": "^4.21.1",
     "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.2",
+    "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.16",
-    "multer": "^1.4.5-lts.1"
+    "nodemailer": "^6.9.16"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -30,11 +30,19 @@
     "@types/node": "^20.10.6",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.14",
+    "mongodb-memory-server": "^11.2.0",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   },
-  "keywords": ["b2b", "logistics", "express", "mongodb", "api", "typescript"],
+  "keywords": [
+    "b2b",
+    "logistics",
+    "express",
+    "mongodb",
+    "api",
+    "typescript"
+  ],
   "license": "ISC"
 }

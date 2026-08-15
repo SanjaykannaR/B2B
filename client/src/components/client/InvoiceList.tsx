@@ -12,7 +12,7 @@ const mockInvoices = [
 export default function InvoiceList() {
   return (
     <div className="w-full">
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-[dashPopIn_0.4s_ease-out_both]">
+      <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-[dashPopIn_0.4s_ease-out_both]">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Billing & Invoices</h2>
           <p className="text-slate-600">Manage your payments and download past invoices.</p>
@@ -38,6 +38,7 @@ export default function InvoiceList() {
           },
           {
             header: 'Date',
+            hiddenOnMobile: true,
             render: (invoice) => <span className="text-sm text-slate-600 font-medium">{invoice.date}</span>
           },
           {
@@ -53,8 +54,25 @@ export default function InvoiceList() {
           {
             header: 'Action',
             align: 'right',
-            render: () => (
-              <button className="inline-flex items-center justify-center p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-accent transition-colors border border-slate-200">
+            hiddenOnMobile: true,
+            render: (invoice) => (
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const content = `INVOICE RECEIPT\n------------------\nInvoice ID: ${invoice.id}\nDate: ${invoice.date}\nStatus: ${invoice.status}\n\nTOTAL AMOUNT: ${invoice.amount}\n`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${invoice.id}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(url);
+                }}
+                className="inline-flex items-center justify-center p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 hover:text-accent transition-colors border border-slate-200"
+                title="Download Invoice"
+              >
                 <Download className="w-4 h-4" />
               </button>
             )

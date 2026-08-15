@@ -16,7 +16,7 @@ export default function ClientOverview() {
         <p className="text-slate-600">Track your real-time logistics KPIs and monthly freight spend.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-2 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
         {stats.map((stat, idx) => (
           <StatCard 
             key={idx}

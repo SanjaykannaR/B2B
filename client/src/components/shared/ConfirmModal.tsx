@@ -17,7 +17,7 @@ export default function ConfirmModal({ isOpen, onClose, title, children }: Confi
       onClick={onClose}
     >
       <div 
-        className="bg-white border border-slate-200 rounded-[24px] max-w-[450px] w-full p-8 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.4)] animate-dashPopIn relative" 
+        className="bg-white border border-slate-200 rounded-[24px] max-w-[450px] w-full p-6 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.4)] animate-dashPopIn relative max-h-[90vh] overflow-y-auto" 
         onClick={(e) => e.stopPropagation()}
       >
         <button 

@@ -37,15 +37,28 @@ export async function connectDB(): Promise<void> {
       return;
     } catch (err) {
       const error = err as Error;
-      console.error(`❌ MongoDB connection attempt ${attempt}/${MAX_ATTEMPTS} failed:`, error.message);
-      if (attempt < MAX_ATTEMPTS) {
+      console.warn(`❌ MongoDB connection attempt ${attempt}/${MAX_ATTEMPTS} failed:`, error.message);
+      
+      if (attempt === MAX_ATTEMPTS) {
+        console.log(`⚠️ Local MongoDB is not running. Starting an in-memory database as a fallback...`);
+        try {
+          const { MongoMemoryServer } = require('mongodb-memory-server');
+          const mongoServer = await MongoMemoryServer.create();
+          const uri = mongoServer.getUri();
+          await mongoose.connect(uri);
+          console.log(`✅ MongoDB Memory Server connected successfully!`);
+          return;
+        } catch (memErr) {
+          console.error(`❌ Failed to start in-memory database:`, (memErr as Error).message);
+          throw new Error('All MongoDB connection attempts failed');
+        }
+      } else {
         console.log(`Retrying in ${RETRY_DELAY_MS / 1000}s...`);
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       }
     }
   }
 
-  throw new Error('MongoDB connection failed after multiple attempts');
 }
 
 export default connectDB;

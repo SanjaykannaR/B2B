@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { login as loginApi, LoginResponse } from '../services/authApi';
+import { getErrorMessage } from '../services/errorMessage';
 
 interface AuthState {
   user: LoginResponse['user'] | null;
@@ -25,8 +26,7 @@ export const loginUser = createAsyncThunk<LoginResponse, { email: string; passwo
       localStorage.setItem('b2b_token', response.token);
       return response;
     } catch (err: any) {
-      const msg = err?.response?.data?.message || err.message || 'Login failed';
-      return rejectWithValue(msg);
+      return rejectWithValue(getErrorMessage(err, 'Login failed'));
     }
   }
 );

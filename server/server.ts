@@ -6,6 +6,8 @@ import express, { Request, Response, NextFunction } from 'express';
 import env from './config/env';
 import connectDB from './config/db';
 import corsMiddleware from './config/cors';
+import { runSeeds } from './seeds/seed';
+import User from './models/User';
 import errorHandler from './middleware/errorHandler';
 
 import authRoutes from './routes/auth.routes';
@@ -59,6 +61,11 @@ app.use(errorHandler);
 async function start(): Promise<void> {
   try {
     await connectDB();
+    const userCount = await User.countDocuments();
+    if (userCount === 0) {
+      console.log('📦 Database is empty. Seeding initial data...');
+      await runSeeds();
+    }
     startOverdueSweep();
     app.listen(env.PORT, () => {
       console.log(`🚀 Server running on http://localhost:${env.PORT}`);

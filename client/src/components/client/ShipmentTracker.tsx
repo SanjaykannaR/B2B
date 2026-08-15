@@ -113,10 +113,10 @@ export default function ShipmentTracker() {
       </div>
 
       {/* RIGHT PANEL: DETAILS */}
-      <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative z-10 p-1 md:p-2">
+      <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative z-10 p-3 md:p-4">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none"></div>
 
-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-200">
+        <div className="flex items-center justify-between mb-6 md:mb-8 pb-5 md:pb-6 border-b border-slate-200">
           <div>
             <h2 className="text-xs font-bold text-accent uppercase tracking-widest mb-1">Manifest</h2>
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{activeShipment.id}</h1>

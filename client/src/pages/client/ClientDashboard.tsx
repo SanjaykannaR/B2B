@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Package, Activity, Truck, Clock, FileText, ArrowRight, MapPin, Search, RefreshCw, ChevronDown, Check, X, PackageSearch } from 'lucide-react';
+import { Package, Activity, Truck, Clock, FileText, ArrowRight, MapPin, Search, ChevronDown, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import type { RootState } from '../../store/store';
+import ClientNavbar from '../../components/client/ClientNavbar';
 import { getMyManifests, Manifest } from '../../services/manifestApi';
 import { getMyInvoices, markInvoicePaid, Invoice } from '../../services/invoiceApi';
+import { getErrorMessage } from '../../services/errorMessage';
 
 /* ─────────────────────── Types ─────────────────────── */
 interface Shipment {
@@ -217,7 +219,6 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [, setSelectedShipment] = useState<Shipment | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceView | null>(null);
 
@@ -232,7 +233,7 @@ export default function ClientDashboard() {
       setShipments(manifestsRes.items.map(toShipment));
       setInvoices(invoicesRes.items.map(toInvoiceView));
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to load dashboard data.');
+      toast.error(getErrorMessage(err, 'Failed to load dashboard data.'));
     } finally {
       setLoading(false);
     }
@@ -273,25 +274,13 @@ export default function ClientDashboard() {
   }, [invoices]);
 
   // ── Actions ──
-  const handleRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    setSearchQuery('');
-    setStatusFilter('All');
-    await loadData();
-    setIsRefreshing(false);
-  }, [loadData]);
-
-  const handleNewShipment = useCallback(() => {
-    navigate('/client/place-order');
-  }, [navigate]);
-
   const markAsPaid = useCallback(async (invoice: InvoiceView) => {
     try {
       await markInvoicePaid(invoice._id);
       setInvoices(prev => prev.map(inv => inv._id === invoice._id ? { ...inv, status: 'Paid' } : inv));
       toast.success('Invoice marked as paid.');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to mark invoice as paid.');
+      toast.error(getErrorMessage(err, 'Failed to mark invoice as paid.'));
     }
   }, []);
 
@@ -300,56 +289,9 @@ export default function ClientDashboard() {
       <style>{dashboardStyles}</style>
 
       {/* ── Global Navbar ── */}
-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-50 shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
-              <PackageSearch className="w-5 h-5 text-orange-500" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
-            </div>
-          </div>
-          
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-            <button onClick={() => navigate('/client/dashboard')} className="text-orange-500 transition-colors flex items-center space-x-1.5">
-              <Activity className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button onClick={() => navigate('/client/track')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>Live Tracking</span>
-            </button>
-            <button onClick={() => navigate('/client/invoices')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <FileText className="w-4 h-4" />
-              <span>Billing</span>
-            </button>
-            
-            {/* Actions */}
-            <div className="flex items-center space-x-6">
-              <button
-                onClick={handleRefresh}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden lg:inline">Refresh</span>
-              </button>
-              <button
-                onClick={handleNewShipment}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <Package className="w-4 h-4" />
-                <span>New Shipment</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <ClientNavbar active="dashboard" />
 
-      <div className="flex-1 max-w-7xl mx-auto w-full space-y-8 p-6 md:p-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10">
 
         {/* ═══ Header ═══ */}
         <div className="dash-header flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
@@ -362,9 +304,9 @@ export default function ClientDashboard() {
         </div>
 
         {/* ═══ Overview Stats ═══ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Total Shipments */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Package className="w-10 h-10 text-slate-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>
@@ -375,7 +317,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Active Shipments */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Activity className="w-10 h-10 text-orange-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>
@@ -386,7 +328,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Delivered Shipments */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Check className="w-10 h-10 text-green-600 group-hover:rotate-12 transition-transform duration-300" />
             </div>
@@ -397,7 +339,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Pending Invoices */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <FileText className="w-10 h-10 text-red-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>
@@ -412,7 +354,7 @@ export default function ClientDashboard() {
         </div>
 
         {/* ═══ Search & Filter Bar ═══ */}
-        <div className="dash-search-bar flex flex-wrap items-center gap-6">
+        <div className="dash-search-bar flex flex-wrap items-center gap-3 md:gap-6">
           <div className="relative group w-[46px] focus-within:w-[280px] md:focus-within:w-[350px] h-[46px] transition-all duration-300 ease-in-out">
             <input
               type="text"
@@ -432,11 +374,11 @@ export default function ClientDashboard() {
         </div>
 
         {/* ═══ Main Content Grid ═══ */}
-        <div className="dash-main-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="dash-main-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
 
           {/* ── Recent Shipments Table ── */}
-          <div className="lg:col-span-2">
-            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
+          <div className="lg:col-span-2 h-full">
+            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
               <div className="dash-section-header flex justify-between items-center p-6 border-b border-slate-200">
                 <h2 className="dash-section-title text-lg font-bold flex items-center text-slate-900">
                   <Truck className="w-5 h-5 mr-2.5 text-orange-500" /> Recent Shipments
@@ -450,9 +392,9 @@ export default function ClientDashboard() {
                 </button>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto flex-1">
                 {filteredShipments.length === 0 ? (
-                  <div className="p-12 text-center">
+                  <div className="p-8 md:p-12 text-center">
                     <Search className="w-10 h-10 text-slate-500 mx-auto mb-4 opacity-40" />
                     <p className="text-slate-500 font-medium text-sm">No shipments match your search.</p>
                     <button onClick={() => { setSearchQuery(''); setStatusFilter('All'); }} className="text-orange-500 text-sm font-bold mt-2 hover:underline">Clear filters</button>
@@ -504,8 +446,8 @@ export default function ClientDashboard() {
           </div>
 
           {/* ── Invoices Panel ── */}
-          <div>
-            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
+          <div className="h-full">
+            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
               <div className="dash-section-header flex justify-between items-center p-6 border-b border-slate-200">
                 <h2 className="dash-section-title text-lg font-bold flex items-center text-slate-900">
                   <FileText className="w-5 h-5 mr-2.5 text-orange-500" /> Invoices
@@ -518,7 +460,7 @@ export default function ClientDashboard() {
                 </button>
               </div>
 
-              <div className="divide-y divide-slate-200">
+              <div className="divide-y divide-slate-200 flex-1">
                 {invoices.map((inv) => (
                   <div
                     key={inv.id}

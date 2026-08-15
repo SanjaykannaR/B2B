@@ -24,8 +24,12 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('b2b_token');
-      window.location.href = '/login';
+      const url: string = error.config?.url ?? '';
+      const isLoginRequest = url.includes('/auth/login');
+      if (!isLoginRequest) {
+        localStorage.removeItem('b2b_token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

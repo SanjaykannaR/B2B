@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { FileText, Search, RefreshCw, ChevronDown, Check, Download, ArrowUpRight, ArrowDownRight, Clock, PackageSearch, Activity, MapPin, Package } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { FileText, Search, RefreshCw, ChevronDown, Check, Download, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ClientNavbar from '../../components/client/ClientNavbar';
 import StatusBadge from '../../components/shared/StatusBadge';
 import StatCard from '../../components/shared/StatCard';
 import DataTable from '../../components/shared/DataTable';
 import ConfirmModal from '../../components/shared/ConfirmModal';
 import { getMyInvoices, getInvoiceStats, markInvoicePaid, Invoice as ApiInvoice, InvoiceStats } from '../../services/invoiceApi';
+import { getErrorMessage } from '../../services/errorMessage';
 
 /* ─────────────────────── Types ─────────────────────── */
 interface InvoiceView {
@@ -105,7 +106,6 @@ function AnimatedDropdown({ value, onChange }: { value: string, onChange: (val: 
 }
 
 export default function ClientInvoices() {
-  const navigate = useNavigate();
   const [invoices, setInvoices] = useState<InvoiceView[]>([]);
   const [stats, setStats] = useState<InvoiceStats>(EMPTY_STATS);
   const [loading, setLoading] = useState(true);
@@ -125,7 +125,7 @@ export default function ClientInvoices() {
       setInvoices(invoicesRes.items.map(toInvoiceView));
       setStats(statsRes);
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to load invoices.');
+      toast.error(getErrorMessage(err, 'Failed to load invoices.'));
     } finally {
       setLoading(false);
     }
@@ -174,7 +174,7 @@ export default function ClientInvoices() {
       }));
       toast.success('Invoice marked as paid.');
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to mark invoice as paid.');
+      toast.error(getErrorMessage(err, 'Failed to mark invoice as paid.'));
     }
   }, [invoices]);
 
@@ -183,56 +183,9 @@ export default function ClientInvoices() {
       <style>{dashboardStyles}</style>
       
       {/* ── Global Navbar ── */}
-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-[100] shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
-              <PackageSearch className="w-5 h-5 text-orange-500" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
-            </div>
-          </div>
-          
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
-            <button onClick={() => navigate('/dashboard')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <Activity className="w-4 h-4" />
-              <span>Dashboard</span>
-            </button>
-            <button onClick={() => navigate('/track')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
-              <MapPin className="w-4 h-4" />
-              <span>Live Tracking</span>
-            </button>
-            <button onClick={() => navigate('/client-invoices')} className="text-orange-500 flex items-center space-x-1.5">
-              <FileText className="w-4 h-4" />
-              <span>Billing</span>
-            </button>
-            
-            {/* Actions */}
-            <div className="flex items-center space-x-6 border-l border-slate-200 pl-6">
-              <button
-                onClick={() => window.location.reload()}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden lg:inline">Refresh</span>
-              </button>
-              <button
-                onClick={() => navigate('/place-order')}
-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
-              >
-                <Package className="w-4 h-4" />
-                <span>New Shipment</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <ClientNavbar active="invoices" />
 
-      <div className="max-w-7xl mx-auto w-full space-y-8 p-6 md:p-10 flex-1">
+      <div className="max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 flex-1">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-[dashPopIn_0.4s_ease-out]">
@@ -254,7 +207,7 @@ export default function ClientInvoices() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap- md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
           <StatCard title="Total Billed" value={formatINR(statsView.totalBilled)} icon={FileText} colorTheme="default" />
           <StatCard title="Total Paid" value={formatINR(statsView.totalPaid)} icon={ArrowUpRight} colorTheme="emerald" />
           <StatCard title="Pending" value={formatINR(statsView.totalPending)} icon={Clock} colorTheme="orange" />
@@ -292,6 +245,7 @@ export default function ClientInvoices() {
             },
             {
               header: 'Manifest',
+              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => <span className="font-semibold text-slate-700">{invoice.clientName}</span>
             },
             {
@@ -300,6 +254,7 @@ export default function ClientInvoices() {
             },
             {
               header: 'Due Date',
+              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => <span className="font-medium text-slate-600">{invoice.dueDate}</span>
             },
             {
@@ -309,9 +264,22 @@ export default function ClientInvoices() {
             {
               header: 'Download',
               align: 'center',
-              render: () => (
+              render: (invoice: InvoiceView) => (
                 <button
-                  onClick={(e) => { e.stopPropagation(); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const content = `INVOICE RECEIPT\n------------------\nInvoice ID: ${invoice.id}\nManifest: ${invoice.clientName}\nDue Date: ${invoice.dueDate}\nStatus: ${invoice.status}\n\nTOTAL AMOUNT: ${formatINR(invoice.amount)}\n`;
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${invoice.id}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    toast.success(`Downloaded ${invoice.id}`);
+                  }}
                   className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 mx-auto"
                   title="Download Invoice"
                 >
@@ -322,6 +290,7 @@ export default function ClientInvoices() {
             {
               header: 'Action',
               align: 'right',
+              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => (
                 invoice.status !== 'Paid' ? (
                   <button

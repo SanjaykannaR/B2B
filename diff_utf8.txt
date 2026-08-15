@@ -1,0 +1,2750 @@
+﻿diff --git a/client/package-lock.json b/client/package-lock.json
+index d740a93..f97c9fc 100644
+--- a/client/package-lock.json
++++ b/client/package-lock.json
+@@ -26,10 +26,14 @@
+         "@types/node": "^26.1.1",
+         "@types/react": "^18.3.14",
+         "@types/react-dom": "^18.3.5",
++        "@typescript-eslint/eslint-plugin": "^8.66.0",
++        "@typescript-eslint/parser": "^8.66.0",
+         "@vitejs/plugin-react": "^4.3.4",
+         "eslint": "^9.16.0",
++        "eslint-plugin-react-hooks": "^7.1.1",
+         "tailwindcss": "^4.0.0",
+         "typescript": "~5.6.2",
++        "typescript-eslint": "^8.66.0",
+         "vite": "^6.0.3"
+       }
+     },
+@@ -1896,6 +1900,301 @@
+       "integrity": "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==",
+       "license": "MIT"
+     },
++    "node_modules/@typescript-eslint/eslint-plugin": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/eslint-plugin/-/eslint-plugin-8.66.0.tgz",
++      "integrity": "sha512-p088eaGrzYz1s+7cov0aMOCkNGTJlVxF4jgubf28c8L0Cv9Rloj8YBHnv4hXLq6IIEE1AsjNWavO+k+8kP2Y0A==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@eslint-community/regexpp": "^4.12.2",
++        "@typescript-eslint/scope-manager": "8.66.0",
++        "@typescript-eslint/type-utils": "8.66.0",
++        "@typescript-eslint/utils": "8.66.0",
++        "@typescript-eslint/visitor-keys": "8.66.0",
++        "ignore": "^7.0.5",
++        "natural-compare": "^1.4.0",
++        "ts-api-utils": "^2.5.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "@typescript-eslint/parser": "^8.66.0",
++        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/eslint-plugin/node_modules/ignore": {
++      "version": "7.0.6",
++      "resolved": "https://registry.npmjs.org/ignore/-/ignore-7.0.6.tgz",
++      "integrity": "sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">= 4"
++      }
++    },
++    "node_modules/@typescript-eslint/parser": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/parser/-/parser-8.66.0.tgz",
++      "integrity": "sha512-X6ypGChaWYk6PBtUg2BwuTZEFFcHJAtGTVJ9/lCTOufhZ4i9fNolQNnktq+kkMCwMj7V8Svsq7+TxSDslmhE0g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/scope-manager": "8.66.0",
++        "@typescript-eslint/types": "8.66.0",
++        "@typescript-eslint/typescript-estree": "8.66.0",
++        "@typescript-eslint/visitor-keys": "8.66.0",
++        "debug": "^4.4.3"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/project-service": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/project-service/-/project-service-8.66.0.tgz",
++      "integrity": "sha512-7MthGPTt4BP69lSryqpqq8HQqxuzynssckL/jyDyk3+TNMQ3y2jFWkptCrktWvBrP+EH787Nl5N5Qpw7WZg+5g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/tsconfig-utils": "^8.66.0",
++        "@typescript-eslint/types": "^8.66.0",
++        "debug": "^4.4.3"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/scope-manager": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/scope-manager/-/scope-manager-8.66.0.tgz",
++      "integrity": "sha512-8TGcH25j9zqJ/IULB/ppyhRvxA8QYfFEZ7nfbg6/BN9spDgb8fPWQXlE5l8TWBL50EtUx007uZ1o9VOwrq2/9g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/types": "8.66.0",
++        "@typescript-eslint/visitor-keys": "8.66.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      }
++    },
++    "node_modules/@typescript-eslint/tsconfig-utils": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/tsconfig-utils/-/tsconfig-utils-8.66.0.tgz",
++      "integrity": "sha512-9D5gLYZG4rOjcoag8MQ/fWI8WqA9wcPDyOGyWtWFhvM1lHRbliqUSPIY5J3zqCU1tvSwzXxnnjhQhz5Ne7mJ4g==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/type-utils": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/type-utils/-/type-utils-8.66.0.tgz",
++      "integrity": "sha512-LG2dWfjZQQp0ADtAu/EWJVayefGL2UEZ3CDeI44D9v3rXB/WYUqE/jpO28KrEKul5AySrmI+Zh1v6v+xW2U9+g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/types": "8.66.0",
++        "@typescript-eslint/typescript-estree": "8.66.0",
++        "@typescript-eslint/utils": "8.66.0",
++        "debug": "^4.4.3",
++        "ts-api-utils": "^2.5.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/types": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/types/-/types-8.66.0.tgz",
++      "integrity": "sha512-H6gcYaSDOyvL3AD/jHUtUFo2jqGgn/F6nuyuZSu0QTesxL+cP4dQoIMrODRofuJC09g64+WgZ6tE19Y1N2YIFQ==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      }
++    },
++    "node_modules/@typescript-eslint/typescript-estree": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/typescript-estree/-/typescript-estree-8.66.0.tgz",
++      "integrity": "sha512-8/x4INiiQb10jGgXYD7116/zQ+OL84ZIFn0za68wwFHCanT/VLbBEroWht8RV8fn0/ZCAoazHLQgwUC0UQcDfg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/project-service": "8.66.0",
++        "@typescript-eslint/tsconfig-utils": "8.66.0",
++        "@typescript-eslint/types": "8.66.0",
++        "@typescript-eslint/visitor-keys": "8.66.0",
++        "debug": "^4.4.3",
++        "minimatch": "^10.2.2",
++        "semver": "^7.7.3",
++        "tinyglobby": "^0.2.15",
++        "ts-api-utils": "^2.5.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/typescript-estree/node_modules/balanced-match": {
++      "version": "4.0.4",
++      "resolved": "https://registry.npmjs.org/balanced-match/-/balanced-match-4.0.4.tgz",
++      "integrity": "sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": "18 || 20 || >=22"
++      }
++    },
++    "node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion": {
++      "version": "5.0.9",
++      "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.9.tgz",
++      "integrity": "sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "balanced-match": "^4.0.2"
++      },
++      "engines": {
++        "node": "20 || >=22"
++      }
++    },
++    "node_modules/@typescript-eslint/typescript-estree/node_modules/minimatch": {
++      "version": "10.2.6",
++      "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-10.2.6.tgz",
++      "integrity": "sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==",
++      "dev": true,
++      "license": "BlueOak-1.0.0",
++      "dependencies": {
++        "brace-expansion": "^5.0.8"
++      },
++      "engines": {
++        "node": "18 || 20 || >=22"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/isaacs"
++      }
++    },
++    "node_modules/@typescript-eslint/typescript-estree/node_modules/semver": {
++      "version": "7.8.5",
++      "resolved": "https://registry.npmjs.org/semver/-/semver-7.8.5.tgz",
++      "integrity": "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==",
++      "dev": true,
++      "license": "ISC",
++      "bin": {
++        "semver": "bin/semver.js"
++      },
++      "engines": {
++        "node": ">=10"
++      }
++    },
++    "node_modules/@typescript-eslint/utils": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/utils/-/utils-8.66.0.tgz",
++      "integrity": "sha512-jasearZPolBw5NJNYGMwxzHMF83niVWmMU1VdHzG1CyfI2VS7f7nZltnKtHcg20hW+7Uo5GfK4MeDPoU3qI8EA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@eslint-community/eslint-utils": "^4.9.1",
++        "@typescript-eslint/scope-manager": "8.66.0",
++        "@typescript-eslint/types": "8.66.0",
++        "@typescript-eslint/typescript-estree": "8.66.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
++    "node_modules/@typescript-eslint/visitor-keys": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/@typescript-eslint/visitor-keys/-/visitor-keys-8.66.0.tgz",
++      "integrity": "sha512-dkKR8q+lKciskj1Y3vthHktl+3cMLWGyVUP23bRiPZ5O9BRT++4EqDDV+TVeIKBL1VXVEqrJlz8MYbcnvJcAlg==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/types": "8.66.0",
++        "eslint-visitor-keys": "^5.0.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      }
++    },
++    "node_modules/@typescript-eslint/visitor-keys/node_modules/eslint-visitor-keys": {
++      "version": "5.0.1",
++      "resolved": "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-5.0.1.tgz",
++      "integrity": "sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA==",
++      "dev": true,
++      "license": "Apache-2.0",
++      "engines": {
++        "node": "^20.19.0 || ^22.13.0 || >=24"
++      },
++      "funding": {
++        "url": "https://opencollective.com/eslint"
++      }
++    },
+     "node_modules/@vitejs/plugin-react": {
+       "version": "4.7.0",
+       "resolved": "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-4.7.0.tgz",
+@@ -2597,6 +2896,26 @@
+         }
+       }
+     },
++    "node_modules/eslint-plugin-react-hooks": {
++      "version": "7.1.1",
++      "resolved": "https://registry.npmjs.org/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-7.1.1.tgz",
++      "integrity": "sha512-f2I7Gw6JbvCexzIInuSbZpfdQ44D7iqdWX01FKLvrPgqxoE7oMj8clOfto8U6vYiz4yd5oKu39rRSVOe1zRu0g==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@babel/core": "^7.24.4",
++        "@babel/parser": "^7.24.4",
++        "hermes-parser": "^0.25.1",
++        "zod": "^3.25.0 || ^4.0.0",
++        "zod-validation-error": "^3.5.0 || ^4.0.0"
++      },
++      "engines": {
++        "node": ">=18"
++      },
++      "peerDependencies": {
++        "eslint": "^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0 || ^10.0.0"
++      }
++    },
+     "node_modules/eslint-scope": {
+       "version": "8.4.0",
+       "resolved": "https://registry.npmjs.org/eslint-scope/-/eslint-scope-8.4.0.tgz",
+@@ -3006,6 +3325,23 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/hermes-estree": {
++      "version": "0.25.1",
++      "resolved": "https://registry.npmjs.org/hermes-estree/-/hermes-estree-0.25.1.tgz",
++      "integrity": "sha512-0wUoCcLp+5Ev5pDW2OriHC2MJCbwLwuRx+gAqMTOkGKJJiBCLjtrvy4PWUGn6MIVefecRpzoOZ/UV6iGdOr+Cw==",
++      "dev": true,
++      "license": "MIT"
++    },
++    "node_modules/hermes-parser": {
++      "version": "0.25.1",
++      "resolved": "https://registry.npmjs.org/hermes-parser/-/hermes-parser-0.25.1.tgz",
++      "integrity": "sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "hermes-estree": "0.25.1"
++      }
++    },
+     "node_modules/https-proxy-agent": {
+       "version": "5.0.1",
+       "resolved": "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-5.0.1.tgz",
+@@ -4213,6 +4549,19 @@
+         "url": "https://github.com/sponsors/SuperchupuDev"
+       }
+     },
++    "node_modules/ts-api-utils": {
++      "version": "2.5.0",
++      "resolved": "https://registry.npmjs.org/ts-api-utils/-/ts-api-utils-2.5.0.tgz",
++      "integrity": "sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18.12"
++      },
++      "peerDependencies": {
++        "typescript": ">=4.8.4"
++      }
++    },
+     "node_modules/type-check": {
+       "version": "0.4.0",
+       "resolved": "https://registry.npmjs.org/type-check/-/type-check-0.4.0.tgz",
+@@ -4240,6 +4589,30 @@
+         "node": ">=14.17"
+       }
+     },
++    "node_modules/typescript-eslint": {
++      "version": "8.66.0",
++      "resolved": "https://registry.npmjs.org/typescript-eslint/-/typescript-eslint-8.66.0.tgz",
++      "integrity": "sha512-QlEbBPz/RuJ1XUHj29nm3t0F/O/cSlEnntozqPOYHnnTGAXFamnMBu5i9Vn6vhUPHGAjR+Vl+5J8vPN/BMUrJw==",
++      "dev": true,
++      "license": "MIT",
++      "dependencies": {
++        "@typescript-eslint/eslint-plugin": "8.66.0",
++        "@typescript-eslint/parser": "8.66.0",
++        "@typescript-eslint/typescript-estree": "8.66.0",
++        "@typescript-eslint/utils": "8.66.0"
++      },
++      "engines": {
++        "node": "^18.18.0 || ^20.9.0 || >=21.1.0"
++      },
++      "funding": {
++        "type": "opencollective",
++        "url": "https://opencollective.com/typescript-eslint"
++      },
++      "peerDependencies": {
++        "eslint": "^8.57.0 || ^9.0.0 || ^10.0.0",
++        "typescript": ">=4.8.4 <6.1.0"
++      }
++    },
+     "node_modules/undici-types": {
+       "version": "8.3.0",
+       "resolved": "https://registry.npmjs.org/undici-types/-/undici-types-8.3.0.tgz",
+@@ -4439,6 +4812,29 @@
+       "funding": {
+         "url": "https://github.com/sponsors/sindresorhus"
+       }
++    },
++    "node_modules/zod": {
++      "version": "4.4.3",
++      "resolved": "https://registry.npmjs.org/zod/-/zod-4.4.3.tgz",
++      "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==",
++      "dev": true,
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/colinhacks"
++      }
++    },
++    "node_modules/zod-validation-error": {
++      "version": "4.0.2",
++      "resolved": "https://registry.npmjs.org/zod-validation-error/-/zod-validation-error-4.0.2.tgz",
++      "integrity": "sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==",
++      "dev": true,
++      "license": "MIT",
++      "engines": {
++        "node": ">=18.0.0"
++      },
++      "peerDependencies": {
++        "zod": "^3.25.0 || ^4.0.0"
++      }
+     }
+   }
+ }
+diff --git a/client/package.json b/client/package.json
+index 2f5efaa..0a61922 100644
+--- a/client/package.json
++++ b/client/package.json
+@@ -28,10 +28,14 @@
+     "@types/node": "^26.1.1",
+     "@types/react": "^18.3.14",
+     "@types/react-dom": "^18.3.5",
++    "@typescript-eslint/eslint-plugin": "^8.66.0",
++    "@typescript-eslint/parser": "^8.66.0",
+     "@vitejs/plugin-react": "^4.3.4",
+     "eslint": "^9.16.0",
++    "eslint-plugin-react-hooks": "^7.1.1",
+     "tailwindcss": "^4.0.0",
+     "typescript": "~5.6.2",
++    "typescript-eslint": "^8.66.0",
+     "vite": "^6.0.3"
+   }
+ }
+diff --git a/client/src/App.tsx b/client/src/App.tsx
+index 155a9ac..aa299b8 100644
+--- a/client/src/App.tsx
++++ b/client/src/App.tsx
+@@ -8,12 +8,18 @@ import TrackShipment from './pages/client/TrackShipment';
+ 
+ import ClientInvoices from './pages/client/ClientInvoices';
+ import PlaceOrder from './pages/client/PlaceOrder';
++import ClientSettings from './pages/client/ClientSettings';
++
++import AdminDashboard from './pages/admin/AdminDashboard';
++import FleetMonitor from './pages/admin/FleetMonitor';
++import LiveOperations from './pages/admin/LiveOperations';
++import ManifestCreate from './pages/admin/ManifestCreate';
+ 
+ // Temporary placeholders for role dashboards not yet wired (Modules 14/16/17).
+ function RolePlaceholder({ title }: { title: string }) {
+   return (
+     <div className="min-h-screen bg-[#f5f6f8] flex items-center justify-center font-sans">
+-      <div className="text-center p-10">
++      <div className="text-center p-6 sm:p-10">
+         <h1 className="text-2xl font-extrabold text-slate-900 mb-2">{title}</h1>
+         <p className="text-slate-500">This workspace is under construction. Log in with a client account to use the live portal.</p>
+         <a href="/login" className="inline-block mt-6 text-orange-500 font-bold hover:underline">Sign out</a>
+@@ -41,9 +47,15 @@ export default function App() {
+           <Route path="/client/place-order" element={<PlaceOrder />} />
+           <Route path="/client/track" element={<TrackShipment />} />
+           <Route path="/client/invoices" element={<ClientInvoices />} />
++          <Route path="/client/settings" element={<ClientSettings />} />
++
++          {/* Admin Routes */}
++          <Route path="/admin/dashboard" element={<AdminDashboard />} />
++          <Route path="/admin/fleet" element={<FleetMonitor />} />
++          <Route path="/admin/operations" element={<LiveOperations />} />
++          <Route path="/admin/manifest/create" element={<ManifestCreate />} />
+ 
+-          {/* Role dashboards ΓÇö replace placeholders when Modules 14/16/17 land */}
+-          <Route path="/admin/dashboard" element={<RolePlaceholder title="Admin Dashboard" />} />
++          {/* Role dashboards ΓÇö replace placeholders when Modules 16/17 land */}
+           <Route path="/driver/dashboard" element={<RolePlaceholder title="Driver Dashboard" />} />
+           <Route path="/executive/analytics" element={<RolePlaceholder title="Executive Analytics" />} />
+ 
+diff --git a/client/src/components/client/ClientOverview.tsx b/client/src/components/client/ClientOverview.tsx
+index c819d25..7e17d64 100644
+--- a/client/src/components/client/ClientOverview.tsx
++++ b/client/src/components/client/ClientOverview.tsx
+@@ -16,7 +16,7 @@ export default function ClientOverview() {
+         <p className="text-slate-600">Track your real-time logistics KPIs and monthly freight spend.</p>
+       </div>
+ 
+-      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-2 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
++      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
+         {stats.map((stat, idx) => (
+           <StatCard 
+             key={idx}
+diff --git a/client/src/components/client/InvoiceList.tsx b/client/src/components/client/InvoiceList.tsx
+index 806e800..782a567 100644
+--- a/client/src/components/client/InvoiceList.tsx
++++ b/client/src/components/client/InvoiceList.tsx
+@@ -12,7 +12,7 @@ const mockInvoices = [
+ export default function InvoiceList() {
+   return (
+     <div className="w-full">
+-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-[dashPopIn_0.4s_ease-out_both]">
++      <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-[dashPopIn_0.4s_ease-out_both]">
+         <div>
+           <h2 className="text-2xl font-bold text-slate-900 mb-2">Billing & Invoices</h2>
+           <p className="text-slate-600">Manage your payments and download past invoices.</p>
+diff --git a/client/src/components/client/OrderForm.tsx b/client/src/components/client/OrderForm.tsx
+index ba11d35..ceaac6c 100644
+--- a/client/src/components/client/OrderForm.tsx
++++ b/client/src/components/client/OrderForm.tsx
+@@ -1,9 +1,10 @@
+-import { useState, useEffect } from 'react';
+-import { MapPin, Calendar, Truck, ChevronRight, ShieldCheck, CheckCircle2, Navigation, PackageSearch, Clock, RefreshCw, AlertTriangle, Hash } from 'lucide-react';
++import { useState } from 'react';
++import { MapPin, Calendar, Truck, ChevronRight, ShieldCheck, CheckCircle2, Navigation, Clock, RefreshCw, AlertTriangle, Hash, PackageSearch } from 'lucide-react';
+ import { useSelector } from 'react-redux';
+ import toast from 'react-hot-toast';
+ import type { RootState } from '../../store/store';
+ import { createManifest, Manifest, GeoPoint } from '../../services/manifestApi';
++import { getErrorMessage } from '../../services/errorMessage';
+ 
+ interface FormState {
+   origin: string;
+@@ -66,28 +67,18 @@ export default function OrderForm() {
+   const [step, setStep] = useState(1);
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [isGeocoding, setIsGeocoding] = useState(false);
+-  const [animateIn, setAnimateIn] = useState(false);
+   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+   const [route, setRoute] = useState<{ origin: GeoPoint; destination: GeoPoint; distanceKm: number; estimatedDurationMinutes: number } | null>(null);
+   const [created, setCreated] = useState<Manifest | null>(null);
+ 
+-  useEffect(() => {
+-    setAnimateIn(true);
+-  }, []);
+-
+   const setField = (key: keyof FormState, value: string | boolean) => {
+     setForm((prev) => ({ ...prev, [key]: value }));
+   };
+ 
+-  const nextStep = () => {
+-    setStep((s) => Math.min(s + 1, 4));
+-  };
+-
+   const prevStep = () => {
+     setStep((s) => Math.max(s - 1, 1));
+   };
+ 
+-  // Geocode addresses before showing the quote in step 3
+   const goToQuote = async () => {
+     if (!form.origin.trim() || !form.destination.trim()) {
+       toast.error('Please enter both pickup and delivery addresses.');
+@@ -157,7 +148,7 @@ export default function OrderForm() {
+       toast.success('Manifest created successfully.');
+       setStep(4);
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to create shipment. Please try again.');
++      toast.error(getErrorMessage(err, 'Failed to create shipment. Please try again.'));
+     } finally {
+       setIsSubmitting(false);
+     }
+@@ -170,112 +161,163 @@ export default function OrderForm() {
+     setStep(1);
+   };
+ 
+-  const getStepClass = (stepNum: number) => {
+-    if (step === stepNum) return "opacity-100 translate-x-0 relative z-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+-    if (step > stepNum) return "opacity-0 -translate-x-16 absolute inset-0 pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+-    return "opacity-0 translate-x-16 absolute inset-0 pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]";
+-  };
++  const inputClass = "w-full bg-white/60 hover:bg-white backdrop-blur-md border border-slate-200/60 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all duration-500 font-medium placeholder:text-slate-400 shadow-sm hover:shadow-md hover:-translate-y-0.5";
+ 
+-  const inputClass = "w-full bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all duration-300 font-medium placeholder:text-slate-400";
++  const renderStepIcon = (idx: number, active: boolean, completed: boolean) => {
++    if (completed) return <CheckCircle2 className="w-5 h-5 text-white" />;
++    return <span className={`text-sm font-bold ${active || completed ? 'text-white' : 'text-slate-400'}`}>{idx}</span>;
++  };
+ 
+   return (
+-    <div className={`w-full max-w-4xl mx-auto transition-all duration-1000 transform ${animateIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+-
+-      {/* Premium Header */}
+-      <div className="mb-10 flex flex-col items-center text-center">
+-        <div className="inline-flex items-center space-x-2 bg-orange-50 border border-orange-100 rounded-full px-5 py-1.5 mb-4 shadow-sm">
+-          <Truck className="w-4 h-4 text-orange-500" />
+-          <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Enterprise Freight</span>
++    <div className="w-full h-auto lg:h-[85vh] min-h-[80vh] flex flex-col lg:flex-row bg-white rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-slate-200/60 overflow-hidden animate-[dashPopIn_0.7s_ease-out_both]">
++      
++      {/* Custom Keyframes */}
++      <style>{`
++        @keyframes driveTruck {
++          0% { transform: translateX(-100px); opacity: 0; }
++          10% { opacity: 0.1; }
++          90% { opacity: 0.1; }
++          100% { transform: translateX(400px); opacity: 0; }
++        }
++      `}</style>
++
++      {/* Left Sidebar - Branding & Progress */}
++      <div className="lg:w-[380px] lg:h-full bg-white border-r border-slate-200 p-3 md:p-3 lg:p-7 flex flex-col justify-between relative overflow-hidden shrink-0">
++        
++        {/* Animated Background Truck */}
++        <div className="absolute top-1/2 left-0 pointer-events-none opacity-5" style={{ animation: 'driveTruck 8s linear infinite' }}>
++          <Truck className="w-48 h-48 text-slate-400" strokeWidth={1} />
+         </div>
+-        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Create Shipment</h2>
+-        <p className="text-slate-500 text-lg max-w-lg">Enter logistics details below to instantly route your cargo and generate a tracking ID.</p>
+-      </div>
+-
+-      <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-12 relative overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)]">
++        
++        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-orange-500 rounded-full blur-[120px] opacity-10 pointer-events-none"></div>
+ 
+-        {/* Sleek Progress Line */}
+-        <div className="mb-16 relative">
+-          <div className="flex justify-between relative z-10 mb-2">
+-            {['Routing', 'Cargo Specs', 'Scheduling'].map((label, idx) => (
+-              <span key={idx} className={`text-[10px] font-bold uppercase tracking-widest transition-colors duration-500 ${step === idx + 1 ? 'text-orange-500' : step > idx + 1 ? 'text-slate-900' : 'text-slate-400'}`}>
+-                {label}
+-              </span>
+-            ))}
++        <div className="relative z-10">
++          <div className="inline-flex items-center space-x-2 bg-orange-50 border border-orange-100 rounded-full px-4 py-1.5 mb-6 md:mb-8">
++            <Truck className="w-4 h-4 text-orange-500" />
++            <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest">Enterprise Freight</span>
+           </div>
+-          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
+-            <div
+-              className="absolute top-0 left-0 h-full bg-orange-500 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+-              style={{ width: `${Math.min(((step - 1) / 2) * 100, 100)}%` }}
+-            ></div>
++          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 mb-2 md:mb-2 tracking-tight leading-tight">
++            Create<br />Shipment
++          </h2>
++          <p className="text-slate-500 text-sm leading-relaxed mb-6 md:mb-10">
++            Configure logistics details below to instantly route your cargo and generate a secure tracking ID.
++          </p>
++
++          {/* Stepper */}
++          <div className="space-y-7">
++            {['Origin & Destination', 'Cargo Specifications', 'Scheduling & Quote'].map((label, idx) => {
++              const num = idx + 1;
++              const isActive = step === num;
++              const isPast = step > num;
++              return (
++                <div key={idx} className="flex items-center space-x-4 relative">
++                  {idx < 2 && (
++                    <div className={`absolute top-10 left-[1.15rem] bottom-[-2rem] w-px transition-colors duration-700 ${isPast ? 'bg-orange-500' : 'bg-slate-200'}`} />
++                  )}
++                  <div className={`w-10 h-10 rounded-full flex items-center justify-center relative z-10 transition-all duration-700 shadow-lg ${isActive ? 'bg-orange-500 shadow-orange-500/40 scale-110 text-white' : isPast ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
++                    {renderStepIcon(num, isActive, isPast)}
++                  </div>
++                  <span className={`font-bold transition-all duration-500 ${isActive ? 'text-slate-900 text-base' : isPast ? 'text-slate-500 text-sm' : 'text-slate-400 text-sm'}`}>
++                    {label}
++                  </span>
++                </div>
++              );
++            })}
+           </div>
+         </div>
+ 
+-        {/* Forms Container */}
+-        <div className="relative min-h-[400px]">
++        <div className="relative z-6 mt-auto pt-6 border-t border-slate-200/60">
++          <div className="flex justify-center items-center space-x-2 opacity-60 text-slate-500">
++            <ShieldCheck className="w-4 h-4" />
++            <span className="text-xs font-bold uppercase tracking-wider">End-to-End Encrypted</span>
++          </div>
++        </div>
++      </div>
+ 
+-          {/* STEP 1: ROUTE */}
+-          <div className={getStepClass(1)}>
+-            <div className="space-y-8">
+-              <div>
+-                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Pickup Address</label>
++      {/* Right Main Content Area */}
++      <div className="flex-1 bg-slate-50/30 p-1 md:p-6 relative overflow-hidden h-[70vh] lg:h-auto">
++        
++        {/* Step 1: Routing */}
++        <div className={`absolute inset-0 p-5 md:p-12 overflow-y-auto transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${step === 1 ? 'opacity-100 translate-x-0 z-10' : 'opacity-0 -translate-x-32 pointer-events-none'}`}>
++          <div className="max-w-2xl mx-auto space-y-6 md:space-y-8 animate-in fade-in slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
++            <div>
++              <h3 className="text-2xl font-extrabold text-slate-800 mb-2">Routing Details</h3>
++              <p className="text-slate-500 font-medium">Where is this cargo heading?</p>
++            </div>
++            
++            <div className="space-y-6">
++              <div className="group">
++                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Pickup Address</label>
+                 <div className="relative">
+                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+-                    <Navigation className="h-5 w-5 text-slate-400" />
++                    <Navigation className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                   </div>
+                   <input type="text" required placeholder="e.g. 123 Factory Row, Chicago IL" className={inputClass}
+                     value={form.origin} onChange={(e) => setField('origin', e.target.value)} />
+                 </div>
+               </div>
+-              <div>
+-                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Delivery Address</label>
++              <div className="group animate-in fade-in slide-in-from-right-8 duration-700 delay-200 fill-mode-both">
++                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Delivery Address</label>
+                 <div className="relative">
+                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+-                    <MapPin className="h-5 w-5 text-slate-400" />
++                    <MapPin className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                   </div>
+                   <input type="text" required placeholder="e.g. 456 Warehouse Ave, Detroit MI" className={inputClass}
+                     value={form.destination} onChange={(e) => setField('destination', e.target.value)} />
+                 </div>
+               </div>
+ 
+-              <div className="pt-4 flex justify-end">
+-                <button type="button" onClick={() => { setStep(2); }} className="group flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-orange-500/30 hover:-translate-y-1">
++              <div className="pt-6 md:pt-8 flex justify-end animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both">
++                <button type="button" onClick={() => { setStep(2); }} className="group flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-orange-500/30 hover:-translate-y-1">
+                   Continue to Cargo <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                 </button>
+               </div>
+             </div>
+           </div>
++        </div>
++
++        {/* Step 2: Cargo */}
++        <div className={`absolute inset-0 p-5 md:p-12 overflow-y-auto transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${step === 2 ? 'opacity-100 translate-x-0 z-10' : step > 2 ? 'opacity-0 -translate-x-32 pointer-events-none' : 'opacity-0 translate-x-32 pointer-events-none'}`}>
++          <div className="max-w-2xl mx-auto space-y-5 md:space-y-6">
++            <div>
++              <h3 className="text-2xl font-extrabold text-slate-800 mb-2">Cargo Specifications</h3>
++              <p className="text-slate-500 font-medium">What are we transporting?</p>
++            </div>
+ 
+-          {/* STEP 2: CARGO */}
+-          <div className={getStepClass(2)}>
+-            <div className="space-y-8">
+-              <div>
+-                <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Cargo Description</label>
+-                <input type="text" required placeholder="e.g. Automotive components, palletized" className={inputClass}
+-                  value={form.description} onChange={(e) => setField('description', e.target.value)} />
++            <div className="space-y-6">
++              <div className="group animate-in fade-in slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
++                <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Cargo Description</label>
++                <div className="relative">
++                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
++                    <PackageSearch className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
++                  </div>
++                  <input type="text" required placeholder="e.g. Automotive components, palletized" className={inputClass}
++                    value={form.description} onChange={(e) => setField('description', e.target.value)} />
++                </div>
+               </div>
+ 
+-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+-                <div>
+-                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Total Weight</label>
++              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-200 fill-mode-both">
++                <div className="group">
++                  <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Total Weight</label>
+                   <div className="relative">
+-                    <input type="number" min="0" step="any" placeholder="0.00" className={inputClass}
++                    <input type="number" min="0" step="any" placeholder="0.00" className={`${inputClass} !pl-6`}
+                       value={form.weight} onChange={(e) => setField('weight', e.target.value)} />
+                     <span className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 font-bold text-sm pointer-events-none">kg</span>
+                   </div>
+                 </div>
+-                <div>
+-                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Total Volume</label>
++                <div className="group">
++                  <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Total Volume</label>
+                   <div className="relative">
+-                    <input type="number" min="0" step="any" placeholder="0.00" className={inputClass}
++                    <input type="number" min="0" step="any" placeholder="0.00" className={`${inputClass} !pl-6`}
+                       value={form.volume} onChange={(e) => setField('volume', e.target.value)} />
+                     <span className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 font-bold text-sm pointer-events-none">m┬│</span>
+                   </div>
+                 </div>
+-                <div>
+-                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Item Count</label>
++                <div className="group">
++                  <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Item Count</label>
+                   <div className="relative">
+                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+-                      <Hash className="h-5 w-5 text-slate-400" />
++                      <Hash className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                     </div>
+                     <input type="number" min="1" step="1" placeholder="1" className={inputClass}
+                       value={form.itemCount} onChange={(e) => setField('itemCount', e.target.value)} />
+@@ -283,7 +325,7 @@ export default function OrderForm() {
+                 </div>
+               </div>
+ 
+-              <label className="flex items-start space-x-4 p-6 rounded-2xl border-2 border-slate-100 bg-white cursor-pointer hover:border-orange-500 hover:bg-orange-50/30 transition-all duration-300 group shadow-sm hover:shadow-md">
++              <label className="animate-in fade-in slide-in-from-right-8 duration-700 delay-300 fill-mode-both flex items-start space-x-4 p-5 md:p-6 rounded-2xl border-2 border-slate-100 bg-white/60 backdrop-blur-md cursor-pointer hover:border-orange-500 hover:bg-orange-50/50 transition-all duration-300 group shadow-sm hover:shadow-md hover:-translate-y-1">
+                 <div className="relative flex items-center justify-center mt-0.5">
+                   <input type="checkbox" checked={form.hazardous} onChange={(e) => setField('hazardous', e.target.checked)}
+                     className="peer appearance-none w-6 h-6 border-2 border-slate-300 rounded-lg checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" />
+@@ -295,41 +337,48 @@ export default function OrderForm() {
+                 </div>
+               </label>
+ 
+-              <div className="flex items-center justify-between pt-4">
+-                <button type="button" onClick={prevStep} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-lg">
++              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-6 md:pt-8 animate-in fade-in slide-in-from-right-8 duration-700 delay-500 fill-mode-both">
++                <button type="button" onClick={prevStep} className="w-full sm:w-auto text-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-all duration-300 uppercase tracking-widest px-6 py-4 hover:bg-slate-200/50 rounded-xl hover:-translate-y-1 hover:shadow-sm">
+                   Go Back
+                 </button>
+                 <button type="button" onClick={goToQuote} disabled={isGeocoding}
+-                  className="group flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-60 disabled:hover:translate-y-0">
++                  className="group w-full sm:w-auto justify-center flex items-center bg-slate-900 hover:bg-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-60 disabled:hover:translate-y-0">
+                   {isGeocoding ? (
+-                    <span className="flex items-center">Locating addresses <RefreshCw className="w-5 h-5 ml-2 animate-spin" /></span>
++                    <span className="flex items-center">Locating <RefreshCw className="w-5 h-5 ml-2 animate-spin" /></span>
+                   ) : (
+-                    <span className="flex items-center">Continue <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" /></span>
++                    <span className="flex items-center">Generate Quote <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" /></span>
+                   )}
+                 </button>
+               </div>
+             </div>
+           </div>
++        </div>
+ 
+-          {/* STEP 3: SCHEDULE & SUMMARY */}
+-          <div className={getStepClass(3)}>
+-            <form onSubmit={handleSubmit} className="space-y-8">
+-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+-                <div>
+-                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Requested Pickup Date</label>
++        {/* Step 3: Scheduling & Review */}
++        <div className={`absolute inset-0 p-5 md:p-12 overflow-y-auto transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${step === 3 ? 'opacity-100 translate-x-0 z-10' : step > 3 ? 'opacity-0 -translate-x-32 pointer-events-none' : 'opacity-0 translate-x-32 pointer-events-none'}`}>
++          <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
++            <div>
++              <h3 className="text-2xl font-extrabold text-slate-800 mb-2">Scheduling & Quote</h3>
++              <p className="text-slate-500 font-medium">Finalize logistics timing and review the manifest.</p>
++            </div>
++
++            <form onSubmit={handleSubmit} className="space-y-6">
++              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-in fade-in slide-in-from-right-8 duration-700 delay-100 fill-mode-both">
++                <div className="group">
++                  <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Requested Pickup Date</label>
+                   <div className="relative">
+-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+-                      <Calendar className="h-5 w-5 text-slate-400" />
++                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
++                      <Calendar className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                     </div>
+                     <input type="datetime-local" className={inputClass}
+                       value={form.pickupDate} onChange={(e) => setField('pickupDate', e.target.value)} />
+                   </div>
+                 </div>
+-                <div>
+-                  <label className="block text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-2">Delivery Window Close</label>
++                <div className="group">
++                  <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-2 group-focus-within:text-orange-500 transition-colors">Delivery Window Close</label>
+                   <div className="relative">
+-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+-                      <Clock className="h-5 w-5 text-slate-400" />
++                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
++                      <Clock className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
+                     </div>
+                     <input type="datetime-local" className={inputClass}
+                       value={form.windowClose} onChange={(e) => setField('windowClose', e.target.value)} />
+@@ -338,37 +387,37 @@ export default function OrderForm() {
+               </div>
+ 
+               {/* Premium Dark Order Summary Card */}
+-              <div className="bg-[#0f172a] rounded-[2rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20">
+-                <div className="absolute top-0 right-0 p-8 opacity-10">
+-                  <Truck className="w-48 h-48 -mt-16 -mr-16" />
++              <div className="bg-slate-900 rounded-[2rem] p-4 md:p-5 text-white relative overflow-hidden shadow-2xl shadow-slate-900/20 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 fill-mode-both hover:-translate-y-1 transition-all">
++                <div className="absolute top-0 right-0 p-8 opacity-5">
++                  <Truck className="w-64 h-64 -mt-20 -mr-20" />
+                 </div>
+-                <h4 className="font-extrabold text-lg mb-6 flex items-center relative z-10">
+-                  <Clock className="w-5 h-5 mr-3 text-orange-500" />
++                <h4 className="font-extrabold text-lg mb-6 md:mb-8 flex items-center relative z-10 text-orange-400">
++                  <Clock className="w-5 h-5 mr-3" />
+                   Estimated Logistics Profile
+                 </h4>
+ 
+-                <div className="space-y-4 relative z-10">
+-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+-                    <span className="text-slate-400 font-medium">Route</span>
+-                    <span className="font-mono font-bold text-sm text-right">{form.origin} ΓåÆ {form.destination}</span>
++                <div className="space-y-1 relative z-10">
++                  <div className="flex flex-col sm:flex-row justify-between pb-3 border-b border-white/10 gap-2">
++                    <span className="text-slate-400 font-medium text-sm uppercase tracking-widest">Route</span>
++                    <span className="font-semibold text-right">{form.origin} ΓåÆ {form.destination}</span>
+                   </div>
+-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+-                    <span className="text-slate-400 font-medium">Est. Transport Distance</span>
+-                    <span className="font-mono font-bold text-lg">{route ? `${route.distanceKm.toFixed(0)} km` : 'ΓÇö'}</span>
++                  <div className="flex justify-between items-center pb-5 border-b border-white/10">
++                    <span className="text-slate-400 font-medium text-sm uppercase tracking-widest">Transport Distance</span>
++                    <span className="font-bold text-lg">{route ? `${route.distanceKm.toFixed(0)} km` : 'ΓÇö'}</span>
+                   </div>
+-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+-                    <span className="text-slate-400 font-medium">Est. Duration</span>
+-                    <span className="font-mono font-bold text-lg">
++                  <div className="flex justify-between items-center pb-5 border-b border-white/10">
++                    <span className="text-slate-400 font-medium text-sm uppercase tracking-widest">Est. Duration</span>
++                    <span className="font-bold text-lg">
+                       {route ? `${Math.floor(route.estimatedDurationMinutes / 60)}h ${route.estimatedDurationMinutes % 60}m` : 'ΓÇö'}
+                     </span>
+                   </div>
+-                  <div className="flex justify-between items-center pb-4 border-b border-slate-700/50">
+-                    <span className="text-slate-400 font-medium">Cargo Weight</span>
+-                    <span className="font-mono font-bold text-lg">{form.weight ? `${form.weight} kg` : 'ΓÇö'}</span>
++                  <div className="flex justify-between items-center pb-5 border-b border-white/10">
++                    <span className="text-slate-400 font-medium text-sm uppercase tracking-widest">Cargo Weight</span>
++                    <span className="font-bold text-lg">{form.weight ? `${form.weight} kg` : 'ΓÇö'}</span>
+                   </div>
+-                  <div className="flex justify-between items-center pt-2">
+-                    <span className="font-bold text-slate-300 uppercase tracking-widest text-xs">Total Quote</span>
+-                    <span className="text-orange-500 font-bold text-3xl tabular-nums font-mono">
++                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3 pt-4">
++                    <span className="font-bold text-white uppercase tracking-widest">Total Quote</span>
++                    <span className="text-orange-400 font-bold text-3xl sm:text-4xl tabular-nums tracking-tight">
+                       {route && form.weight ? formatINR(Math.round(route.distanceKm * (parseFloat(form.weight) / 1000) * 5 + route.distanceKm * 2)) : 'ΓÇö'}
+                     </span>
+                   </div>
+@@ -376,17 +425,17 @@ export default function OrderForm() {
+               </div>
+ 
+               {form.hazardous && (
+-                <div className="flex items-center space-x-2 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-bold">
+-                  <AlertTriangle className="w-4 h-4" />
+-                  <span>HAZMAT flagged ΓÇö certified driver required.</span>
++                <div className="flex items-center space-x-2 bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 px-6 py-4 rounded-2xl text-sm font-bold animate-in fade-in duration-500 delay-300 fill-mode-both">
++                  <AlertTriangle className="w-5 h-5 flex-shrink-0" />
++                  <span>HAZMAT flagged ΓÇö certified driver assignment required.</span>
+                 </div>
+               )}
+ 
+-              <div className="flex items-center justify-between pt-4">
+-                <button type="button" onClick={prevStep} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest px-4 py-2 hover:bg-slate-50 rounded-lg">
++              <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 md:pt-3 animate-in fade-in slide-in-from-right-8 duration-700 delay-500 fill-mode-both">
++                <button type="button" onClick={prevStep} className="w-full sm:w-auto text-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-all duration-300 uppercase tracking-widest px-6 py-4 hover:bg-slate-200/50 rounded-xl hover:-translate-y-1 hover:shadow-sm">
+                   Go Back
+                 </button>
+-                <button type="submit" disabled={isSubmitting} className="group flex items-center bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0">
++                <button type="submit" disabled={isSubmitting} className="group w-full sm:w-auto justify-center flex items-center bg-orange-500 hover:bg-orange-600 text-white px-10 py-4 rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-orange-500/30 hover:-translate-y-1 disabled:opacity-50 disabled:hover:translate-y-0">
+                   {isSubmitting ? (
+                     <span className="flex items-center">Processing <RefreshCw className="w-5 h-5 ml-2 animate-spin" /></span>
+                   ) : (
+@@ -396,65 +445,69 @@ export default function OrderForm() {
+               </div>
+             </form>
+           </div>
++        </div>
+ 
+-          {/* STEP 4: SUCCESS */}
+-          <div className={getStepClass(4)}>
+-            <div className="text-center py-12 px-4">
+-              <div className="relative w-full h-32 mx-auto mb-8 overflow-hidden rounded-xl bg-gradient-to-r from-transparent via-orange-500/5 to-transparent flex items-center justify-center">
+-                <div
+-                  className="absolute bottom-10 flex flex-col items-center justify-end"
+-                  style={{
+-                    transform: step === 4 ? 'translateX(0px)' : 'translateX(-200px)',
+-                    opacity: step === 4 ? 1 : 0,
+-                    transition: 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s',
+-                  }}
+-                >
+-                  <div className="relative">
+-                    <Truck className="w-16 h-16 text-orange-500 drop-shadow-lg" />
+-                    <div className="absolute top-1/2 right-full mr-2 w-32 h-1 bg-gradient-to-l from-orange-500/40 to-transparent rounded-full -translate-y-1/2"></div>
+-                  </div>
++        {/* Step 4: Success */}
++        <div className={`absolute inset-0 p-5 md:p-12 overflow-y-auto flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${step === 4 ? 'opacity-100 translate-y-0 z-20' : 'opacity-0 translate-y-32 pointer-events-none'}`}>
++          <div className="w-full max-w-lg text-center space-y-3 md:space-y-2">
++            <div className="relative w-full h-40 mx-auto overflow-hidden rounded-3xl bg-orange-50/50 border border-orange-100 flex items-center justify-center">
++              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-orange-200/40 via-transparent to-transparent opacity-50"></div>
++              
++              <div
++                className="absolute bottom-12 flex flex-col items-center justify-end transition-all"
++                style={{
++                  transform: step === 4 ? 'translateX(0px)' : 'translateX(-200px)',
++                  opacity: step === 4 ? 1 : 0,
++                  transition: 'all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s',
++                }}
++              >
++                <div className="relative">
++                  <Truck className="w-20 h-20 text-orange-500 drop-shadow-xl" />
++                  <div className="absolute top-1/2 right-full mr-2 w-48 h-1.5 bg-gradient-to-l from-orange-500/40 to-transparent rounded-full -translate-y-1/2"></div>
+                 </div>
++              </div>
+ 
+-                <div
+-                  className="absolute bottom-[2.75rem] ml-12 bg-white rounded-full p-1 shadow-lg"
+-                  style={{
+-                    transform: step === 4 ? 'scale(1)' : 'scale(0)',
+-                    opacity: step === 4 ? 1 : 0,
+-                    transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s',
+-                  }}
+-                >
+-                  <CheckCircle2 className="w-6 h-6 text-green-500" />
+-                </div>
++              <div
++                className="absolute bottom-12 ml-16 bg-white rounded-full p-1.5 shadow-xl transition-all"
++                style={{
++                  transform: step === 4 ? 'scale(1)' : 'scale(0)',
++                  opacity: step === 4 ? 1 : 0,
++                  transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s',
++                }}
++              >
++                <CheckCircle2 className="w-8 h-8 text-green-500" />
+               </div>
++            </div>
+ 
+-              <h3 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Dispatch Confirmed</h3>
+-              <p className="text-slate-500 text-lg mb-10 max-w-md mx-auto leading-relaxed">
++            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 fill-mode-both">
++              <h3 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Dispatch Confirmed</h3>
++              <p className="text-slate-500 text-lg leading-relaxed">
+                 Your freight request has been securely logged and is awaiting driver assignment.
+               </p>
++            </div>
+ 
+-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 inline-block mb-12 shadow-inner">
+-                <p className="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest mb-2">Secure Tracking ID</p>
+-                <p className="font-mono text-slate-900 text-2xl font-bold tracking-widest">{created?.trackingId ?? 'ΓÇö'}</p>
+-              </div>
++            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 fill-mode-both">
++              <p className="text-xs text-slate-400 uppercase font-extrabold tracking-widest mb-3">Secure Tracking ID</p>
++              <p className="font-mono text-slate-900 text-2xl md:text-3xl font-extrabold tracking-widest break-all">{created?.trackingId ?? 'ΓÇö'}</p>
++            </div>
+ 
+-              <div className="flex items-center justify-center gap-4">
+-                <button
+-                  onClick={resetForm}
+-                  className="text-sm font-extrabold text-orange-500 hover:text-orange-600 transition-colors uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-orange-50"
+-                >
+-                  Schedule Another Shipment
+-                </button>
+-                <a
+-                  href="/client/track"
+-                  className="text-sm font-extrabold text-slate-900 transition-colors uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-slate-100"
+-                >
+-                  Track It
+-                </a>
+-              </div>
++            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-in fade-in duration-700 delay-700 fill-mode-both">
++              <button
++                onClick={resetForm}
++                className="w-full sm:w-auto text-sm font-extrabold text-slate-500 hover:text-slate-900 transition-all uppercase tracking-widest px-8 py-4 rounded-2xl hover:bg-slate-100 hover:-translate-y-1"
++              >
++                New Shipment
++              </button>
++              <a
++                href="/client/track"
++                className="w-full sm:w-auto text-sm font-extrabold text-white bg-orange-500 hover:bg-orange-600 transition-all uppercase tracking-widest px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-1 text-center"
++              >
++                Track Cargo
++              </a>
+             </div>
+           </div>
+-
+         </div>
++
+       </div>
+     </div>
+   );
+diff --git a/client/src/components/client/ShipmentTracker.tsx b/client/src/components/client/ShipmentTracker.tsx
+index 719e208..cd095d6 100644
+--- a/client/src/components/client/ShipmentTracker.tsx
++++ b/client/src/components/client/ShipmentTracker.tsx
+@@ -113,10 +113,10 @@ export default function ShipmentTracker() {
+       </div>
+ 
+       {/* RIGHT PANEL: DETAILS */}
+-      <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative z-10 p-1 md:p-2">
++      <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative z-10 p-3 md:p-4">
+         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none"></div>
+ 
+-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-200">
++        <div className="flex items-center justify-between mb-6 md:mb-8 pb-5 md:pb-6 border-b border-slate-200">
+           <div>
+             <h2 className="text-xs font-bold text-accent uppercase tracking-widest mb-1">Manifest</h2>
+             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{activeShipment.id}</h1>
+diff --git a/client/src/components/shared/ConfirmModal.tsx b/client/src/components/shared/ConfirmModal.tsx
+index 0fd74bc..e029d11 100644
+--- a/client/src/components/shared/ConfirmModal.tsx
++++ b/client/src/components/shared/ConfirmModal.tsx
+@@ -17,7 +17,7 @@ export default function ConfirmModal({ isOpen, onClose, title, children }: Confi
+       onClick={onClose}
+     >
+       <div 
+-        className="bg-white border border-slate-200 rounded-[24px] max-w-[450px] w-full p-8 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.4)] animate-dashPopIn relative" 
++        className="bg-white border border-slate-200 rounded-[24px] max-w-[450px] w-full p-6 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.4)] animate-dashPopIn relative max-h-[90vh] overflow-y-auto" 
+         onClick={(e) => e.stopPropagation()}
+       >
+         <button 
+diff --git a/client/src/components/shared/DataTable.tsx b/client/src/components/shared/DataTable.tsx
+index faface3..261a7e6 100644
+--- a/client/src/components/shared/DataTable.tsx
++++ b/client/src/components/shared/DataTable.tsx
+@@ -18,7 +18,7 @@ interface DataTableProps<T> {
+ export default function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No data found', emptyIcon }: DataTableProps<T>) {
+   if (data.length === 0) {
+     return (
+-      <div className="p-12 text-center flex flex-col items-center bg-white border border-slate-200 rounded-2xl shadow-sm animate-dashPopIn">
++      <div className="p-8 md:p-12 text-center flex flex-col items-center bg-white border border-slate-200 rounded-2xl shadow-sm animate-dashPopIn">
+         {emptyIcon}
+         <p className="text-slate-500 mt-2 font-medium">{emptyMessage}</p>
+       </div>
+diff --git a/client/src/components/shared/StatCard.tsx b/client/src/components/shared/StatCard.tsx
+index f5962cb..c721760 100644
+--- a/client/src/components/shared/StatCard.tsx
++++ b/client/src/components/shared/StatCard.tsx
+@@ -2,7 +2,7 @@ import { LucideIcon } from 'lucide-react';
+ 
+ interface StatCardProps {
+   title: string;
+-  value: string;
++  value: string | number;
+   icon: LucideIcon;
+   trend?: string;
+   isPositive?: boolean;
+@@ -22,7 +22,7 @@ export default function StatCard({ title, value, icon: Icon, trend, isPositive,
+   const theme = themeConfig[colorTheme];
+ 
+   return (
+-    <div className={`bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl ${theme.shadow} ${theme.border} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default`}>
++    <div className={`bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl ${theme.shadow} ${theme.border} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default`}>
+       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
+         <Icon className={`w-10 h-12 ${theme.icon} group-hover:-rotate-6 transition-transform duration-300`} />
+       </div>
+diff --git a/client/src/main.tsx b/client/src/main.tsx
+index 1f860e3..9ab1ce3 100644
+--- a/client/src/main.tsx
++++ b/client/src/main.tsx
+@@ -3,6 +3,18 @@ import ReactDOM from 'react-dom/client';
+ import App from './App';
+ import './styles/globals.css';
+ 
++// Reclaim this origin from any stale service worker left behind by a previous app
++// (e.g. a different site that previously ran on this port). Otherwise the browser
++// keeps serving the old cached app and this project's UI/errors never appear.
++if ('serviceWorker' in navigator) {
++  navigator.serviceWorker.getRegistrations().then((registrations) => {
++    registrations.forEach((registration) => registration.unregister());
++  });
++  if (caches) {
++    caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
++  }
++}
++
+ ReactDOM.createRoot(document.getElementById('root')!).render(
+   <React.StrictMode>
+     <App />
+diff --git a/client/src/pages/Login.tsx b/client/src/pages/Login.tsx
+index 3872ad1..f71d6ca 100644
+--- a/client/src/pages/Login.tsx
++++ b/client/src/pages/Login.tsx
+@@ -23,16 +23,27 @@ const DEMO_ACCOUNTS = [
+ const loginStyles = `
+ /* ΓöÇΓöÇ Mobile (Γëñ640px) ΓöÇΓöÇ */
+ @media (max-width: 640px) {
+-  .login-brand { padding: 20px; }
+-  .login-brand h1 { font-size: 24px; }
++  .login-brand { padding: 16px 20px 20px; }
++  .login-brand h1 { font-size: 24px; line-height: 1.25; }
+   .login-brand p { font-size: 13px; }
+   .login-brand-stats { gap: 12px; }
++  .login-brand-stats > div:first-child { min-width: 0; }
+   .login-form-wrap { padding: 24px 0; }
+   .login-form-wrap h2 { font-size: 22px; }
+   .login-demo-grid { grid-template-columns: 1fr; }
+   .login-quote { display: none; }
+ }
+ 
++/* ΓöÇΓöÇ Small mobile (Γëñ400px) ΓöÇΓöÇ */
++@media (max-width: 400px) {
++  .login-brand { height: 44vh !important; }
++  .login-brand-stats { gap: 10px; }
++  .login-brand-stats .text-2xl { font-size: 20px; }
++  .login-brand-stats .text-xs { font-size: 10px; }
++  .login-form-wrap { padding: 20px 0; }
++  .login-form-wrap .flex.justify-between { flex-wrap: wrap; gap: 8px; }
++}
++
+ /* ΓöÇΓöÇ Tablet (641pxΓÇô1024px) ΓöÇΓöÇ */
+ @media (min-width: 641px) and (max-width: 1024px) {
+   .login-brand h1 { font-size: 28px; }
+@@ -55,20 +66,17 @@ export default function Login() {
+   const navigate = useNavigate();
+   const { isAuthenticated, loading, error, user } = useSelector((state: RootState) => state.auth);
+ 
+-  const [email, setEmail] = useState('');
++  const [email, setEmail] = useState(() => {
++    try { return localStorage.getItem('b2b_remember_email') || ''; } catch { return ''; }
++  });
+   const [password, setPassword] = useState('');
+   const [showPassword, setShowPassword] = useState(false);
+-  const [remember, setRemember] = useState(false);
++  const [remember, setRemember] = useState(() => {
++    try { return !!localStorage.getItem('b2b_remember_email'); } catch { return false; }
++  });
+   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+   const emailRef = useRef<HTMLInputElement>(null);
+ 
+-  useEffect(() => {
+-    try {
+-      const saved = localStorage.getItem('b2b_remember_email');
+-      if (saved) { setEmail(saved); setRemember(true); }
+-    } catch {}
+-  }, []);
+-
+   useEffect(() => {
+     if (isAuthenticated && user) {
+       const match = ROLE_REDIRECTS[user.role];
+@@ -125,7 +133,7 @@ export default function Login() {
+       <style>{loginStyles}</style>
+ 
+       {/* ΓöÇΓöÇ Brand Panel ΓöÇΓöÇ */}
+-      <div className="login-brand relative flex-none h-[40vh] lg:h-auto lg:flex-[1.5] p-6 lg:p-12 flex flex-col justify-between overflow-hidden animate-[dashFadeIn_1s_ease-out_both]">
++      <div className="login-brand relative flex-none h-[40vh] lg:h-auto lg:flex-[1.5] p-5 lg:p-12 flex flex-col justify-between overflow-hidden animate-[dashFadeIn_1s_ease-out_both]">
+         <img
+           src="/truck-bg.jpg"
+           alt="Logistics Trucks"
+@@ -141,18 +149,18 @@ export default function Login() {
+         </div>
+ 
+         <div className="relative z-10 max-w-[460px]">
+-          <div className="flex items-center gap-2 text-accent-light text-[11px] font-bold tracking-widest mb-3">
++          <div className="flex items-center gap-2 text-accent-light text-[11px] font-bold tracking-widest mb-2 md:mb-3">
+             <span className="w-6 h-px bg-accent-light" />
+             CLIENT ┬╖ DRIVER ┬╖ ADMIN ┬╖ EXECUTIVE
+           </div>
+-          <h1 className="text-3xl lg:text-[40px] leading-tight font-extrabold tracking-tight text-white mb-2">
++          <h1 className="text-3xl lg:text-[40px] leading-tight font-extrabold tracking-tight text-white mb-1.5 md:mb-2">
+             Freight visibility,<br />the moment <span className="text-accent">it matters.</span>
+           </h1>
+           <p className="text-white/55 text-sm leading-relaxed max-w-[400px]">
+             One login, four workspaces. Track shipments in real time, dispatch drivers, and reconcile invoices.
+           </p>
+ 
+-          <div className="login-brand-stats flex gap-6 pt-5">
++          <div className="login-brand-stats flex gap-6 pt-4 md:pt-5">
+             <StatItem value="42" label="Active shipments" />
+             <div className="w-px bg-white/12" />
+             <StatItem value="99.8%" label="Platform uptime" />
+@@ -170,7 +178,8 @@ export default function Login() {
+       </div>
+ 
+       {/* ΓöÇΓöÇ Form Panel ΓöÇΓöÇ */}
+-      <div className="flex-1 bg-white flex items-center justify-center p-6 lg:p-8 overflow-y-auto">
++      <div className="flex-1 bg-white overflow-y-auto">
++        <div className="min-h-full flex items-center justify-center p-6 lg:p-8">
+         <div className="login-form-wrap w-full max-w-[400px] animate-[dashPopIn_0.6s_ease-out_both]">
+           <div className="text-accent text-[11px] font-bold tracking-widest mb-1.5">WELCOME BACK</div>
+           <h2 className="text-2xl font-extrabold tracking-tight text-[var(--color-text-primary)] mb-1">Sign in to your account</h2>
+@@ -278,6 +287,7 @@ export default function Login() {
+             </div>
+           </div>
+         </div>
++        </div>
+       </div>
+     </div>
+   );
+diff --git a/client/src/pages/admin/AdminDashboard.tsx b/client/src/pages/admin/AdminDashboard.tsx
+index f8b4ce1..58aed2a 100644
+--- a/client/src/pages/admin/AdminDashboard.tsx
++++ b/client/src/pages/admin/AdminDashboard.tsx
+@@ -1,6 +1,123 @@
+-// This file is for: Admin Dashboard page ΓÇö summary stat cards + recent manifests table
+-// Module: Admin Pages (Module 14)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// Layout: 4 StatCards at top (Total Manifests, Active Vehicles, Pending Orders, Overdue)
+-//         + DataTable below with recent manifests, status badges, and quick action buttons
++import { useState, useEffect, useCallback, useMemo } from 'react';
++import { Package, Truck, Clock, AlertTriangle, FileText, ArrowRight } from 'lucide-react';
++import toast from 'react-hot-toast';
++import AdminNavbar from '../../components/admin/AdminNavbar';
++import StatCard from '../../components/shared/StatCard';
++import DataTable from '../../components/shared/DataTable';
++import StatusBadge from '../../components/shared/StatusBadge';
++import { getAllManifests, Manifest } from '../../services/manifestApi';
++import { getVehicleStats, VehicleStats } from '../../services/vehicleApi';
++import { getErrorMessage } from '../../services/errorMessage';
++
++function formatDate(iso: string): string {
++  if (!iso) return 'ΓÇö';
++  const d = new Date(iso);
++  if (isNaN(d.getTime())) return 'ΓÇö';
++  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
++}
++
++export default function AdminDashboard() {
++  const [manifests, setManifests] = useState<Manifest[]>([]);
++  const [stats, setStats] = useState<VehicleStats | null>(null);
++  const [totalManifests, setTotalManifests] = useState(0);
++
++  const loadData = useCallback(async () => {
++    try {
++      const [manifestsRes, statsRes] = await Promise.all([
++        getAllManifests({ limit: 8 }),
++        getVehicleStats(),
++      ]);
++      setManifests(manifestsRes.items);
++      setTotalManifests(manifestsRes.total);
++      setStats(statsRes);
++    } catch (err: any) {
++      toast.error(getErrorMessage(err, 'Failed to load admin dashboard data.'));
++    }
++  }, []);
++
++  useEffect(() => {
++    loadData();
++  }, [loadData]);
++
++  const pendingOrders = useMemo(
++    () => manifests.filter((m) => m.currentStatus === 'Pending').length,
++    [manifests]
++  );
++  const overdueOrders = useMemo(
++    () => manifests.filter((m) => m.currentStatus === 'Delayed').length,
++    [manifests]
++  );
++
++  return (
++    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
++      <AdminNavbar active="dashboard" />
++
++      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
++        <header>
++          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Admin Dashboard</h1>
++          <p className="text-sm font-medium text-slate-500 mt-1">Overview of manifests, fleet status, and pending work.</p>
++        </header>
++
++        {/* ΓöÇΓöÇ Stat Cards Grid ΓöÇΓöÇ */}
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
++          <StatCard title="Total Manifests" value={totalManifests} icon={Package} colorTheme="blue" />
++          <StatCard title="Active Vehicles" value={stats?.total || 0} icon={Truck} colorTheme="orange" />
++          <StatCard title="Pending Orders" value={pendingOrders} icon={Clock} colorTheme="purple" />
++          <StatCard title="Overdue / Delayed" value={overdueOrders} icon={AlertTriangle} colorTheme="red" />
++        </div>
++
++        {/* ΓöÇΓöÇ Recent Manifests ΓöÇΓöÇ */}
++        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
++          <div className="p-5 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
++            <h2 className="text-lg font-bold text-slate-900 flex items-center">
++              <FileText className="w-5 h-5 mr-2 text-blue-500" /> Recent Manifests
++            </h2>
++            <a
++              href="/admin/manifest/create"
++              className="inline-flex items-center text-xs font-bold text-orange-500 hover:text-orange-600 transition-all hover:scale-105 active:scale-95"
++            >
++              Create Manifest <ArrowRight className="w-3.5 h-3.5 ml-1" />
++            </a>
++          </div>
++
++          <DataTable
++            columns={[
++              {
++                header: 'Tracking ID',
++                render: (m: Manifest) => <span className="font-bold text-slate-900 font-mono tracking-wider">{m.trackingId}</span>,
++              },
++              {
++                header: 'Route',
++                render: (m: Manifest) => (
++                  <div className="flex flex-col">
++                    <span className="font-semibold text-slate-800 text-sm">{m.routing.destination.name}</span>
++                    <span className="text-xs text-slate-500">from {m.routing.origin.name}</span>
++                  </div>
++                ),
++              },
++              {
++                header: 'Cargo',
++                render: (m: Manifest) => (
++                  <span className="font-medium text-slate-600 text-sm">
++                    {m.cargoDetails.weight.toLocaleString()} kg / {m.cargoDetails.itemCount} items
++                  </span>
++                ),
++              },
++              {
++                header: 'Scheduled Pickup',
++                render: (m: Manifest) => <span className="font-medium text-slate-600 text-sm">{formatDate(m.scheduledPickup)}</span>,
++              },
++              {
++                header: 'Status',
++                render: (m: Manifest) => <StatusBadge status={m.currentStatus} />,
++              },
++            ]}
++            data={manifests}
++            emptyMessage="No manifests found yet. Create one to get started."
++            emptyIcon={<Package className="w-10 h-10 text-slate-300 mx-auto" />}
++          />
++        </div>
++      </main>
++    </div>
++  );
++}
+diff --git a/client/src/pages/admin/FleetMonitor.tsx b/client/src/pages/admin/FleetMonitor.tsx
+index 5bdd675..3b9664c 100644
+--- a/client/src/pages/admin/FleetMonitor.tsx
++++ b/client/src/pages/admin/FleetMonitor.tsx
+@@ -1,5 +1,136 @@
+-// This file is for: Fleet Monitor page ΓÇö full vehicle fleet data grid
+-// Module: Admin Pages (Module 14)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// Uses: FleetGrid component, AddEditVehicleModal, status filter tabs (All/Available/In-Transit/Maintenance)
++import { useState, useEffect, useCallback, useMemo } from 'react';
++import { Truck, Search, Activity, Wrench, CheckCircle2 } from 'lucide-react';
++import toast from 'react-hot-toast';
++import AdminNavbar from '../../components/admin/AdminNavbar';
++import StatCard from '../../components/shared/StatCard';
++import DataTable from '../../components/shared/DataTable';
++import { listVehicles, getVehicleStats, Vehicle, VehicleStats } from '../../services/vehicleApi';
++import { getErrorMessage } from '../../services/errorMessage';
++
++const VehicleStatusBadge = ({ status }: { status: string }) => {
++  if (status === 'Available') return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center w-max"><CheckCircle2 className="w-3 h-3 mr-1.5" /> Available</span>;
++  if (status === 'In-Transit') return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 flex items-center w-max"><Activity className="w-3 h-3 mr-1.5" /> In-Transit</span>;
++  return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center w-max"><Wrench className="w-3 h-3 mr-1.5" /> Maintenance</span>;
++};
++
++export default function FleetMonitor() {
++  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
++  const [stats, setStats] = useState<VehicleStats | null>(null);
++  const [, setLoading] = useState(true);
++  const [searchQuery, setSearchQuery] = useState('');
++  const [statusFilter, setStatusFilter] = useState<string>('All');
++
++  const loadData = useCallback(async () => {
++    setLoading(true);
++    try {
++      const [vehiclesRes, statsRes] = await Promise.all([
++        listVehicles({ limit: 100 }),
++        getVehicleStats(),
++      ]);
++      setVehicles(vehiclesRes.items);
++      setStats(statsRes);
++    } catch (err: any) {
++      toast.error(getErrorMessage(err, 'Failed to load fleet data.'));
++    } finally {
++      setLoading(false);
++    }
++  }, []);
++
++  useEffect(() => {
++    loadData();
++  }, [loadData]);
++
++  const filteredVehicles = useMemo(() => {
++    return vehicles.filter(v => {
++      const matchesSearch = v.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
++                            v.make.toLowerCase().includes(searchQuery.toLowerCase());
++      const matchesStatus = statusFilter === 'All' || v.status === statusFilter;
++      return matchesSearch && matchesStatus;
++    });
++  }, [vehicles, searchQuery, statusFilter]);
++
++  return (
++    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
++      <AdminNavbar active="fleet" />
++
++      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
++        <header>
++          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Fleet Monitor</h1>
++          <p className="text-sm font-medium text-slate-500 mt-1">Manage vehicles, track statuses, and assign maintenance.</p>
++        </header>
++
++        {/* ΓöÇΓöÇ Stat Cards Grid ΓöÇΓöÇ */}
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
++          <StatCard title="Total Fleet" value={stats?.total || 0} icon={Truck} colorTheme="blue" />
++          <StatCard title="Available" value={stats?.available || 0} icon={CheckCircle2} colorTheme="emerald" />
++          <StatCard title="In-Transit" value={stats?.inTransit || 0} icon={Activity} colorTheme="orange" />
++          <StatCard title="Maintenance" value={stats?.maintenance || 0} icon={Wrench} colorTheme="red" />
++        </div>
++
++        {/* ΓöÇΓöÇ Fleet List ΓöÇΓöÇ */}
++        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
++          <div className="p-5 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
++            <h2 className="text-lg font-bold text-slate-900 flex items-center">
++              <Truck className="w-5 h-5 mr-2 text-blue-500" /> Active Roster
++            </h2>
++            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
++              <div className="relative w-full sm:max-w-xs">
++                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
++                <input 
++                  type="text" 
++                  placeholder="Search REG or Make..." 
++                  value={searchQuery}
++                  onChange={(e) => setSearchQuery(e.target.value)}
++                  className="w-full bg-slate-50 border border-slate-200 rounded-full h-10 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
++                />
++              </div>
++              <select 
++                value={statusFilter}
++                onChange={(e) => setStatusFilter(e.target.value)}
++                className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-full h-10 px-4 pr-10 appearance-none text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer transition-all bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.7rem]"
++              >
++                <option value="All">All Statuses</option>
++                <option value="Available">Available</option>
++                <option value="In-Transit">In-Transit</option>
++                <option value="Maintenance">Maintenance</option>
++              </select>
++            </div>
++          </div>
++
++          <DataTable 
++            columns={[
++              {
++                header: 'Registration',
++                render: (v: Vehicle) => <span className="font-bold text-slate-900 font-mono tracking-wider">{v.registrationNumber}</span>
++              },
++              {
++                header: 'Vehicle',
++                render: (v: Vehicle) => (
++                  <div className="flex flex-col">
++                    <span className="font-semibold text-slate-800 text-sm">{v.make} {v.model}</span>
++                    <span className="text-xs text-slate-500">{v.year} Model</span>
++                  </div>
++                )
++              },
++              {
++                header: 'Capacity',
++                render: (v: Vehicle) => <span className="font-medium text-slate-600 text-sm">{v.maxWeightKg} kg / {v.maxVolumeCubicMeters} m┬│</span>
++              },
++              {
++                header: 'Status',
++                render: (v: Vehicle) => <VehicleStatusBadge status={v.status} />
++              },
++              {
++                header: 'Driver',
++                render: (v: Vehicle) => <span className="font-medium text-slate-600 text-sm">{v.currentDriver ? v.currentDriver.firstName : 'ΓÇö'}</span>
++              }
++            ]}
++            data={filteredVehicles}
++            emptyMessage="No vehicles match your criteria."
++            emptyIcon={<Truck className="w-10 h-10 text-slate-300 mx-auto" />}
++          />
++        </div>
++      </main>
++    </div>
++  );
++}
+diff --git a/client/src/pages/admin/LiveOperations.tsx b/client/src/pages/admin/LiveOperations.tsx
+index da10671..26bf899 100644
+--- a/client/src/pages/admin/LiveOperations.tsx
++++ b/client/src/pages/admin/LiveOperations.tsx
+@@ -1,5 +1,131 @@
+-// This file is for: Live Operations page ΓÇö map + dispatch panel
+-// Module: Admin Pages (Module 14)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// Uses: LiveMap (Leaflet) + DispatchPanel side-by-side, manifest cards with live trip timers
++import { useState, useEffect, useCallback, useMemo } from 'react';
++import { Activity, CheckCircle2, AlertTriangle, Search, Navigation } from 'lucide-react';
++import toast from 'react-hot-toast';
++import AdminNavbar from '../../components/admin/AdminNavbar';
++import StatCard from '../../components/shared/StatCard';
++import DataTable from '../../components/shared/DataTable';
++import { getRouteEfficiency, RouteEfficiency, RouteEfficiencyRow } from '../../services/analyticsApi';
++import { getErrorMessage } from '../../services/errorMessage';
++
++export default function LiveOperations() {
++  const [data, setData] = useState<RouteEfficiency | null>(null);
++  const [, setLoading] = useState(true);
++  const [searchQuery, setSearchQuery] = useState('');
++  const [statusFilter, setStatusFilter] = useState<string>('All');
++
++  const loadData = useCallback(async () => {
++    setLoading(true);
++    try {
++      const res = await getRouteEfficiency();
++      setData(res);
++    } catch (err: any) {
++      toast.error(getErrorMessage(err, 'Failed to load operations data.'));
++    } finally {
++      setLoading(false);
++    }
++  }, []);
++
++  useEffect(() => {
++    loadData();
++  }, [loadData]);
++
++  const filteredRows = useMemo(() => {
++    if (!data) return [];
++    return data.rows.filter(r => {
++      const matchesSearch = r.trackingId.toLowerCase().includes(searchQuery.toLowerCase()) || 
++                            r.destination.toLowerCase().includes(searchQuery.toLowerCase());
++      const matchesStatus = statusFilter === 'All' || 
++                            (statusFilter === 'On-Time' ? r.onTime : !r.onTime);
++      return matchesSearch && matchesStatus;
++    });
++  }, [data, searchQuery, statusFilter]);
++
++  return (
++    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
++      <AdminNavbar active="operations" />
++
++      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
++        <header>
++          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Live Operations</h1>
++          <p className="text-sm font-medium text-slate-500 mt-1">Monitor route efficiency and dispatch delays.</p>
++        </header>
++
++        {/* ΓöÇΓöÇ Stat Cards Grid ΓöÇΓöÇ */}
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
++          <StatCard title="Active Routes" value={data?.total || 0} icon={Navigation} colorTheme="blue" />
++          <StatCard title="On-Time Delivery" value={`${data?.onTimePct.toFixed(1) || 0}%`} icon={CheckCircle2} colorTheme="emerald" />
++          <StatCard title="Delayed / Late" value={data?.late || 0} icon={AlertTriangle} colorTheme="red" />
++          <StatCard title="Avg Route Distance" value={`${data?.averageDistanceKm.toFixed(0) || 0} km`} icon={Activity} colorTheme="orange" />
++        </div>
++
++        {/* ΓöÇΓöÇ Operations List ΓöÇΓöÇ */}
++        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
++          <div className="p-5 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
++            <h2 className="text-lg font-bold text-slate-900 flex items-center">
++              <Activity className="w-5 h-5 mr-2 text-blue-500" /> Route Tracking
++            </h2>
++            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
++              <div className="relative w-full sm:max-w-xs">
++                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
++                <input 
++                  type="text" 
++                  placeholder="Search Route..." 
++                  value={searchQuery}
++                  onChange={(e) => setSearchQuery(e.target.value)}
++                  className="w-full bg-slate-50 border border-slate-200 rounded-full h-10 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
++                />
++              </div>
++              <select 
++                value={statusFilter}
++                onChange={(e) => setStatusFilter(e.target.value)}
++                className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-full h-10 px-4 pr-10 appearance-none text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer transition-all bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.7rem]"
++              >
++                <option value="All">All Operations</option>
++                <option value="On-Time">On-Time</option>
++                <option value="Delayed">Delayed</option>
++              </select>
++            </div>
++          </div>
++
++          <DataTable 
++            columns={[
++              {
++                header: 'Tracking ID',
++                render: (r: RouteEfficiencyRow) => <span className="font-bold text-slate-900 font-mono tracking-wider">{r.trackingId}</span>
++              },
++              {
++                header: 'Route Details',
++                render: (r: RouteEfficiencyRow) => (
++                  <div className="flex flex-col">
++                    <span className="font-semibold text-slate-800 text-sm">{r.destination}</span>
++                    <span className="text-xs text-slate-500">from {r.origin}</span>
++                  </div>
++                )
++              },
++              {
++                header: 'Distance / ETA',
++                render: (r: RouteEfficiencyRow) => (
++                  <div className="flex flex-col">
++                    <span className="font-medium text-slate-600 text-sm">{r.distanceKm.toFixed(0)} km</span>
++                    <span className="text-xs text-slate-400">{Math.floor(r.estimatedDurationMinutes / 60)}h {r.estimatedDurationMinutes % 60}m</span>
++                  </div>
++                )
++              },
++              {
++                header: 'Performance',
++                render: (r: RouteEfficiencyRow) => r.onTime ? (
++                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center w-max"><CheckCircle2 className="w-3 h-3 mr-1.5" /> On-Time</span>
++                ) : (
++                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center w-max"><AlertTriangle className="w-3 h-3 mr-1.5" /> Delayed</span>
++                )
++              }
++            ]}
++            data={filteredRows}
++            emptyMessage="No routes match your criteria."
++            emptyIcon={<Navigation className="w-10 h-10 text-slate-300 mx-auto" />}
++          />
++        </div>
++      </main>
++    </div>
++  );
++}
+diff --git a/client/src/pages/admin/ManifestCreate.tsx b/client/src/pages/admin/ManifestCreate.tsx
+index 791776f..0fbb3af 100644
+--- a/client/src/pages/admin/ManifestCreate.tsx
++++ b/client/src/pages/admin/ManifestCreate.tsx
+@@ -1,5 +1,22 @@
+-// This file is for: Manifest Create page ΓÇö multi-step wizard page
+-// Module: Admin Pages (Module 14)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// Uses: WizardContainer (StepPartner ΓåÆ StepCargo ΓåÆ StepRoute) with localStorage persistence
++import AdminNavbar from '../../components/admin/AdminNavbar';
++import OrderForm from '../../components/client/OrderForm'; // Reusing the robust manifest creator
++
++export default function ManifestCreate() {
++  return (
++    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
++      <AdminNavbar active="create-manifest" />
++
++      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
++        <header className="mb-6 md:mb-8">
++          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Create Manifest</h1>
++          <p className="text-sm font-medium text-slate-500 mt-1">Admin override: manually route and schedule a new shipment.</p>
++        </header>
++
++        {/* We reuse the robust OrderForm, which scales perfectly on mobile and desktop */}
++        <div className="w-full">
++          <OrderForm />
++        </div>
++      </main>
++    </div>
++  );
++}
+diff --git a/client/src/pages/client/ClientDashboard.tsx b/client/src/pages/client/ClientDashboard.tsx
+index 4f52c9a..0da06ce 100644
+--- a/client/src/pages/client/ClientDashboard.tsx
++++ b/client/src/pages/client/ClientDashboard.tsx
+@@ -1,11 +1,13 @@
+ import { useState, useMemo, useCallback, useEffect } from 'react';
+-import { Package, Activity, Truck, Clock, FileText, ArrowRight, MapPin, Search, RefreshCw, ChevronDown, Check, X, PackageSearch } from 'lucide-react';
++import { Package, Activity, Truck, Clock, FileText, ArrowRight, MapPin, Search, ChevronDown, Check, X } from 'lucide-react';
+ import { useNavigate } from 'react-router-dom';
+ import { useSelector } from 'react-redux';
+ import toast from 'react-hot-toast';
+ import type { RootState } from '../../store/store';
++import ClientNavbar from '../../components/client/ClientNavbar';
+ import { getMyManifests, Manifest } from '../../services/manifestApi';
+ import { getMyInvoices, markInvoicePaid, Invoice } from '../../services/invoiceApi';
++import { getErrorMessage } from '../../services/errorMessage';
+ 
+ /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+ interface Shipment {
+@@ -217,7 +219,6 @@ export default function ClientDashboard() {
+   const [loading, setLoading] = useState(true);
+   const [searchQuery, setSearchQuery] = useState('');
+   const [statusFilter, setStatusFilter] = useState<string>('All');
+-  const [isRefreshing, setIsRefreshing] = useState(false);
+   const [, setSelectedShipment] = useState<Shipment | null>(null);
+   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceView | null>(null);
+ 
+@@ -232,7 +233,7 @@ export default function ClientDashboard() {
+       setShipments(manifestsRes.items.map(toShipment));
+       setInvoices(invoicesRes.items.map(toInvoiceView));
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to load dashboard data.');
++      toast.error(getErrorMessage(err, 'Failed to load dashboard data.'));
+     } finally {
+       setLoading(false);
+     }
+@@ -273,25 +274,13 @@ export default function ClientDashboard() {
+   }, [invoices]);
+ 
+   // ΓöÇΓöÇ Actions ΓöÇΓöÇ
+-  const handleRefresh = useCallback(async () => {
+-    setIsRefreshing(true);
+-    setSearchQuery('');
+-    setStatusFilter('All');
+-    await loadData();
+-    setIsRefreshing(false);
+-  }, [loadData]);
+-
+-  const handleNewShipment = useCallback(() => {
+-    navigate('/client/place-order');
+-  }, [navigate]);
+-
+   const markAsPaid = useCallback(async (invoice: InvoiceView) => {
+     try {
+       await markInvoicePaid(invoice._id);
+       setInvoices(prev => prev.map(inv => inv._id === invoice._id ? { ...inv, status: 'Paid' } : inv));
+       toast.success('Invoice marked as paid.');
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to mark invoice as paid.');
++      toast.error(getErrorMessage(err, 'Failed to mark invoice as paid.'));
+     }
+   }, []);
+ 
+@@ -300,56 +289,9 @@ export default function ClientDashboard() {
+       <style>{dashboardStyles}</style>
+ 
+       {/* ΓöÇΓöÇ Global Navbar ΓöÇΓöÇ */}
+-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-50 shadow-md">
+-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
+-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
+-              <PackageSearch className="w-5 h-5 text-orange-500" />
+-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
+-            </div>
+-            <div className="flex flex-col">
+-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
+-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
+-            </div>
+-          </div>
+-          
+-          {/* Desktop Nav */}
+-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
+-            <button onClick={() => navigate('/client/dashboard')} className="text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <Activity className="w-4 h-4" />
+-              <span>Dashboard</span>
+-            </button>
+-            <button onClick={() => navigate('/client/track')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <MapPin className="w-4 h-4" />
+-              <span>Live Tracking</span>
+-            </button>
+-            <button onClick={() => navigate('/client/invoices')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <FileText className="w-4 h-4" />
+-              <span>Billing</span>
+-            </button>
+-            
+-            {/* Actions */}
+-            <div className="flex items-center space-x-6">
+-              <button
+-                onClick={handleRefresh}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+-                <span className="hidden lg:inline">Refresh</span>
+-              </button>
+-              <button
+-                onClick={handleNewShipment}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <Package className="w-4 h-4" />
+-                <span>New Shipment</span>
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-      </nav>
++      <ClientNavbar active="dashboard" />
+ 
+-      <div className="flex-1 max-w-7xl mx-auto w-full space-y-8 p-6 md:p-10">
++      <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10">
+ 
+         {/* ΓòÉΓòÉΓòÉ Header ΓòÉΓòÉΓòÉ */}
+         <div className="dash-header flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
+@@ -362,9 +304,9 @@ export default function ClientDashboard() {
+         </div>
+ 
+         {/* ΓòÉΓòÉΓòÉ Overview Stats ΓòÉΓòÉΓòÉ */}
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
++        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+           {/* Total Shipments */}
+-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
++          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
+               <Package className="w-10 h-10 text-slate-600 group-hover:-rotate-12 transition-transform duration-300" />
+             </div>
+@@ -375,7 +317,7 @@ export default function ClientDashboard() {
+           </div>
+ 
+           {/* Active Shipments */}
+-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
++          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
+               <Activity className="w-10 h-10 text-orange-600 group-hover:-rotate-12 transition-transform duration-300" />
+             </div>
+@@ -386,7 +328,7 @@ export default function ClientDashboard() {
+           </div>
+ 
+           {/* Delivered Shipments */}
+-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
++          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
+               <Check className="w-10 h-10 text-green-600 group-hover:rotate-12 transition-transform duration-300" />
+             </div>
+@@ -397,7 +339,7 @@ export default function ClientDashboard() {
+           </div>
+ 
+           {/* Pending Invoices */}
+-          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
++          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
+               <FileText className="w-10 h-10 text-red-600 group-hover:-rotate-12 transition-transform duration-300" />
+             </div>
+@@ -412,7 +354,7 @@ export default function ClientDashboard() {
+         </div>
+ 
+         {/* ΓòÉΓòÉΓòÉ Search & Filter Bar ΓòÉΓòÉΓòÉ */}
+-        <div className="dash-search-bar flex flex-wrap items-center gap-6">
++        <div className="dash-search-bar flex flex-wrap items-center gap-3 md:gap-6">
+           <div className="relative group w-[46px] focus-within:w-[280px] md:focus-within:w-[350px] h-[46px] transition-all duration-300 ease-in-out">
+             <input
+               type="text"
+@@ -432,11 +374,11 @@ export default function ClientDashboard() {
+         </div>
+ 
+         {/* ΓòÉΓòÉΓòÉ Main Content Grid ΓòÉΓòÉΓòÉ */}
+-        <div className="dash-main-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
++        <div className="dash-main-grid grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+ 
+           {/* ΓöÇΓöÇ Recent Shipments Table ΓöÇΓöÇ */}
+-          <div className="lg:col-span-2">
+-            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
++          <div className="lg:col-span-2 h-full">
++            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+               <div className="dash-section-header flex justify-between items-center p-6 border-b border-slate-200">
+                 <h2 className="dash-section-title text-lg font-bold flex items-center text-slate-900">
+                   <Truck className="w-5 h-5 mr-2.5 text-orange-500" /> Recent Shipments
+@@ -450,9 +392,9 @@ export default function ClientDashboard() {
+                 </button>
+               </div>
+ 
+-              <div className="overflow-x-auto">
++              <div className="overflow-x-auto flex-1">
+                 {filteredShipments.length === 0 ? (
+-                  <div className="p-12 text-center">
++                  <div className="p-8 md:p-12 text-center">
+                     <Search className="w-10 h-10 text-slate-500 mx-auto mb-4 opacity-40" />
+                     <p className="text-slate-500 font-medium text-sm">No shipments match your search.</p>
+                     <button onClick={() => { setSearchQuery(''); setStatusFilter('All'); }} className="text-orange-500 text-sm font-bold mt-2 hover:underline">Clear filters</button>
+@@ -504,8 +446,8 @@ export default function ClientDashboard() {
+           </div>
+ 
+           {/* ΓöÇΓöÇ Invoices Panel ΓöÇΓöÇ */}
+-          <div>
+-            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
++          <div className="h-full">
++            <div className="bg-white shadow-sm border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+               <div className="dash-section-header flex justify-between items-center p-6 border-b border-slate-200">
+                 <h2 className="dash-section-title text-lg font-bold flex items-center text-slate-900">
+                   <FileText className="w-5 h-5 mr-2.5 text-orange-500" /> Invoices
+@@ -518,7 +460,7 @@ export default function ClientDashboard() {
+                 </button>
+               </div>
+ 
+-              <div className="divide-y divide-slate-200">
++              <div className="divide-y divide-slate-200 flex-1">
+                 {invoices.map((inv) => (
+                   <div
+                     key={inv.id}
+diff --git a/client/src/pages/client/ClientInvoices.tsx b/client/src/pages/client/ClientInvoices.tsx
+index 6242e07..4d4600e 100644
+--- a/client/src/pages/client/ClientInvoices.tsx
++++ b/client/src/pages/client/ClientInvoices.tsx
+@@ -1,12 +1,13 @@
+ import { useState, useMemo, useCallback, useEffect } from 'react';
+-import { FileText, Search, RefreshCw, ChevronDown, Check, Download, ArrowUpRight, ArrowDownRight, Clock, PackageSearch, Activity, MapPin, Package } from 'lucide-react';
+-import { useNavigate } from 'react-router-dom';
++import { FileText, Search, RefreshCw, ChevronDown, Check, Download, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react';
+ import toast from 'react-hot-toast';
++import ClientNavbar from '../../components/client/ClientNavbar';
+ import StatusBadge from '../../components/shared/StatusBadge';
+ import StatCard from '../../components/shared/StatCard';
+ import DataTable from '../../components/shared/DataTable';
+ import ConfirmModal from '../../components/shared/ConfirmModal';
+ import { getMyInvoices, getInvoiceStats, markInvoicePaid, Invoice as ApiInvoice, InvoiceStats } from '../../services/invoiceApi';
++import { getErrorMessage } from '../../services/errorMessage';
+ 
+ /* ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Types ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
+ interface InvoiceView {
+@@ -105,7 +106,6 @@ function AnimatedDropdown({ value, onChange }: { value: string, onChange: (val:
+ }
+ 
+ export default function ClientInvoices() {
+-  const navigate = useNavigate();
+   const [invoices, setInvoices] = useState<InvoiceView[]>([]);
+   const [stats, setStats] = useState<InvoiceStats>(EMPTY_STATS);
+   const [loading, setLoading] = useState(true);
+@@ -125,7 +125,7 @@ export default function ClientInvoices() {
+       setInvoices(invoicesRes.items.map(toInvoiceView));
+       setStats(statsRes);
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to load invoices.');
++      toast.error(getErrorMessage(err, 'Failed to load invoices.'));
+     } finally {
+       setLoading(false);
+     }
+@@ -174,7 +174,7 @@ export default function ClientInvoices() {
+       }));
+       toast.success('Invoice marked as paid.');
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to mark invoice as paid.');
++      toast.error(getErrorMessage(err, 'Failed to mark invoice as paid.'));
+     }
+   }, [invoices]);
+ 
+@@ -183,56 +183,9 @@ export default function ClientInvoices() {
+       <style>{dashboardStyles}</style>
+       
+       {/* ΓöÇΓöÇ Global Navbar ΓöÇΓöÇ */}
+-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-[100] shadow-md">
+-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
+-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
+-              <PackageSearch className="w-5 h-5 text-orange-500" />
+-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
+-            </div>
+-            <div className="flex flex-col">
+-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
+-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
+-            </div>
+-          </div>
+-          
+-          {/* Desktop Nav */}
+-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
+-            <button onClick={() => navigate('/dashboard')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <Activity className="w-4 h-4" />
+-              <span>Dashboard</span>
+-            </button>
+-            <button onClick={() => navigate('/track')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <MapPin className="w-4 h-4" />
+-              <span>Live Tracking</span>
+-            </button>
+-            <button onClick={() => navigate('/client-invoices')} className="text-orange-500 flex items-center space-x-1.5">
+-              <FileText className="w-4 h-4" />
+-              <span>Billing</span>
+-            </button>
+-            
+-            {/* Actions */}
+-            <div className="flex items-center space-x-6 border-l border-slate-200 pl-6">
+-              <button
+-                onClick={() => window.location.reload()}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <RefreshCw className="w-4 h-4" />
+-                <span className="hidden lg:inline">Refresh</span>
+-              </button>
+-              <button
+-                onClick={() => navigate('/place-order')}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <Package className="w-4 h-4" />
+-                <span>New Shipment</span>
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-      </nav>
++      <ClientNavbar active="invoices" />
+ 
+-      <div className="max-w-7xl mx-auto w-full space-y-8 p-6 md:p-10 flex-1">
++      <div className="max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 flex-1">
+         
+         {/* Header */}
+         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-[dashPopIn_0.4s_ease-out]">
+@@ -254,7 +207,7 @@ export default function ClientInvoices() {
+         </div>
+ 
+         {/* Stats Grid */}
+-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap- md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
++        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-[dashPopIn_0.5s_ease-out_both]">
+           <StatCard title="Total Billed" value={formatINR(statsView.totalBilled)} icon={FileText} colorTheme="default" />
+           <StatCard title="Total Paid" value={formatINR(statsView.totalPaid)} icon={ArrowUpRight} colorTheme="emerald" />
+           <StatCard title="Pending" value={formatINR(statsView.totalPending)} icon={Clock} colorTheme="orange" />
+diff --git a/client/src/pages/client/PlaceOrder.tsx b/client/src/pages/client/PlaceOrder.tsx
+index c0ed764..35d4403 100644
+--- a/client/src/pages/client/PlaceOrder.tsx
++++ b/client/src/pages/client/PlaceOrder.tsx
+@@ -1,65 +1,15 @@
+-import { PackageSearch, Activity, MapPin, FileText, RefreshCw, Package } from 'lucide-react';
+-import { useNavigate } from 'react-router-dom';
++import ClientNavbar from '../../components/client/ClientNavbar';
+ import OrderForm from '../../components/client/OrderForm';
+ 
+ export default function PlaceOrder() {
+-  const navigate = useNavigate();
+-
+   return (
+     <div className="min-h-screen w-full bg-[#f5f6f8] text-slate-900 font-sans flex flex-col relative">
+-      
++
+       {/* ΓöÇΓöÇ Global Navbar ΓöÇΓöÇ */}
+-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-50 shadow-md">
+-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
+-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
+-              <PackageSearch className="w-5 h-5 text-orange-500" />
+-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
+-            </div>
+-            <div className="flex flex-col">
+-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
+-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
+-            </div>
+-          </div>
+-          
+-          {/* Desktop Nav */}
+-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
+-            <button onClick={() => navigate('/dashboard')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <Activity className="w-4 h-4" />
+-              <span>Dashboard</span>
+-            </button>
+-            <button onClick={() => navigate('/track')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <MapPin className="w-4 h-4" />
+-              <span>Live Tracking</span>
+-            </button>
+-            <button onClick={() => navigate('/client-invoices')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <FileText className="w-4 h-4" />
+-              <span>Billing</span>
+-            </button>
+-            
+-            {/* Actions */}
+-            <div className="flex items-center space-x-6 border-l border-slate-200 pl-6">
+-              <button
+-                onClick={() => window.location.reload()}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <RefreshCw className="w-4 h-4" />
+-                <span className="hidden lg:inline">Refresh</span>
+-              </button>
+-              <button
+-                onClick={() => navigate('/place-order')}
+-                className="text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <Package className="w-4 h-4" />
+-                <span>New Shipment</span>
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-      </nav>
++      <ClientNavbar active="place-order" />
+ 
+       {/* ΓöÇΓöÇ Main Content ΓöÇΓöÇ */}
+-      <div className="flex-1 w-full flex flex-col items-center justify-start pt-12 p-4 md:p-8">
++      <div className="flex-1 w-full flex flex-col items-center justify-start p-5 md:p-4">
+         <div className="w-full max-w-5xl mx-auto">
+           <OrderForm />
+         </div>
+diff --git a/client/src/pages/client/TrackShipment.tsx b/client/src/pages/client/TrackShipment.tsx
+index 6d76010..867129a 100644
+--- a/client/src/pages/client/TrackShipment.tsx
++++ b/client/src/pages/client/TrackShipment.tsx
+@@ -2,14 +2,15 @@ import { useState, useCallback, useEffect } from 'react';
+ import {
+   Search, Package, MapPin, Navigation,
+   Calendar, CheckCircle2, Clock, AlertTriangle,
+-  Truck, FileText, Hash, ShieldCheck, PackageSearch, Activity, RefreshCw
++  Truck, FileText, Hash, ShieldCheck, X
+ } from 'lucide-react';
+-import { useNavigate } from 'react-router-dom';
++import ClientNavbar from '../../components/client/ClientNavbar';
+ import toast from 'react-hot-toast';
+ import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+ import L from 'leaflet';
+ import 'leaflet/dist/leaflet.css';
+ import { getMyManifests, Manifest } from '../../services/manifestApi';
++import { getErrorMessage } from '../../services/errorMessage';
+ 
+ interface ShipmentView {
+   id: string;
+@@ -90,8 +91,8 @@ function toShipmentView(m: Manifest): ShipmentView {
+ }
+ 
+ export default function TrackShipment() {
+-  const navigate = useNavigate();
+   const [searchQuery, setSearchQuery] = useState('');
++  const [searchOpen, setSearchOpen] = useState(false);
+   const [loading, setLoading] = useState(true);
+   const [shipments, setShipments] = useState<ShipmentView[]>([]);
+   const [activeId, setActiveId] = useState<string | null>(null);
+@@ -104,7 +105,7 @@ export default function TrackShipment() {
+       setShipments(views);
+       setActiveId((prev) => prev && views.some((v) => v.id === prev) ? prev : (views[0]?.id ?? null));
+     } catch (err: any) {
+-      toast.error(err?.response?.data?.message || 'Failed to load shipments.');
++      toast.error(getErrorMessage(err, 'Failed to load shipments.'));
+     } finally {
+       setLoading(false);
+     }
+@@ -125,74 +126,53 @@ export default function TrackShipment() {
+     <div className="min-h-screen bg-[#f5f6f8] text-slate-700 font-sans flex flex-col">
+ 
+       {/* ΓöÇΓöÇ Global Navbar ΓöÇΓöÇ */}
+-      <nav className="bg-white border-b border-slate-200 py-4 px-4 md:px-8 sticky top-0 z-[100] shadow-md">
+-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/client/dashboard')}>
+-            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-[#0a0a0a] border border-orange-500 shadow-sm">
+-              <PackageSearch className="w-5 h-5 text-orange-500" />
+-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border-2 border-white"></div>
+-            </div>
+-            <div className="flex flex-col">
+-              <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-tight">B2B Logistics</span>
+-              <span className="text-[10px] font-semibold text-slate-500 leading-tight">Freight Operations Console</span>
+-            </div>
+-          </div>
+-
+-          {/* Desktop Nav */}
+-          <div className="hidden md:flex items-center space-x-6 text-sm font-semibold">
+-            <button onClick={() => navigate('/dashboard')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <Activity className="w-4 h-4" />
+-              <span>Dashboard</span>
+-            </button>
+-            <button onClick={() => navigate('/track')} className="text-orange-500 flex items-center space-x-1.5">
+-              <MapPin className="w-4 h-4" />
+-              <span>Live Tracking</span>
+-            </button>
+-            <button onClick={() => navigate('/client-invoices')} className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5">
+-              <FileText className="w-4 h-4" />
+-              <span>Billing</span>
+-            </button>
+-            
+-            {/* Actions */}
+-            <div className="flex items-center space-x-6 border-l border-slate-200 pl-6">
+-              <button
+-                onClick={() => window.location.reload()}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <RefreshCw className="w-4 h-4" />
+-                <span className="hidden lg:inline">Refresh</span>
+-              </button>
+-              <button
+-                onClick={() => navigate('/place-order')}
+-                className="text-slate-600 hover:text-orange-500 transition-colors flex items-center space-x-1.5"
+-              >
+-                <Package className="w-4 h-4" />
+-                <span>New Shipment</span>
+-              </button>
+-            </div>
+-          </div>
+-        </div>
+-      </nav>
++      <ClientNavbar active="track" />
+ 
+       {/* Main Layout Area */}
+-      <div className="flex-1 flex flex-col md:flex-row relative">
++      <div className="flex-1 flex flex-col lg:flex-row relative">
+         {/* LEFT PANEL: SEARCH & LIST */}
+-        <div className="track-list-panel w-full md:w-96 bg-white border-r border-slate-200 flex flex-col h-[calc(100vh-76px)] sticky top-[76px] z-50">
+-
+-          <div className="p-6 border-b border-slate-200 bg-white z-6 flex items-center justify-between">
+-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Track Shipments</h1>
+-
+-            <div className="relative group w-[46px] focus-within:w-full max-w-[260px] h-[46px] transition-all duration-300 ease-in-out">
+-              <div className="absolute inset-y-0 left-0 flex items-center justify-center w-[46px] h-[46px] pointer-events-none z-10">
+-                <Search className="h-5 w-5 text-slate-500 group-focus-within:text-orange-500 transition-colors" />
+-              </div>
+-              <input
+-                type="text"
+-                placeholder="Search ID..."
+-                className="absolute right-0 w-full h-full bg-white border border-slate-200 rounded-full pl-11 pr-4 text-sm text-slate-900 placeholder-transparent focus:placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 ease-in-out cursor-pointer focus:cursor-text shadow-sm hover:shadow-md hover:border-slate-300"
+-                value={searchQuery}
+-                onChange={(e) => setSearchQuery(e.target.value)}
+-              />
++        <div className="track-list-panel w-full lg:w-96 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col max-h-[50vh] lg:max-h-[calc(100vh-76px)] lg:sticky lg:top-[76px] z-50">
++
++          <div className="p-4 border-b border-slate-200 bg-white z-6 flex items-center justify-between">
++            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Track Shipments</h1>
++
++            <div className={`relative flex items-center transition-all duration-300 ease-in-out ${searchOpen ? 'w-48 sm:w-60 md:w-64' : 'w-10'}`}>
++              {searchOpen ? (
++                <div className="relative w-full">
++                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
++                  <input
++                    autoFocus
++                    type="text"
++                    placeholder="Search ID or destination..."
++                    className="w-full h-10 pl-10 pr-9 text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-full shadow-sm outline-none placeholder:text-slate-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
++                    value={searchQuery}
++                    onChange={(e) => setSearchQuery(e.target.value)}
++                    onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); } }}
++                    onBlur={() => setSearchOpen(false)}
++                  />
++                  {searchQuery && (
++                    <button
++                      type="button"
++                      onMouseDown={(e) => e.preventDefault()}
++                      onClick={() => setSearchQuery('')}
++                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
++                      aria-label="Clear search"
++                    >
++                      <X className="w-3.5 h-3.5" />
++                    </button>
++                  )}
++                </div>
++              ) : (
++                <button
++                  type="button"
++                  onClick={() => setSearchOpen(true)}
++                  className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-full text-slate-500 hover:text-orange-600 hover:border-orange-500 shadow-sm transition-all duration-300"
++                  aria-label="Open search"
++                  title="Search shipments"
++                >
++                  <Search className="w-4 h-4" />
++                </button>
++              )}
+             </div>
+           </div>
+ 
+@@ -216,7 +196,12 @@ export default function TrackShipment() {
+               return (
+                 <div
+                   key={shipment.id}
+-                  onClick={() => setActiveId(shipment.id)}
++                  onClick={() => {
++                    setActiveId(shipment.id);
++                    if (window.innerWidth < 1024) {
++                      document.getElementById('track-details-panel')?.scrollIntoView({ behavior: 'smooth' });
++                    }
++                  }}
+                   className={`p-4 rounded-xl cursor-pointer transition-all duration-300 border ${isSelected
+                     ? 'bg-accent/10 border-accent/50 shadow-[0_0_15px_rgba(249,115,22,0.1)]'
+                     : 'bg-white border-slate-300 hover:border-slate-400 hover:bg-slate-100'
+@@ -225,7 +210,7 @@ export default function TrackShipment() {
+                   <div className="flex justify-between items-start mb-3">
+                     <div className="flex items-center space-x-2">
+                       <Hash className={`w-4 h-4 ${isSelected ? 'text-accent' : 'text-slate-500'}`} />
+-                      <span className={`font-bold ${isSelected ? 'text-slate-900' : 'text-slate-200'}`}>
++                      <span className={`font-bold ${isSelected ? 'text-slate-900' : 'text-slate-700'}`}>
+                         {shipment.id}
+                       </span>
+                     </div>
+@@ -252,14 +237,14 @@ export default function TrackShipment() {
+         </div>
+ 
+         {/* RIGHT PANEL: DETAILS */}
+-        <div className="flex-1 overflow-y-auto bg-[#f5f6f8] relative">
++        <div id="track-details-panel" className="flex-1 overflow-y-auto bg-[#f5f6f8] relative">
+           <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] pointer-events-none"></div>
+ 
+           {activeShipment ? (
+-            <div className="max-w-4xl mx-auto p-6 md:p-12 relative z-10">
++            <div className="max-w-4xl mx-auto p-5 md:p-12 relative z-10">
+ 
+               {/* Header */}
+-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-200">
++              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-10 pb-5 md:pb-6 border-b border-slate-200">
+                 <div>
+                   <h2 className="text-sm font-bold text-accent uppercase tracking-widest mb-1">Manifest Details</h2>
+                   <div className="flex items-center space-x-3">
+@@ -274,15 +259,15 @@ export default function TrackShipment() {
+               </div>
+ 
+               {/* Progress Stepper */}
+-              <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-8 shadow-xl overflow-hidden">
++              <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-8 mb-6 md:mb-8 shadow-xl overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+                 <h3 className="text-lg font-bold text-slate-900 mb-6">Delivery Progress</h3>
+                 <ProgressStepper currentStatus={activeShipment.status} />
+               </div>
+ 
+               {/* Cards Grid */}
+-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
++              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+                 {/* Route Info */}
+-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm">
++                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm">
+                   <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-200">
+                     <div className="bg-blue-500/20 p-2 rounded-lg text-blue-400">
+                       <MapPin className="w-5 h-5" />
+@@ -329,7 +314,7 @@ export default function TrackShipment() {
+                 {/* Cargo & Assignment Info */}
+                 <div className="flex flex-col gap-6">
+ 
+-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm flex-1">
++                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm flex-1">
+                     <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-200">
+                       <div className="bg-accent/20 p-2 rounded-lg text-accent">
+                         <Package className="w-5 h-5" />
+@@ -358,7 +343,7 @@ export default function TrackShipment() {
+                     </div>
+                   </div>
+ 
+-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 backdrop-blur-sm">
++                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 md:p-6 backdrop-blur-sm">
+                     <div className="flex items-center space-x-3 mb-4">
+                       <div className="bg-emerald-500/20 p-2 rounded-lg text-emerald-400">
+                         <ShieldCheck className="w-5 h-5" />
+@@ -388,11 +373,11 @@ export default function TrackShipment() {
+               </div>
+ 
+               {/* Bottom Grid: Activity & Map */}
+-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
++              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+ 
+                 {/* Activity Timeline */}
+-                <div className="bg-slate-100 border border-slate-200 rounded-2xl p-8 backdrop-blur-sm">
+-                  <h3 className="text-lg font-bold text-slate-900 mb-8">Activity Log</h3>
++                <div className="bg-slate-100 border border-slate-200 rounded-2xl p-5 md:p-8 backdrop-blur-sm">
++                  <h3 className="text-lg font-bold text-slate-900 mb-6 md:mb-8">Activity Log</h3>
+                   <div className="space-y-8 relative z-0">
+                     <div className="absolute left-6 top-6 bottom-6 w-px bg-slate-300 -translate-x-1/2 z-[-1]"></div>
+ 
+@@ -428,7 +413,7 @@ export default function TrackShipment() {
+                 </div>
+ 
+                 {/* Live GPS Tracking */}
+-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl min-h-[400px] flex flex-col relative">
++                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl min-h-[400px] flex flex-col relative hover:-translate-y-1 hover:shadow-2xl transition-all duration-300">
+                   <div className="p-6 border-b border-slate-200 flex items-center justify-between z-10 bg-white">
+                     <div className="flex items-center space-x-3">
+                       <div className="bg-accent/20 p-2 rounded-lg text-accent">
+@@ -452,7 +437,7 @@ export default function TrackShipment() {
+ 
+             </div>
+           ) : (
+-            <div className="h-full flex flex-col items-center justify-center text-slate-500 py-32">
++            <div className="h-full flex flex-col items-center justify-center text-slate-500 py-16 md:py-32">
+               <Package className="w-16 h-16 mb-4 opacity-20" />
+               <p className="text-lg font-bold text-slate-700">Select a shipment to view details</p>
+               <p className="text-sm mt-1">Shipments appear here after you place an order.</p>
+@@ -468,10 +453,6 @@ export default function TrackShipment() {
+         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+-
+-        @media (max-width: 767px) {
+-          .track-list-panel { height: 50vh; }
+-        }
+       `}} />
+     </div>
+   );
+diff --git a/client/src/services/analyticsApi.ts b/client/src/services/analyticsApi.ts
+index 2fa02c5..e261370 100644
+--- a/client/src/services/analyticsApi.ts
++++ b/client/src/services/analyticsApi.ts
+@@ -1,10 +1,92 @@
+-// This file is for: Analytics API service ΓÇö all executive endpoints
+-// Module: Frontend API Services (Module 10)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// What goes here:
+-// - getFleetUtilization() ΓåÆ GET /analytics/fleet-utilization
+-// - getRouteEfficiency() ΓåÆ GET /analytics/route-efficiency
+-// - getMonthlyCapacity() ΓåÆ GET /analytics/monthly-capacity
+-// - getDeliveryPerformance() ΓåÆ GET /analytics/delivery-performance
+-// - getRevenueSummary() ΓåÆ GET /analytics/revenue-summary
++// Analytics API service ΓÇö executive aggregation endpoints
++// Module: Frontend API Services (Module 10) | Owner: Developer 2
++
++import api from './api';
++
++export interface FleetUtilization {
++  total: number;
++  available: number;
++  inTransit: number;
++  maintenance: number;
++  availablePct: number;
++  inTransitPct: number;
++  maintenancePct: number;
++}
++
++export interface RouteEfficiencyRow {
++  trackingId: string;
++  origin: string;
++  destination: string;
++  distanceKm: number;
++  estimatedDurationMinutes: number;
++  status: string;
++  onTime: boolean;
++}
++
++export interface RouteEfficiency {
++  total: number;
++  onTime: number;
++  late: number;
++  onTimePct: number;
++  averageDistanceKm: number;
++  rows: RouteEfficiencyRow[];
++}
++
++export interface MonthlyCapacityEntry {
++  month: string;
++  totalWeightKg: number;
++  totalVolumeM3: number;
++  shipmentCount: number;
++}
++
++export interface MonthlyCapacity {
++  months: MonthlyCapacityEntry[];
++}
++
++export interface DeliveryPerformance {
++  total: number;
++  onTime: number;
++  delayed: number;
++  cancelled: number;
++  onTimePct: number;
++  delayedPct: number;
++  cancelledPct: number;
++}
++
++export interface RevenueMonth {
++  month: string;
++  total: number;
++  paid: number;
++  pending: number;
++  overdue: number;
++}
++
++export interface RevenueSummary {
++  months: RevenueMonth[];
++  summary: { paid: number; pending: number; overdue: number; total: number };
++}
++
++export async function getFleetUtilization(): Promise<FleetUtilization> {
++  const { data } = await api.get<FleetUtilization>('/analytics/fleet-utilization');
++  return data;
++}
++
++export async function getRouteEfficiency(): Promise<RouteEfficiency> {
++  const { data } = await api.get<RouteEfficiency>('/analytics/route-efficiency');
++  return data;
++}
++
++export async function getMonthlyCapacity(): Promise<MonthlyCapacity> {
++  const { data } = await api.get<MonthlyCapacity>('/analytics/monthly-capacity');
++  return data;
++}
++
++export async function getDeliveryPerformance(): Promise<DeliveryPerformance> {
++  const { data } = await api.get<DeliveryPerformance>('/analytics/delivery-performance');
++  return data;
++}
++
++export async function getRevenueSummary(): Promise<RevenueSummary> {
++  const { data } = await api.get<RevenueSummary>('/analytics/revenue-summary');
++  return data;
++}
+diff --git a/client/src/services/api.ts b/client/src/services/api.ts
+index ccf022a..bf32e2f 100644
+--- a/client/src/services/api.ts
++++ b/client/src/services/api.ts
+@@ -24,8 +24,12 @@ api.interceptors.response.use(
+   },
+   (error) => {
+     if (error.response?.status === 401) {
+-      localStorage.removeItem('b2b_token');
+-      window.location.href = '/login';
++      const url: string = error.config?.url ?? '';
++      const isLoginRequest = url.includes('/auth/login');
++      if (!isLoginRequest) {
++        localStorage.removeItem('b2b_token');
++        window.location.href = '/login';
++      }
+     }
+     return Promise.reject(error);
+   }
+diff --git a/client/src/services/manifestApi.ts b/client/src/services/manifestApi.ts
+index de5c5fc..10a37ce 100644
+--- a/client/src/services/manifestApi.ts
++++ b/client/src/services/manifestApi.ts
+@@ -76,6 +76,11 @@ export async function getMyManifests(params?: { page?: number; limit?: number })
+   return data;
+ }
+ 
++export async function getAllManifests(params?: { page?: number; limit?: number; status?: string }): Promise<Paginated<Manifest>> {
++  const { data } = await api.get<Paginated<Manifest>>('/manifests', { params });
++  return data;
++}
++
+ export async function getManifest(id: string): Promise<Manifest> {
+   const { data } = await api.get<Manifest>(`/manifests/${id}`);
+   return data;
+diff --git a/client/src/services/vehicleApi.ts b/client/src/services/vehicleApi.ts
+index 63f7a6a..0f98df9 100644
+--- a/client/src/services/vehicleApi.ts
++++ b/client/src/services/vehicleApi.ts
+@@ -1,12 +1,91 @@
+-// This file is for: Vehicle API service ΓÇö CRUD + availability + stats
+-// Module: Frontend API Services (Module 10)
+-// Owner: Developer 2 (Web Frontend Engineer)
+-//
+-// What goes here:
+-// - getVehicles(filters) ΓåÆ GET /vehicles
+-// - getAvailableVehicles() ΓåÆ GET /vehicles/available
+-// - getVehicleStats() ΓåÆ GET /vehicles/stats
+-// - createVehicle(data) ΓåÆ POST /vehicles
+-// - updateVehicle(id, data) ΓåÆ PUT /vehicles/:id
+-// - updateVehicleStatus(id, status) ΓåÆ PATCH /vehicles/:id/status
+-// - deleteVehicle(id) ΓåÆ DELETE /vehicles/:id
++// Vehicle API service ΓÇö fleet CRUD, availability, stats
++// Module: Frontend API Services (Module 10) | Owner: Developer 2
++
++import api from './api';
++
++export type VehicleStatus = 'Available' | 'In-Transit' | 'Maintenance';
++
++export interface Vehicle {
++  _id: string;
++  registrationNumber: string;
++  make: string;
++  model: string;
++  year: number;
++  maxWeightKg: number;
++  maxVolumeCubicMeters: number;
++  status: VehicleStatus;
++  currentDriver?: { _id: string; firstName: string; lastName: string; email: string } | null;
++  fuelEfficiency?: number;
++  lastMaintenanceDate?: string;
++  createdAt: string;
++}
++
++export interface VehicleStats {
++  total: number;
++  available: number;
++  inTransit: number;
++  maintenance: number;
++}
++
++export interface Paginated<T> {
++  items: T[];
++  total: number;
++  page: number;
++  limit: number;
++  totalPages: number;
++}
++
++export interface VehiclePayload {
++  registrationNumber: string;
++  make: string;
++  model: string;
++  year: number;
++  maxWeightKg: number;
++  maxVolumeCubicMeters: number;
++  fuelEfficiency?: number;
++}
++
++export async function listVehicles(params?: {
++  page?: number;
++  limit?: number;
++  status?: VehicleStatus;
++  search?: string;
++}): Promise<Paginated<Vehicle>> {
++  const { data } = await api.get<Paginated<Vehicle>>('/vehicles', { params });
++  return data;
++}
++
++export async function getAvailableVehicles(): Promise<Vehicle[]> {
++  const { data } = await api.get<Vehicle[]>('/vehicles/available');
++  return data;
++}
++
++export async function getVehicleStats(): Promise<VehicleStats> {
++  const { data } = await api.get<VehicleStats>('/vehicles/stats');
++  return data;
++}
++
++export async function getVehicle(id: string): Promise<Vehicle> {
++  const { data } = await api.get<Vehicle>(`/vehicles/${id}`);
++  return data;
++}
++
++export async function createVehicle(payload: VehiclePayload): Promise<Vehicle> {
++  const { data } = await api.post<Vehicle>('/vehicles', payload);
++  return data;
++}
++
++export async function updateVehicle(id: string, payload: Partial<VehiclePayload>): Promise<Vehicle> {
++  const { data } = await api.put<Vehicle>(`/vehicles/${id}`, payload);
++  return data;
++}
++
++export async function updateVehicleStatus(id: string, status: VehicleStatus): Promise<Vehicle> {
++  const { data } = await api.patch<Vehicle>(`/vehicles/${id}/status`, { status });
++  return data;
++}
++
++export async function deleteVehicle(id: string): Promise<{ id: string; deleted: boolean }> {
++  const { data } = await api.delete<{ id: string; deleted: boolean }>(`/vehicles/${id}`);
++  return data;
++}
+diff --git a/client/src/store/authSlice.ts b/client/src/store/authSlice.ts
+index ff0d974..359ae0c 100644
+--- a/client/src/store/authSlice.ts
++++ b/client/src/store/authSlice.ts
+@@ -1,5 +1,6 @@
+ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+ import { login as loginApi, LoginResponse } from '../services/authApi';
++import { getErrorMessage } from '../services/errorMessage';
+ 
+ interface AuthState {
+   user: LoginResponse['user'] | null;
+@@ -25,8 +26,7 @@ export const loginUser = createAsyncThunk<LoginResponse, { email: string; passwo
+       localStorage.setItem('b2b_token', response.token);
+       return response;
+     } catch (err: any) {
+-      const msg = err?.response?.data?.message || err.message || 'Login failed';
+-      return rejectWithValue(msg);
++      return rejectWithValue(getErrorMessage(err, 'Login failed'));
+     }
+   }
+ );
+diff --git a/client/src/styles/globals.css b/client/src/styles/globals.css
+index a7835c0..d07525b 100644
+--- a/client/src/styles/globals.css
++++ b/client/src/styles/globals.css
+@@ -64,6 +64,8 @@
+     background-color: var(--color-primary-dark);
+     color: var(--color-text-inverse);
+     min-height: 100vh;
++    width: 100%;
++    overflow-x: hidden;
+   }
+ }
+ 
+@@ -121,8 +123,9 @@
+ 
+ /* ΓöÇΓöÇ Mobile (Γëñ640px) ΓöÇΓöÇ */
+ @media (max-width: 640px) {
+-  .dash-table { min-width: 520px; }
++  .dash-table { min-width: 560px; }
+   .dash-table-cell { padding: 12px; }
++  .dash-shipment-table { min-width: 640px; }
+ }
+ 
+ /* ΓöÇΓöÇ Tablet (641pxΓÇô1024px) ΓöÇΓöÇ */
+diff --git a/server/config/cors.ts b/server/config/cors.ts
+index d4fa3e9..9352be5 100644
+--- a/server/config/cors.ts
++++ b/server/config/cors.ts
+@@ -13,6 +13,17 @@ const corsOptions: cors.CorsOptions = {
+     if (!origin || allowedOrigins.includes(origin)) {
+       return callback(null, true);
+     }
++    // In development, allow any localhost / 127.0.0.1 origin (Vite may run on any port)
++    if (env.NODE_ENV !== 'production') {
++      try {
++        const { hostname } = new URL(origin);
++        if (hostname === 'localhost' || hostname === '127.0.0.1') {
++          return callback(null, true);
++        }
++      } catch {
++        /* invalid origin URL ΓÇö fall through to rejection */
++      }
++    }
+     return callback(new Error('Not allowed by CORS'));
+   },
+   credentials: true,
