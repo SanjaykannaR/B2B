@@ -33,14 +33,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear local storage auth credentials on token expiration / unauthorized
+      // Clear local storage auth credentials on token expiration / unauthorized.
+      // No login page anymore — pages fall back to demo data on API failure.
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
-      // Force redirect to login page (avoid using router if outside React context)
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
     }
     return Promise.reject(error);
   }

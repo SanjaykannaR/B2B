@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Shield, Lock, Save, LogOut, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { logoutUser, updateUser } from '../../store/authSlice';
-import { updateProfile } from '../../services/authApi';
+import { updateProfile, changePassword } from '../../services/authApi';
 import type { RootState } from '../../store/store';
 
 const inputCls = `w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200
@@ -45,7 +45,7 @@ export const Settings: React.FC = () => {
     }
   };
 
-  const handlePasswordSave = () => {
+  const handlePasswordSave = async () => {
     setPasswordError('');
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordError('All fields are required');
@@ -59,16 +59,21 @@ export const Settings: React.FC = () => {
       setPasswordError('New passwords do not match');
       return;
     }
-    setPasswordSaved(true);
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setTimeout(() => setPasswordSaved(false), 2000);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setPasswordSaved(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordSaved(false), 2000);
+    } catch (e: any) {
+      setPasswordError(e?.response?.data?.message || 'Failed to update password. Please try again.');
+    }
   };
 
   const handleLogout = () => {
     dispatch(logoutUser());
-    navigate('/login');
+    navigate('/');
   };
 
   const inputStyle = {

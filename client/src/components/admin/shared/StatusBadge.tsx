@@ -18,6 +18,11 @@ const STATUS_CONFIG: Record<string, { text: string; bg: string; dot?: string }> 
   CANCELLED:   { text: '#6B7280', bg: '#F3F4F6', dot: '#6B7280' },
   MAINTENANCE: { text: '#F97316', bg: '#FFF7ED', dot: '#F97316' },
   AVAILABLE:   { text: '#22C55E', bg: '#DCFCE7', dot: '#22C55E' },
+  PAID:        { text: '#059669', bg: '#D1FAE5', dot: '#059669' },
+  OVERDUE:     { text: '#EF4444', bg: '#FEE2E2', dot: '#EF4444' },
+  REJECTED:    { text: '#EF4444', bg: '#FEE2E2', dot: '#EF4444' },
+  CONTACTED:   { text: '#0EA5E9', bg: '#E0F2FE', dot: '#0EA5E9' },
+  APPROVED:    { text: '#10B981', bg: '#D1FAE5', dot: '#10B981' },
 };
 
 /**

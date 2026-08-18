@@ -172,7 +172,7 @@
 - [x] `src/services/authApi.ts` — `updateProfile(data, userId?)` → `PUT /users/:id`, try/catch + local fallback
 - [x] `src/store/authSlice.ts` — `updateUser` reducer (merges + persists localStorage)
 - [x] `src/pages/admin/Settings.tsx` — `handleProfileSave` wired to API + dispatch; demo-mode fallback works
-- [ ] ⏳ **Blocked:** `changePassword()` → `PATCH /auth/change-password` — needs Developer 1 to implement endpoint (client-side validation already in place)
+- [x] `changePassword()` → `PATCH /auth/change-password` — backend endpoint implemented (auth.controller.ts) + wired in Settings.tsx (client-side validation + API call + error display)
 
 **Navbar UX (App.tsx)**
 - [x] Notification bell + unread badge + dropdown (demo data, API-ready via `notificationApi`), mark-read / mark-all-read, closes on route change
@@ -218,6 +218,27 @@
 **Verified:** `npx tsc --noEmit` clean, `npx vite build` clean.
 
 ---
+
+### P0 — New Pages Build (2026-08-18) ✅
+> From `future.md` #1–4. All backend-ready; now have full UI. All wired to real MongoDB/API.
+- [x] `src/pages/admin/Invoices.tsx` + route `/admin/invoices` + sidebar item — KPI cards (billed/paid/pending/overdue), search, status tabs, table, pagination, **Mark Paid** (ConfirmModal), **Generate Invoice** modal (picks delivered manifest without invoice)
+- [x] `src/pages/admin/Notifications.tsx` + route `/admin/notifications` + sidebar item — All/Unread filter, type icons (info/warning/success/error), mark-one/mark-all read, link to related manifest; Topbar bell now has "View all notifications →"
+- [x] `src/pages/admin/Users.tsx` + route `/admin/users` + sidebar item — role filter tabs, search, table, **Create/Edit User** modal (role-based), Deactivate/Reactivate (ConfirmModal), Reset Password modal
+- [x] `src/pages/admin/Analytics.tsx` + route `/admin/analytics` + sidebar item — 5 charts: monthly revenue, fleet utilization, delivery performance, monthly load, route-efficiency strip
+  - ⚠️ **Handed off (2026-08-18):** another developer owns the Analytics page. `Analytics.tsx` is fully commented out (fallback), route + sidebar entry commented out. Re-enable by uncommenting if needed.
+- [x] Dark mode: REMOVED / not needed — forced light theme stays; removed stray `dark:bg-slate-900` class; future.md #11 marked ❌ REMOVED
+
+## Cleanup — Client/Driver/Login Removed (2026-08-18)
+- **Sidebar**: removed Notifications item (bell in top-right → full `/admin/notifications` page), removed CLIENT + DRIVER sections. Admin console now shows Admin + Executive only.
+- **Deleted (frontend)**: `pages/client/*`, `pages/driver/*`, `pages/Login.tsx`, `components/client/*`, `components/driver/*`, client/driver routes in `App.tsx`.
+- **`/` now redirects straight to `/admin`**; `ProtectedRoute` is a pass-through until auth is redesigned; `api.ts` 401 handler no longer redirects to `/login`; Topbar/Settings/NotFound logout + home links no longer target `/login`.
+- **`manifestApi.ts`**: removed `getMyManifests`, `getDriverManifests`, `startTrip`, `updateStatus`, `completeDelivery` (client/driver page services only).
+- **Backend (commented out, NOT deleted — reconnect on teammate's git merge)**: `getMy`, `getDriverManifests`, `myDeliveryRequests`, `acceptDriverRequest`, `declineDriverRequest`, `startTrip`, `updateLocation`, `updateStatus`, `completeManifest` in `manifest.controller.ts`; their routes in `manifest.routes.ts`; `/api/delivery-requests` mount in `server.ts`. Kept: admin list/getOne/create/update/approve/reject/contact/dispatch/assign/delete + `getClients`/`getDrivers` (wizard + dispatch depend on them).
+- [x] `src/services/userApi.ts` — getUsers, createUser, updateUser, deactivateUser, resetPassword
+- [x] `server/controllers/user.controller.ts` — `updateUser` now honors `isActive` (enables reactivation); seed uses `User.create()` (bcrypt hook) not `insertMany` (fixes plaintext-password login bug)
+- [x] `client/src/components/admin/shared/StatusBadge.tsx` — added PAID / OVERDUE / APPROVED / REJECTED / CONTACTED
+- [x] `client/src/pages/executive/ExecutiveAnalytics.tsx` — fixed monthly-capacity chart never rendering (`res.data` unwrap)
+- [x] Verified end-to-end against live server: invoice list/stats/mark-paid, notification create→deliver, user create→login→deactivate→reactivate, all 5 analytics endpoints. `tsc --noEmit` + `vite build` clean on both client & server.
 
 ## Notes
 

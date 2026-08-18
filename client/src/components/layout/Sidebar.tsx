@@ -1,5 +1,6 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Truck,
@@ -9,14 +10,14 @@ import {
   FilePlus,
   Settings,
   PackageSearch,
-  Send,
-  MapPin,
   Receipt,
-  Navigation,
   BarChart3,
+  Users,
+  LogOut,
   X,
   type LucideIcon,
 } from 'lucide-react';
+import { logoutUser } from '../../store/authSlice';
 
 interface NavItem {
   to: string;
@@ -38,24 +39,12 @@ const ADMIN: NavSection = {
     { to: '/admin/live', label: 'Live Operations', icon: Radio },
     { to: '/admin/manifests', label: 'Manifests', icon: ClipboardList },
     { to: '/admin/requests', label: 'Client Requests', icon: Search },
+    { to: '/admin/invoices', label: 'Invoices', icon: Receipt },
+    { to: '/admin/users', label: 'Users', icon: Users },
+    // { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/admin/manifests/new', label: 'Create Manifest', icon: FilePlus },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ],
-};
-
-const CLIENT: NavSection = {
-  title: 'Client',
-  items: [
-    { to: '/client', label: 'Dashboard', icon: LayoutDashboard, end: true },
-    { to: '/client/place-order', label: 'Place Order', icon: Send },
-    { to: '/client/track', label: 'Track Shipment', icon: MapPin },
-    { to: '/client/invoices', label: 'Invoices', icon: Receipt },
-  ],
-};
-
-const DRIVER: NavSection = {
-  title: 'Driver',
-  items: [{ to: '/driver', label: 'My Deliveries', icon: Navigation, end: true }],
 };
 
 const EXEC: NavSection = {
@@ -63,11 +52,10 @@ const EXEC: NavSection = {
   items: [{ to: '/executive/analytics', label: 'Analytics', icon: BarChart3, end: true }],
 };
 
-// Admin sees ALL sections (full access). Other roles see their own.
+// Client/Driver sections are owned by another developer's team — removed from this
+// console. Admin sees Admin + Executive only.
 const ROLE_SECTIONS: Record<string, NavSection[]> = {
-  admin: [ADMIN, CLIENT, DRIVER, EXEC],
-  client: [CLIENT],
-  driver: [DRIVER],
+  admin: [ADMIN, EXEC],
   executive: [EXEC],
 };
 
@@ -78,7 +66,15 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ role, open, onClose }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const sections = ROLE_SECTIONS[role] || [];
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    onClose();
+    navigate('/', { replace: true });
+  };
 
   const content = (
     <div className="flex flex-col h-full">
@@ -113,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, open, onClose }) => {
       </div>
 
       {/* Sections */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-6 space-y-5">
+      <nav className="flex-1 scrollbar-hidden overflow-y-auto px-3 pb-6 space-y-5">
         {sections.map((section) => (
           <div key={section.title}>
             <p className="px-3 mb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/35">
@@ -147,8 +143,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, open, onClose }) => {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t shrink-0" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-        <p className="text-[10px] text-white/35" style={{ fontFamily: 'var(--font-mono)' }}>
+      <div className="px-3 pb-4 border-t shrink-0" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold text-white/60 transition-all duration-200"
+          style={{ minHeight: 44 }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = 'var(--color-error)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = ''; }}
+        >
+          <LogOut size={16} strokeWidth={2.2} className="shrink-0" />
+          <span className="truncate">Log out</span>
+        </button>
+        <p className="px-3 mt-2 text-[10px] text-white/35" style={{ fontFamily: 'var(--font-mono)' }}>
           v1.0 · JWT secured
         </p>
       </div>

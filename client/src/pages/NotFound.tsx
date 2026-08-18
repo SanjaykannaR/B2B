@@ -4,7 +4,7 @@ import { PackageSearch, Home } from 'lucide-react';
 
 export const NotFound: React.FC = () => {
   const role = (JSON.parse(localStorage.getItem('user') || 'null') || {}).role;
-  const home = role ? `/${role}` : '/login';
+  const home = role ? `/${role}` : '/admin';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--color-surface)' }}>

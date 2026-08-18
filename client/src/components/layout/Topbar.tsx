@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Bell, CheckCheck, LogOut, PackageSearch } from 'lucide-react';
+import { Menu, Bell, CheckCheck, PackageSearch } from 'lucide-react';
 import * as notificationApi from '../../services/notificationApi';
-import { logoutUser } from '../../store/authSlice';
 
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Dashboard',
@@ -11,13 +10,10 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/live': 'Live Operations',
   '/admin/manifests': 'Manifests',
   '/admin/requests': 'Client Requests',
+  '/admin/invoices': 'Invoices',
+  '/admin/notifications': 'Notifications',
   '/admin/manifests/new': 'Create Manifest',
   '/admin/settings': 'Settings',
-  '/client': 'Client Dashboard',
-  '/client/place-order': 'Place Order',
-  '/client/track': 'Track Shipment',
-  '/client/invoices': 'Invoices',
-  '/driver': 'My Deliveries',
   '/executive/analytics': 'Analytics',
 };
 
@@ -32,7 +28,6 @@ interface TopbarProps {
 }
 
 export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user } = useSelector((s: any) => s.auth);
@@ -71,13 +66,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
     notificationApi.markRead(id).catch(() => {});
   };
 
-  const handleLogout = () => {
-    dispatch(logoutUser());
-    navigate('/login', { replace: true });
-  };
-
   const title = Object.keys(PAGE_TITLES).find((k) => pathname.startsWith(k)) ? PAGE_TITLES[Object.keys(PAGE_TITLES).find((k) => pathname.startsWith(k))!] : 'Console';
-
   return (
     <header
       className="shrink-0 flex items-center gap-3 px-4 sm:px-6 py-3 border-b sticky top-0 z-40"
@@ -167,6 +156,13 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => navigate('/admin/notifications')}
+              className="w-full text-left px-4 py-3 border-t text-xs font-bold transition-colors min-h-[44px]"
+              style={{ borderColor: 'var(--color-border-light)', color: 'var(--color-accent)' }}
+            >
+              View all notifications →
+            </button>
           </div>
         )}
       </div>
@@ -187,17 +183,6 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
             {role || 'user'}
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="p-2 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          style={{ color: 'var(--color-text-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; e.currentTarget.style.color = 'var(--color-error)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--color-text-muted)'; }}
-          title="Log out"
-          aria-label="Log out"
-        >
-          <LogOut size={18} strokeWidth={1.8} />
-        </button>
       </div>
     </header>
   );

@@ -64,7 +64,7 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
                 if (isCancelled) bg = '#EF4444';
                 if (isDelayed) bg = '#F59E0B';
                 return (
-                  <div key={step} className="relative z-10 flex flex-col items-center gap-1.5 bg-white dark:bg-slate-900 px-2">
+                  <div key={step} className="relative z-10 flex flex-col items-center gap-1.5 bg-white px-2">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
                       style={{ background: bg }}>
                       {done ? <Check size={14} /> : i + 1}

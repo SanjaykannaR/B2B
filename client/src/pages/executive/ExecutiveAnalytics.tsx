@@ -33,7 +33,7 @@ export const ExecutiveAnalytics: React.FC = () => {
       setRoute(val(rt));
       setPerf(val(p));
       const capData = val(c);
-      setCap(Array.isArray(capData) ? capData : []);
+      setCap(capData?.data && Array.isArray(capData.data) ? capData.data : []);
     });
   }, []);
 

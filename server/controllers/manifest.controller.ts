@@ -2,11 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { User } from '../models/User';
 import { Vehicle } from '../models/Vehicle';
-import { Manifest, MANIFEST_STATUSES } from '../models/Manifest';
+import { Manifest } from '../models/Manifest';
 import { sendError, sendSuccess } from '../utils/ApiResponse';
 import { paginate, toObjectId, userDisplay, generateTrackingId } from '../utils/helpers';
 import { routeFromCoords } from '../services/routeCalculator';
-import { generateInvoiceForManifest } from '../services/invoiceGenerator';
 import { notify } from '../services/notificationService';
 
 const POPULATE = [
@@ -160,34 +159,36 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const getMy = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    const manifests = await Manifest.find({ client: user._id })
-      .populate(POPULATE)
-      .sort({ createdAt: -1 });
-    return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getDriverManifests = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    const manifests = await Manifest.find({
-      $or: [
-        { driver: user._id },
-        { 'driverRequest.driverId': user._id },
-      ],
-    })
-      .populate(POPULATE)
-      .sort({ createdAt: -1 });
-    return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
-  } catch (err) {
-    next(err);
-  }
-};
+// ── Client / Driver page endpoints (owned by another developer's team) ────────
+// COMMENTED OUT pending their git merge — reconnect when their code lands.
+// export const getMy = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = req.user!;
+//     const manifests = await Manifest.find({ client: user._id })
+//       .populate(POPULATE)
+//       .sort({ createdAt: -1 });
+//     return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// export const getDriverManifests = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = req.user!;
+//     const manifests = await Manifest.find({
+//       $or: [
+//         { driver: user._id },
+//         { 'driverRequest.driverId': user._id },
+//       ],
+//     })
+//       .populate(POPULATE)
+//       .sort({ createdAt: -1 });
+//     return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 export const createManifest = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -473,118 +474,118 @@ export const sendDriverRequest = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const myDeliveryRequests = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    const manifests = await Manifest.find({
-      'driverRequest.driverId': user._id,
-      'driverRequest.status': 'pending',
-    })
-      .populate(POPULATE)
-      .sort({ 'driverRequest.sentAt': -1 });
-    return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const findManifestByDriverRequestId = async (requestId: string) => {
-  const id = toObjectId(requestId);
-  return id ? Manifest.findOne({ 'driverRequest._id': id }) : null;
-};
-
-export const acceptDriverRequest = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    const manifest = await findManifestByDriverRequestId(req.params.id);
-    if (!manifest || manifest.driverRequest?.status !== 'pending') {
-      return sendError(res, 404, 'Pending delivery request not found');
-    }
-    if (manifest.driverRequest.driverId.toString() !== user._id.toString()) {
-      return sendError(res, 403, 'This request was not sent to you');
-    }
-
-    const driverId = manifest.driverRequest.driverId;
-    const vehicleId = manifest.driverRequest.vehicleId;
-
-    manifest.driverRequest.status = 'accepted';
-    manifest.driverRequest.respondedAt = new Date();
-    manifest.driver = driverId;
-    manifest.vehicle = vehicleId;
-    manifest.currentStatus = 'ASSIGNED';
-    pushTimeline(
-      manifest,
-      'ASSIGNED',
-      `${user.firstName} ${user.lastName} accepted the delivery request`,
-      'driver',
-    );
-    await manifest.save();
-
-    const vehicle = await Vehicle.findById(vehicleId);
-    if (vehicle) {
-      vehicle.status = 'IN_TRANSIT';
-      vehicle.currentDriver = driverId;
-      await vehicle.save();
-    }
-
-    const client = manifest.client;
-    await notifyAdmins(
-      `Driver accepted: ${manifest.trackingId}`,
-      `${user.firstName} ${user.lastName} accepted delivery for ${manifest.trackingId}.`,
-      'success',
-      manifest._id,
-    );
-    await notify(
-      {
-        recipient: client,
-        title: `Delivery assigned: ${manifest.trackingId}`,
-        message: 'A driver has accepted your delivery. Tracking will go live when the trip starts.',
-        type: 'success',
-        relatedManifest: manifest._id,
-      },
-    );
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery request accepted');
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const declineDriverRequest = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user!;
-    const manifest = await findManifestByDriverRequestId(req.params.id);
-    if (!manifest || manifest.driverRequest?.status !== 'pending') {
-      return sendError(res, 404, 'Pending delivery request not found');
-    }
-    if (manifest.driverRequest.driverId.toString() !== user._id.toString()) {
-      return sendError(res, 403, 'This request was not sent to you');
-    }
-
-    manifest.driverRequest.status = 'declined';
-    manifest.driverRequest.respondedAt = new Date();
-    pushTimeline(
-      manifest,
-      manifest.currentStatus,
-      `${user.firstName} ${user.lastName} declined the delivery request`,
-      'driver',
-    );
-    await manifest.save();
-
-    await notifyAdmins(
-      `Driver declined: ${manifest.trackingId}`,
-      `${user.firstName} ${user.lastName} declined the delivery request. Please pick another driver.`,
-      'warning',
-      manifest._id,
-    );
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery request declined');
-  } catch (err) {
-    next(err);
-  }
-};
+// export const myDeliveryRequests = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = req.user!;
+//     const manifests = await Manifest.find({
+//       'driverRequest.driverId': user._id,
+//       'driverRequest.status': 'pending',
+//     })
+//       .populate(POPULATE)
+//       .sort({ 'driverRequest.sentAt': -1 });
+//     return sendSuccess(res, { manifests: manifests.map(serializeManifest) });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// const findManifestByDriverRequestId = async (requestId: string) => {
+//   const id = toObjectId(requestId);
+//   return id ? Manifest.findOne({ 'driverRequest._id': id }) : null;
+// };
+//
+// export const acceptDriverRequest = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = req.user!;
+//     const manifest = await findManifestByDriverRequestId(req.params.id);
+//     if (!manifest || manifest.driverRequest?.status !== 'pending') {
+//       return sendError(res, 404, 'Pending delivery request not found');
+//     }
+//     if (manifest.driverRequest.driverId.toString() !== user._id.toString()) {
+//       return sendError(res, 403, 'This request was not sent to you');
+//     }
+//
+//     const driverId = manifest.driverRequest.driverId;
+//     const vehicleId = manifest.driverRequest.vehicleId;
+//
+//     manifest.driverRequest.status = 'accepted';
+//     manifest.driverRequest.respondedAt = new Date();
+//     manifest.driver = driverId;
+//     manifest.vehicle = vehicleId;
+//     manifest.currentStatus = 'ASSIGNED';
+//     pushTimeline(
+//       manifest,
+//       'ASSIGNED',
+//       `${user.firstName} ${user.lastName} accepted the delivery request`,
+//       'driver',
+//     );
+//     await manifest.save();
+//
+//     const vehicle = await Vehicle.findById(vehicleId);
+//     if (vehicle) {
+//       vehicle.status = 'IN_TRANSIT';
+//       vehicle.currentDriver = driverId;
+//       await vehicle.save();
+//     }
+//
+//     const client = manifest.client;
+//     await notifyAdmins(
+//       `Driver accepted: ${manifest.trackingId}`,
+//       `${user.firstName} ${user.lastName} accepted delivery for ${manifest.trackingId}.`,
+//       'success',
+//       manifest._id,
+//     );
+//     await notify(
+//       {
+//         recipient: client,
+//         title: `Delivery assigned: ${manifest.trackingId}`,
+//         message: 'A driver has accepted your delivery. Tracking will go live when the trip starts.',
+//         type: 'success',
+//         relatedManifest: manifest._id,
+//       },
+//     );
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery request accepted');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// export const declineDriverRequest = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const user = req.user!;
+//     const manifest = await findManifestByDriverRequestId(req.params.id);
+//     if (!manifest || manifest.driverRequest?.status !== 'pending') {
+//       return sendError(res, 404, 'Pending delivery request not found');
+//     }
+//     if (manifest.driverRequest.driverId.toString() !== user._id.toString()) {
+//       return sendError(res, 403, 'This request was not sent to you');
+//     }
+//
+//     manifest.driverRequest.status = 'declined';
+//     manifest.driverRequest.respondedAt = new Date();
+//     pushTimeline(
+//       manifest,
+//       manifest.currentStatus,
+//       `${user.firstName} ${user.lastName} declined the delivery request`,
+//       'driver',
+//     );
+//     await manifest.save();
+//
+//     await notifyAdmins(
+//       `Driver declined: ${manifest.trackingId}`,
+//       `${user.firstName} ${user.lastName} declined the delivery request. Please pick another driver.`,
+//       'warning',
+//       manifest._id,
+//     );
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery request declined');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 export const assignManifest = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -636,167 +637,167 @@ export const assignManifest = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const startTrip = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = toObjectId(req.params.id);
-    const manifest = id ? await Manifest.findById(id) : null;
-    if (!manifest) return sendError(res, 404, 'Manifest not found');
-    if (manifest.currentStatus === 'DELIVERED' || manifest.currentStatus === 'CANCELLED') {
-      return sendError(res, 400, `Cannot start a ${manifest.currentStatus} manifest`);
-    }
-
-    const ts = Number(req.body.timestamp ?? Date.now());
-    manifest.tripStartTimestamp = ts;
-    manifest.tripStartTime = new Date(ts);
-    manifest.currentStatus = 'IN_TRANSIT';
-    pushTimeline(
-      manifest,
-      'IN_TRANSIT',
-      `${req.user!.firstName} ${req.user!.lastName} started the trip`,
-      'driver',
-    );
-    await manifest.save();
-
-    await notifyAdmins(
-      `Trip started: ${manifest.trackingId}`,
-      'Goods loaded and trip is in transit. Live tracking is now active.',
-      'info',
-      manifest._id,
-    );
-    await notify(
-      {
-        recipient: manifest.client,
-        title: `In transit: ${manifest.trackingId}`,
-        message: 'Your shipment is on the way. Live tracking is now available.',
-        type: 'info',
-        relatedManifest: manifest._id,
-      },
-    );
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Trip started');
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const updateLocation = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = toObjectId(req.params.id);
-    const manifest = id ? await Manifest.findById(id) : null;
-    if (!manifest) return sendError(res, 404, 'Manifest not found');
-
-    const lat = Number(req.body.lat);
-    const lng = Number(req.body.lng);
-    if (isNaN(lat) || isNaN(lng)) {
-      return sendError(res, 400, 'Valid lat and lng are required');
-    }
-
-    manifest.lastLocation = {
-      lat,
-      lng,
-      heading: req.body.heading !== undefined ? Number(req.body.heading) : undefined,
-      updatedAt: new Date(),
-    };
-    await manifest.save();
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Location updated');
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const updateStatus = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = toObjectId(req.params.id);
-    const manifest = id ? await Manifest.findById(id) : null;
-    if (!manifest) return sendError(res, 404, 'Manifest not found');
-
-    const status = String(req.body.status || '').toUpperCase();
-    if (!MANIFEST_STATUSES.includes(status as any)) {
-      return sendError(res, 400, `Invalid status. Must be one of: ${MANIFEST_STATUSES.join(', ')}`);
-    }
-
-    const note = String(req.body.note || '').trim();
-    manifest.currentStatus = status as any;
-    if (status === 'DELAYED') manifest.delayReason = note || manifest.delayReason || 'Delayed';
-    pushTimeline(
-      manifest,
-      status,
-      note || `Status changed to ${status}`,
-      req.user!.role,
-    );
-    await manifest.save();
-
-    await notifyAdmins(
-      `Status update: ${manifest.trackingId}`,
-      `${manifest.trackingId} is now ${status}.`,
-      status === 'DELAYED' ? 'warning' : 'info',
-      manifest._id,
-    );
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Status updated');
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const completeManifest = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const id = toObjectId(req.params.id);
-    const manifest = id ? await Manifest.findById(id) : null;
-    if (!manifest) return sendError(res, 404, 'Manifest not found');
-
-    manifest.currentStatus = 'DELIVERED';
-    manifest.requestStatus = 'APPROVED';
-    manifest.actualDeliveryTime = new Date();
-    pushTimeline(
-      manifest,
-      'DELIVERED',
-      `${req.user!.firstName} ${req.user!.lastName} completed the delivery`,
-      req.user!.role,
-    );
-    await manifest.save();
-
-    // Release the vehicle back to Available.
-    if (manifest.vehicle) {
-      const vehicle = await Vehicle.findById(manifest.vehicle);
-      if (vehicle) {
-        vehicle.status = 'AVAILABLE';
-        vehicle.currentDriver = undefined;
-        await vehicle.save();
-      }
-    }
-
-    // Auto-generate invoice from the delivered manifest.
-    const invoice = await generateInvoiceForManifest(manifest._id.toString());
-
-    await notifyAdmins(
-      `Delivery completed: ${manifest.trackingId}`,
-      'Shipment delivered successfully.',
-      'success',
-      manifest._id,
-    );
-    await notify(
-      {
-        recipient: manifest.client,
-        title: `Delivered: ${manifest.trackingId}`,
-        message: invoice
-          ? `Your shipment was delivered. Invoice ${invoice.invoiceNumber} has been generated.`
-          : 'Your shipment was delivered successfully.',
-        type: 'success',
-        relatedManifest: manifest._id,
-      },
-    );
-
-    const full = await Manifest.findById(manifest._id).populate(POPULATE);
-    return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery completed');
-  } catch (err) {
-    next(err);
-  }
-};
+// export const startTrip = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const id = toObjectId(req.params.id);
+//     const manifest = id ? await Manifest.findById(id) : null;
+//     if (!manifest) return sendError(res, 404, 'Manifest not found');
+//     if (manifest.currentStatus === 'DELIVERED' || manifest.currentStatus === 'CANCELLED') {
+//       return sendError(res, 400, `Cannot start a ${manifest.currentStatus} manifest`);
+//     }
+//
+//     const ts = Number(req.body.timestamp ?? Date.now());
+//     manifest.tripStartTimestamp = ts;
+//     manifest.tripStartTime = new Date(ts);
+//     manifest.currentStatus = 'IN_TRANSIT';
+//     pushTimeline(
+//       manifest,
+//       'IN_TRANSIT',
+//       `${req.user!.firstName} ${req.user!.lastName} started the trip`,
+//       'driver',
+//     );
+//     await manifest.save();
+//
+//     await notifyAdmins(
+//       `Trip started: ${manifest.trackingId}`,
+//       'Goods loaded and trip is in transit. Live tracking is now active.',
+//       'info',
+//       manifest._id,
+//     );
+//     await notify(
+//       {
+//         recipient: manifest.client,
+//         title: `In transit: ${manifest.trackingId}`,
+//         message: 'Your shipment is on the way. Live tracking is now available.',
+//         type: 'info',
+//         relatedManifest: manifest._id,
+//       },
+//     );
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Trip started');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// export const updateLocation = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const id = toObjectId(req.params.id);
+//     const manifest = id ? await Manifest.findById(id) : null;
+//     if (!manifest) return sendError(res, 404, 'Manifest not found');
+//
+//     const lat = Number(req.body.lat);
+//     const lng = Number(req.body.lng);
+//     if (isNaN(lat) || isNaN(lng)) {
+//       return sendError(res, 400, 'Valid lat and lng are required');
+//     }
+//
+//     manifest.lastLocation = {
+//       lat,
+//       lng,
+//       heading: req.body.heading !== undefined ? Number(req.body.heading) : undefined,
+//       updatedAt: new Date(),
+//     };
+//     await manifest.save();
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Location updated');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// export const updateStatus = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const id = toObjectId(req.params.id);
+//     const manifest = id ? await Manifest.findById(id) : null;
+//     if (!manifest) return sendError(res, 404, 'Manifest not found');
+//
+//     const status = String(req.body.status || '').toUpperCase();
+//     if (!MANIFEST_STATUSES.includes(status as any)) {
+//       return sendError(res, 400, `Invalid status. Must be one of: ${MANIFEST_STATUSES.join(', ')}`);
+//     }
+//
+//     const note = String(req.body.note || '').trim();
+//     manifest.currentStatus = status as any;
+//     if (status === 'DELAYED') manifest.delayReason = note || manifest.delayReason || 'Delayed';
+//     pushTimeline(
+//       manifest,
+//       status,
+//       note || `Status changed to ${status}`,
+//       req.user!.role,
+//     );
+//     await manifest.save();
+//
+//     await notifyAdmins(
+//       `Status update: ${manifest.trackingId}`,
+//       `${manifest.trackingId} is now ${status}.`,
+//       status === 'DELAYED' ? 'warning' : 'info',
+//       manifest._id,
+//     );
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Status updated');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+//
+// export const completeManifest = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const id = toObjectId(req.params.id);
+//     const manifest = id ? await Manifest.findById(id) : null;
+//     if (!manifest) return sendError(res, 404, 'Manifest not found');
+//
+//     manifest.currentStatus = 'DELIVERED';
+//     manifest.requestStatus = 'APPROVED';
+//     manifest.actualDeliveryTime = new Date();
+//     pushTimeline(
+//       manifest,
+//       'DELIVERED',
+//       `${req.user!.firstName} ${req.user!.lastName} completed the delivery`,
+//       req.user!.role,
+//     );
+//     await manifest.save();
+//
+//     // Release the vehicle back to Available.
+//     if (manifest.vehicle) {
+//       const vehicle = await Vehicle.findById(manifest.vehicle);
+//       if (vehicle) {
+//         vehicle.status = 'AVAILABLE';
+//         vehicle.currentDriver = undefined;
+//         await vehicle.save();
+//       }
+//     }
+//
+//     // Auto-generate invoice from the delivered manifest.
+//     const invoice = await generateInvoiceForManifest(manifest._id.toString());
+//
+//     await notifyAdmins(
+//       `Delivery completed: ${manifest.trackingId}`,
+//       'Shipment delivered successfully.',
+//       'success',
+//       manifest._id,
+//     );
+//     await notify(
+//       {
+//         recipient: manifest.client,
+//         title: `Delivered: ${manifest.trackingId}`,
+//         message: invoice
+//           ? `Your shipment was delivered. Invoice ${invoice.invoiceNumber} has been generated.`
+//           : 'Your shipment was delivered successfully.',
+//         type: 'success',
+//         relatedManifest: manifest._id,
+//       },
+//     );
+//
+//     const full = await Manifest.findById(manifest._id).populate(POPULATE);
+//     return sendSuccess(res, { manifest: serializeManifest(full) }, 'Delivery completed');
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 export const deleteManifest = async (req: Request, res: Response, next: NextFunction) => {
   try {

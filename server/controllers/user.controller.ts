@@ -110,7 +110,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const user = id ? await User.findById(id) : null;
     if (!user) return sendError(res, 404, 'User not found');
 
-    const { firstName, lastName, email, phone, company, role, contractRate, licenseNumber } =
+    const { firstName, lastName, email, phone, company, role, contractRate, licenseNumber, isActive } =
       req.body;
 
     if (firstName !== undefined) user.firstName = String(firstName);
@@ -125,6 +125,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       if (!ROLES.includes(role)) return sendError(res, 400, 'Invalid role');
       user.role = role;
     }
+
+    if (isActive !== undefined) user.isActive = Boolean(isActive);
 
     if (email !== undefined && String(email).toLowerCase() !== user.email) {
       const dup = await User.findOne({

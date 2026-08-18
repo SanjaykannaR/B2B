@@ -8,7 +8,7 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import vehicleRoutes from './routes/vehicle.routes';
-import manifestRoutes, { deliveryRequestRouter } from './routes/manifest.routes';
+import manifestRoutes from './routes/manifest.routes';
 import invoiceRoutes from './routes/invoice.routes';
 import notificationRoutes from './routes/notification.routes';
 import analyticsRoutes from './routes/analytics.routes';
@@ -30,7 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/manifests', manifestRoutes);
-app.use('/api/delivery-requests', deliveryRequestRouter);
+// app.use('/api/delivery-requests', deliveryRequestRouter); // commented out — teammate owns driver pages
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);

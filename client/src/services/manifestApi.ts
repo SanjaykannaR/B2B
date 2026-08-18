@@ -16,26 +16,6 @@ export const getManifests = async (filters?: Record<string, any>) => {
 };
 
 /**
- * Retrieves manifests belonging to the logged-in client.
- * @returns Promise with list of the client's manifests
- */
-export const getMyManifests = async () => {
-  // Call GET /manifests/my to retrieve client-specific shipments
-  const response = await api.get('/manifests/my');
-  return response.data;
-};
-
-/**
- * Retrieves manifests assigned to the logged-in driver.
- * @returns Promise with list of the driver's manifests
- */
-export const getDriverManifests = async () => {
-  // Call GET /manifests/driver/my to retrieve driver-specific deliveries
-  const response = await api.get('/manifests/driver/my');
-  return response.data;
-};
-
-/**
  * Retrieves detailed info of a single manifest.
  * @param id - The manifest ID
  * @returns Promise with manifest details
@@ -79,42 +59,6 @@ export const updateManifest = async (id: string, data: Record<string, any>) => {
 export const assignManifest = async (id: string, driverId: string, vehicleId: string) => {
   // Call PATCH /manifests/:id/assign with assignment payload
   const response = await api.patch(`/manifests/${id}/assign`, { driverId, vehicleId });
-  return response.data;
-};
-
-/**
- * Marks a manifest shipment transit as started (start trip).
- * @param id - The manifest ID
- * @param timestamp - The UNIX timestamp or date string of transit start
- * @returns Promise with updated manifest state
- */
-export const startTrip = async (id: string, timestamp: string | number) => {
-  // Call PATCH /manifests/:id/start-trip with start timestamp
-  const response = await api.patch(`/manifests/${id}/start-trip`, { timestamp });
-  return response.data;
-};
-
-/**
- * Updates a manifest's status and records a timeline note.
- * @param id - The manifest ID
- * @param status - The new status value (e.g. Delayed, In-Transit)
- * @param note - An optional description note detailing the update context
- * @returns Promise with updated status status response
- */
-export const updateStatus = async (id: string, status: string, note?: string) => {
-  // Call PATCH /manifests/:id/status with status details
-  const response = await api.patch(`/manifests/${id}/status`, { status, note });
-  return response.data;
-};
-
-/**
- * Marks a manifest delivery as successfully completed.
- * @param id - The manifest ID
- * @returns Promise with updated manifest
- */
-export const completeDelivery = async (id: string) => {
-  // Call PATCH /manifests/:id/complete to close the shipment lifecycle
-  const response = await api.patch(`/manifests/${id}/complete`);
   return response.data;
 };
 

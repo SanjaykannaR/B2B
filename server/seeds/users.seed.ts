@@ -124,7 +124,11 @@ export const seedUsers = async () => {
     },
   ];
 
-  const created = await User.insertMany(users);
+  // Use create() (not insertMany) so the pre('save') bcrypt hook hashes passwords.
+  const created: any[] = [];
+  for (const u of users) {
+    created.push(await User.create(u));
+  }
   console.log(`[seed] ${created.length} users created`);
   return created;
 };

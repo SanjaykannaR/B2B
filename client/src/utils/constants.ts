@@ -52,8 +52,8 @@ export const STATUS_COLORS: Record<string, { text: string; bg: string }> = {
 };
 
 export const ROUTE_PATHS = {
-  LOGIN: '/login',
-  
+  // Login route removed for now (auth decision pending). Admin console is the entry point.
+
   // Admin routes
   ADMIN_DASHBOARD: '/admin/dashboard',
   ADMIN_FLEET: '/admin/fleet',

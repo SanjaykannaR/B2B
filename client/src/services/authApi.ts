@@ -59,6 +59,17 @@ export const updateProfile = async (data: Record<string, any>, userId?: string) 
 };
 
 /**
+ * Sends a PATCH request to change the current user's password.
+ * @param currentPassword - The user's current password
+ * @param newPassword - The new password to set
+ * @returns Promise with the server response
+ */
+export const changePassword = async (currentPassword: string, newPassword: string) => {
+  const response = await api.patch('/auth/change-password', { currentPassword, newPassword });
+  return response.data;
+};
+
+/**
  * Sends a POST request to refresh the current authentication session.
  * @returns Promise with response containing a new JWT token
  */
