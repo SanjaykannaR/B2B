@@ -20,6 +20,7 @@ yarn-error.log*
 # ==============================
 dist/
 build/
+*.tsbuildinfo
 
 # ==============================
 # Editor & OS Files

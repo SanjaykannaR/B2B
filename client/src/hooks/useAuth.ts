@@ -1,8 +1,22 @@
-// This file is for: useAuth hook — read auth state from Redux
-// Module: Frontend Hooks (Module 10)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// What goes here:
-// - Custom hook that returns { user, role, isAuthenticated, loading }
-// - Reads from Redux authSlice using useSelector
-// - Provides typed access to current user and role
+import { useAppSelector } from '../store/store';
+import type { User } from '../services/authApi';
+
+interface UseAuthResult {
+  user: User | null;
+  role: User['role'] | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useAuth(): UseAuthResult {
+  const { user, isAuthenticated, loading, error } = useAppSelector((state) => state.auth);
+
+  return {
+    user,
+    role: user?.role ?? null,
+    isAuthenticated,
+    loading,
+    error,
+  };
+}

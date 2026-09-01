@@ -1,10 +1,26 @@
-// This file is for: ProtectedRoute — auth guard + role-based redirect
-// Module: Frontend App Shell, Router & Layout (Module 11)
-// Owner: Developer 2 (Web Frontend Engineer)
-//
-// What goes here:
-// - Check if user is authenticated (JWT token exists + valid)
-// - If not authenticated → redirect to /login
-// - If authenticated but wrong role for this route → redirect to user's default dashboard
-// - If authenticated and correct role → render children/outlet
-// - Props: allowedRoles?: string[]
+import { Navigate, Outlet } from 'react-router-dom';
+import LoadingSpinner from '../shared/LoadingSpinner';
+import { useAuth } from '../../hooks/useAuth';
+import { DEFAULT_ROUTES, type Role } from '../../utils/constants';
+
+interface ProtectedRouteProps {
+  allowedRoles?: Role[];
+}
+
+export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const { isAuthenticated, loading, role } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner fullPage label="Checking your session…" />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && role && !allowedRoles.includes(role)) {
+    return <Navigate to={DEFAULT_ROUTES[role]} replace />;
+  }
+
+  return <Outlet />;
+}

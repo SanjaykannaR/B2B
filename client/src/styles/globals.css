@@ -14,18 +14,18 @@
 
 
 /* ============================================================
-   1. TAILWIND CSS IMPORTS
-   ============================================================ */
-@import "tailwindcss";
-
-
-/* ============================================================
-   2. GOOGLE FONTS
+   1. GOOGLE FONTS
    ============================================================
    Inter Variable — Body, headings, UI text
    IBM Plex Mono — Tracking IDs, KPIs, timestamps, financials
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+
+/* ============================================================
+   2. TAILWIND CSS IMPORTS
+   ============================================================ */
+@import "tailwindcss";
 
 
 /* ============================================================
@@ -434,6 +434,16 @@ table,
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes tabEnter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(16px); }
   to   { opacity: 1; transform: translateX(0); }
@@ -449,8 +459,82 @@ table,
   to   { transform: rotate(360deg); }
 }
 
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0%      { background-position: -200% 0; }
+  100%    { background-position: 200% 0; }
+}
+
 .animate-fade-in     { animation: fadeIn 0.3s var(--transition-smooth); }
 .animate-fade-in-up  { animation: fadeInUp 0.4s var(--transition-smooth); }
+.animate-tab-enter   { animation: tabEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.animate-scale-in    { animation: scaleIn 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 .animate-slide-right { animation: slideInRight 0.3s var(--transition-smooth); }
 .animate-pulse       { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 .animate-spin        { animation: spin 1s linear infinite; }
+.animate-float       { animation: floatY 3s ease-in-out infinite; }
+
+
+/* ============================================================
+   17. DRIVER MOBILE APP — PHONE FRAME
+   ============================================================ */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Desktop backdrop behind the phone */
+.b2b-phone-stage {
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: #0B1222;
+  background-image: radial-gradient(circle at 50% 0%, rgba(61, 104, 168, 0.28), transparent 60%);
+}
+
+/* Phone screen itself — fixed viewport height so content
+   scrolls INSIDE the phone instead of growing past the screen */
+.b2b-phone-frame {
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  background: #F1F5F9;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Bezel look on desktop widths */
+@media (min-width: 520px) {
+  .b2b-phone-stage {
+    padding: 32px 0;
+  }
+  .b2b-phone-frame {
+    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
+    max-height: 920px;
+    border: 10px solid #0F1B33;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Tap feedback for cards/buttons */
+.b2b-tap {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.b2b-tap:active {
+  transform: scale(0.985);
+}
