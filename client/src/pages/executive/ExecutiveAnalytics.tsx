@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FiPackage, FiDollarSign, FiTruck, FiClock } from 'react-icons/fi';
 import StatCard from '../../components/shared/StatCard';
 import RevenueSummary from '../../components/executive/RevenueSummary';
 import FleetUtilizationChart from '../../components/executive/FleetUtilizationChart';
@@ -128,28 +129,28 @@ export default function ExecutiveAnalytics() {
             <StatCard
               title="Total Shipments"
               value={totalShipments.toLocaleString()}
-              icon={<span>📦</span>}
+              icon={<FiPackage size={22} color="#FF6B2C" />}
               change={data.revenue?.shipmentsDelta ?? 0}
               changeType="up"
             />
             <StatCard
               title="Revenue"
               value={`$${((data.revenue?.totalRevenue ?? 0) / 1000000).toFixed(1)}M`}
-              icon={<span>💰</span>}
+              icon={<FiDollarSign size={22} color="#10B981" />}
               change={data.revenue?.revenueDelta ?? 0}
               changeType="up"
             />
             <StatCard
               title="Fleet Utilization"
               value={`${(data.fleet?.utilizationRate ?? 0).toFixed(1)}%`}
-              icon={<span>🚛</span>}
+              icon={<FiTruck size={22} color="#2563EB" />}
               change={data.fleet?.utilizationDelta ?? 0}
               changeType="up"
             />
             <StatCard
               title="On-Time Rate"
               value={`${(data.performance?.onTimeRate ?? 0).toFixed(1)}%`}
-              icon={<span>⏱️</span>}
+              icon={<FiClock size={22} color="#8B5CF6" />}
               change={data.performance?.onTimeDelta ?? 0}
               changeType="up"
             />

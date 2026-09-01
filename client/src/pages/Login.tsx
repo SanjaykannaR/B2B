@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { FiTruck } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '../store/store';
 import { loginUser, clearError } from '../store/authSlice';
 import { DEMO_CREDENTIALS } from '../services/authApi';
@@ -70,7 +71,7 @@ export default function Login() {
               marginBottom: '0.875rem',
             }}
           >
-            🚚
+            <FiTruck size={40} color="#FF6B2C" />
           </div>
           <h1 style={{ fontSize: '1.375rem', fontWeight: 800, color: '#1B2A4A', margin: 0 }}>
             B2B Logistics

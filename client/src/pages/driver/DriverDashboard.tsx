@@ -1,5 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiHome, FiTruck, FiClock, FiCheckCircle, FiAlertTriangle, FiArrowRight, FiChevronRight, FiSearch } from 'react-icons/fi';
 import StatusBadge from '../../components/shared/StatusBadge';
 import { useRecovery } from '../../hooks/useRecovery';
 import { getStoredManifests, ManifestItem } from '../../services/driverService';
@@ -54,6 +55,7 @@ function DeliveryCard({ manifest, onOpen, featured = false }: { manifest: Manife
             {manifest.cargo.isHazmat && (
               <span
                 style={{
+                  display: 'inline-flex',
                   backgroundColor: '#FEF3C7',
                   color: '#92400E',
                   border: '1px solid #FCD34D',
@@ -64,7 +66,7 @@ function DeliveryCard({ manifest, onOpen, featured = false }: { manifest: Manife
                   whiteSpace: 'nowrap',
                 }}
               >
-                ⚠️
+                <FiAlertTriangle size={13} />
               </span>
             )}
           </div>
@@ -83,7 +85,7 @@ function DeliveryCard({ manifest, onOpen, featured = false }: { manifest: Manife
                 {manifest.origin}
               </div>
             </div>
-            <div style={{ color: '#FF6B2C', fontSize: '1.125rem', fontWeight: 800, flexShrink: 0 }}>➔</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', color: '#FF6B2C', fontSize: '1.125rem', flexShrink: 0 }}><FiArrowRight size={18} /></div>
             <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
               <div style={{ fontSize: '0.625rem', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 700 }}>To</div>
               <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -123,9 +125,7 @@ function DeliveryCard({ manifest, onOpen, featured = false }: { manifest: Manife
           </div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#FF6B2C', fontWeight: 700, fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>
             {featured ? 'View' : 'Open'}
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <FiChevronRight size={15} strokeWidth={2.5} />
           </div>
         </div>
       </div>
@@ -155,10 +155,10 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
   );
 }
 
-function EmptyState({ icon, title, note }: { icon: string; title: string; note: string }) {
+function EmptyState({ icon, title, note }: { icon: ReactNode; title: string; note: string }) {
   return (
     <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '1rem', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
-      <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>{icon}</div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>{icon}</div>
       <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1E293B', margin: '0 0 0.25rem 0' }}>{title}</div>
       <div style={{ fontSize: '0.8125rem', color: '#64748B', margin: 0 }}>{note}</div>
     </div>
@@ -166,26 +166,9 @@ function EmptyState({ icon, title, note }: { icon: string; title: string; note: 
 }
 
 const TAB_ICONS: Record<Tab, (active: boolean) => JSX.Element> = {
-  home: (active) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill={active ? '#FF6B2C' : 'none'} stroke={active ? '#FF6B2C' : '#94A3B8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 9.5V21h14V9.5" />
-    </svg>
-  ),
-  deliveries: (active) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill={active ? '#FF6B2C' : 'none'} stroke={active ? '#FF6B2C' : '#94A3B8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 7h11v10H3z" />
-      <path d="M14 10h4l3 3v4h-7" />
-      <circle cx="7" cy="18" r="1.5" />
-      <circle cx="17" cy="18" r="1.5" />
-    </svg>
-  ),
-  history: (active) => (
-    <svg width="21" height="21" viewBox="0 0 24 24" fill={active ? '#FF6B2C' : 'none'} stroke={active ? '#FF6B2C' : '#94A3B8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <polyline points="12 7 12 12 15.5 14" />
-    </svg>
-  ),
+  home: (active) => <FiHome size={21} color={active ? '#FF6B2C' : '#94A3B8'} strokeWidth={2} />,
+  deliveries: (active) => <FiTruck size={21} color={active ? '#FF6B2C' : '#94A3B8'} strokeWidth={2} />,
+  history: (active) => <FiClock size={21} color={active ? '#FF6B2C' : '#94A3B8'} strokeWidth={2} />,
 };
 
 const STATUS_DOT: Record<string, string> = {
@@ -292,9 +275,9 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
                 </span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                <StatTile icon={<TruckIcon />} label="Active" value={counts.active} color="#2563EB" />
-                <StatTile icon={<CheckIcon />} label="Delivered" value={counts.delivered} color="#10B981" />
-                <StatTile icon={<AlertIcon />} label="Delayed" value={counts.delayed} color="#EF4444" />
+                <StatTile icon={<FiTruck size={18} />} label="Active" value={counts.active} color="#2563EB" />
+                <StatTile icon={<FiCheckCircle size={18} />} label="Delivered" value={counts.delivered} color="#10B981" />
+                <StatTile icon={<FiAlertTriangle size={18} />} label="Delayed" value={counts.delayed} color="#EF4444" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.75rem', paddingTop: '0.625rem', borderTop: '1px solid #EDF0F7', fontSize: '0.75rem', color: '#64748B' }}>
                 <span>
@@ -324,15 +307,13 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0.75rem', padding: '0.625rem', color: '#1B2A4A', fontWeight: 700, fontSize: '0.8125rem', cursor: 'pointer' }}
                   >
                     View all {activeDeliveries.length} active deliveries
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
+                    <FiChevronRight size={14} strokeWidth={2.5} />
                   </button>
                 )}
               </section>
             ) : (
               <div className="animate-fade-in-up">
-                <EmptyState icon="🚚" title="No Active Deliveries" note="All assigned manifests are complete. New dispatches will appear here." />
+                <EmptyState icon={<FiTruck size={44} color="#CBD5E1" />} title="No Active Deliveries" note="All assigned manifests are complete. New dispatches will appear here." />
               </div>
             )}
           </div>
@@ -345,7 +326,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
             </div>
             {activeDeliveries.length === 0 ? (
               <div className="animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
-                <EmptyState icon="🚚" title="No Active Deliveries" note="Manifests assigned to you or currently in transit will show here." />
+                <EmptyState icon={<FiTruck size={44} color="#CBD5E1" />} title="No Active Deliveries" note="Manifests assigned to you or currently in transit will show here." />
               </div>
             ) : (
               activeDeliveries.map((manifest, i) => (
@@ -364,10 +345,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
             </div>
 
             <div className="animate-fade-in-up" style={{ animationDelay: '0.05s', display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '0.75rem', padding: '0.5rem 0.75rem' }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
+              <FiSearch size={16} color="#94A3B8" strokeWidth={2.5} />
               <input
                 type="text"
                 placeholder="Search tracking ID or route..."
@@ -403,7 +381,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
 
             {recentHistory.length === 0 ? (
               <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-                <EmptyState icon="🗂️" title="No History Found" note="No records match your current filters." />
+                <EmptyState icon={<FiClock size={44} color="#CBD5E1" />} title="No History Found" note="No records match your current filters." />
               </div>
             ) : (
               recentHistory.map((manifest, i) => (
@@ -432,7 +410,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
                       </span>
                     </div>
                     <div style={{ fontSize: '0.75rem', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {manifest.origin} <span style={{ color: '#FF6B2C' }}>➔</span> {manifest.destination}
+                      {manifest.origin} <span style={{ display: 'inline-flex', alignItems: 'center', color: '#FF6B2C' }}><FiArrowRight size={13} /></span> {manifest.destination}
                     </div>
                     <div style={{ fontSize: '0.6875rem', color: '#94A3B8', marginTop: '2px', fontFamily: "'IBM Plex Mono', monospace" }}>
                       {manifest.schedule.actualDeliveryTime
@@ -440,9 +418,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
                         : formatDateTime(manifest.schedule.pickupTime)}
                     </div>
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
+                  <FiChevronRight size={16} color="#CBD5E1" strokeWidth={2.5} style={{ flexShrink: 0 }} />
                 </div>
               ))
             )}
@@ -502,35 +478,5 @@ function StatTile({ icon, label, value, color }: { icon: ReactNode; label: strin
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.375rem', fontWeight: 800, color, lineHeight: 1.1 }}>{value}</div>
       <div style={{ fontSize: '0.6875rem', color: '#64748B', fontWeight: 600, marginTop: '2px' }}>{label}</div>
     </div>
-  );
-}
-
-function TruckIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 7h11v10H3z" />
-      <path d="M14 10h4l3 3v4h-7" />
-      <circle cx="7" cy="18" r="1.5" />
-      <circle cx="17" cy="18" r="1.5" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <polyline points="8.5 12.5 11 15 15.5 9.5" />
-    </svg>
-  );
-}
-
-function AlertIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.3 3.7 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="17" x2="12.01" y2="17" />
-    </svg>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft, FiCheckCircle, FiPackage, FiActivity, FiTrendingUp, FiMap, FiBarChart2 } from 'react-icons/fi';
 import StatusBadge from '../../components/shared/StatusBadge';
 import { getStoredManifests, ManifestItem } from '../../services/driverService';
 import { formatWeight } from '../../utils/formatters';
@@ -64,11 +65,8 @@ export default function DriverAnalytics() {
           className="b2b-tap"
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, border: '1px solid #E2E8F0', borderRadius: '0.75rem', backgroundColor: '#F8FAFC', color: '#1B2A4A', cursor: 'pointer', flexShrink: 0 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
+<FiArrowLeft size={18} strokeWidth={2.5} />
+          </button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: '0.9375rem', color: '#1B2A4A' }}>Analytics</div>
@@ -90,14 +88,14 @@ export default function DriverAnalytics() {
         </div>
 
         <div className="animate-fade-in-up" style={{ animationDelay: '0.05s', flexShrink: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-          <KpiTile icon={<CheckIcon />} label="On-Time Rate" value={`${onTimeRate.toFixed(0)}%`} color="#10B981" />
-          <KpiTile icon={<BoxIcon />} label="Completed" value={`${completed}`} color="#3B82F6" />
-          <KpiTile icon={<RouteIcon />} label="Distance" value={`${totalDistance} km`} color="#FF6B2C" />
-          <KpiTile icon={<WeightIcon />} label="Cargo" value={formatWeight(totalWeight)} color="#8B5CF6" />
+          <KpiTile icon={<FiCheckCircle size={16} />} label="On-Time Rate" value={`${onTimeRate.toFixed(0)}%`} color="#10B981" />
+          <KpiTile icon={<FiPackage size={16} />} label="Completed" value={`${completed}`} color="#3B82F6" />
+          <KpiTile icon={<FiActivity size={16} />} label="Distance" value={`${totalDistance} km`} color="#FF6B2C" />
+          <KpiTile icon={<FiTrendingUp size={16} />} label="Cargo" value={formatWeight(totalWeight)} color="#8B5CF6" />
         </div>
 
         <Card className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <CardHeader icon="📊" title="On-Time Delivery" />
+          <CardHeader icon={<FiBarChart2 size={16} />} title="On-Time Delivery" />
           <div style={{ padding: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '0.625rem' }}>
               <span style={{ fontSize: '0.8125rem', color: '#64748B', fontWeight: 600 }}>Completed vs delayed trips</span>
@@ -124,7 +122,7 @@ export default function DriverAnalytics() {
         </Card>
 
         <Card className="animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-          <CardHeader icon="📦" title="Status Distribution" />
+          <CardHeader icon={<FiPackage size={16} />} title="Status Distribution" />
           <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             {statusCounts.map((s) => {
               const pct = manifests.length > 0 ? (s.count / manifests.length) * 100 : 0;
@@ -150,7 +148,7 @@ export default function DriverAnalytics() {
 
         {chartData.length > 0 && (
           <Card className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <CardHeader icon="📈" title="Deliveries by Status" />
+            <CardHeader icon={<FiBarChart2 size={16} />} title="Deliveries by Status" />
             <div style={{ width: '100%', height: 200, padding: '0.75rem 0.5rem 0.25rem' }}>
               <ResponsiveContainer>
                 <BarChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }} barSize={26}>
@@ -174,7 +172,7 @@ export default function DriverAnalytics() {
         )}
 
         <Card className="animate-fade-in-up" style={{ animationDelay: '0.25s' }}>
-          <CardHeader icon="🗺️" title="Route Performance" />
+          <CardHeader icon={<FiMap size={16} />} title="Route Performance" />
           <div style={{ padding: '0.5rem 1rem 1rem', display: 'flex', flexDirection: 'column' }}>
             {routes.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.5rem 0.5rem', color: '#94A3B8', fontSize: '0.8125rem' }}>
@@ -211,10 +209,10 @@ function Card({ children, style, className }: { children: React.ReactNode; style
   );
 }
 
-function CardHeader({ icon, title }: { icon: string; title: string }) {
+function CardHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.875rem 1rem', borderBottom: '1px solid #EDF0F7' }}>
-      <span style={{ fontSize: '1.0625rem' }}>{icon}</span>
+      <span style={{ display: 'inline-flex', color: '#FF6B2C' }}>{icon}</span>
       <h3 style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#1B2A4A', margin: 0 }}>{title}</h3>
     </div>
   );
@@ -235,43 +233,5 @@ function KpiTile({ icon, label, value, color }: { icon: React.ReactNode; label: 
         {label}
       </div>
     </div>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <polyline points="8.5 12.5 11 15 15.5 9.5" />
-    </svg>
-  );
-}
-
-function BoxIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-      <line x1="12" y1="22.08" x2="12" y2="12" />
-    </svg>
-  );
-}
-
-function RouteIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="6" cy="19" r="3" />
-      <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
-      <circle cx="18" cy="5" r="3" />
-    </svg>
-  );
-}
-
-function WeightIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="3" />
-      <path d="M6.5 8a2 2 0 0 0-1.9 1.5L2 20a2 2 0 0 0 1.9 2.5h16.2A2 2 0 0 0 22 20l-2.6-10.5A2 2 0 0 0 17.5 8h-11Z" />
-    </svg>
   );
 }

@@ -1,14 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { DEFAULT_ROUTES } from '../../utils/constants';
+import { FiTool } from 'react-icons/fi';
+import type { ReactNode } from 'react';
 
 interface PlaceholderPageProps {
   title: string;
   description?: string;
-  icon?: string;
+  icon?: ReactNode;
 }
 
-export default function PlaceholderPage({ title, description, icon = '🛠️' }: PlaceholderPageProps) {
+export default function PlaceholderPage({ title, description, icon = <FiTool size={40} color="#FF6B2C" /> }: PlaceholderPageProps) {
   const navigate = useNavigate();
   const { role } = useAuth();
 
@@ -48,7 +50,7 @@ export default function PlaceholderPage({ title, description, icon = '🛠️' }
           backgroundColor: '#FFFFFF',
         }}
       >
-        <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{icon}</div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>{icon}</div>
         <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#1E293B', margin: '0 0 0.5rem 0' }}>
           Module in Progress
         </h3>

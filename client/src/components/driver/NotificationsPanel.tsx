@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { FiBell, FiArrowLeft, FiChevronDown, FiSend, FiX } from 'react-icons/fi';
 import {
   getNotifications,
   replyToNotification,
@@ -82,7 +83,9 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
     <>
       {notifications.length === 0 && (
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '1rem', padding: '2.5rem 1.5rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>🔔</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+            <FiBell size={36} color="#94A3B8" />
+          </div>
           <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1E293B', margin: '0 0 0.25rem 0' }}>You're all caught up</div>
           <div style={{ fontSize: '0.8125rem', color: '#64748B', margin: 0 }}>New messages from dispatch will show up here.</div>
         </div>
@@ -137,19 +140,10 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
                 {!n.isRead && (
                   <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#FF6B2C', flexShrink: 0 }} />
                 )}
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#94A3B8"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ flexShrink: 0, transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
+                <FiChevronDown
+                  size={14}
+                  style={{ flexShrink: 0, transform: expanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', color: '#94A3B8' }}
+                />
               </div>
 
               <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1B2A4A', lineHeight: 1.3 }}>{n.title}</div>
@@ -325,10 +319,8 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
                         opacity: (drafts[n.id] ?? '').trim() ? 1 : 0.4,
                       }}
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <path d="M2 21 23 12 2 3 2 10l15 2-15 2z" />
-                      </svg>
-                    </button>
+                      <FiSend size={16} />
+                      </button>
                   </div>
                 </div>
               )}
@@ -349,10 +341,7 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
             className="b2b-tap"
             style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, border: '1px solid #E2E8F0', borderRadius: '0.75rem', backgroundColor: '#F8FAFC', color: '#1B2A4A', cursor: 'pointer', flexShrink: 0 }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
+            <FiArrowLeft size={18} strokeWidth={2.5} />
           </button>
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -466,10 +455,7 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
                 flexShrink: 0,
               }}
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <FiX size={15} strokeWidth={2.5} />
             </button>
           </div>
         </div>

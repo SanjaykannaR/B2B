@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft, FiArrowRight, FiAlertTriangle, FiPackage, FiClock, FiFileText, FiPlay, FiCheck } from 'react-icons/fi';
 import StatusBadge from '../../components/shared/StatusBadge';
 import ProgressStepper from '../../components/shared/ProgressStepper';
 import TripTimer from '../../components/driver/TripTimer';
@@ -20,10 +21,10 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   );
 }
 
-function CardHeader({ icon, title }: { icon: string; title: string }) {
+function CardHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0.875rem 1rem', borderBottom: '1px solid #EDF0F7' }}>
-      <span style={{ fontSize: '1.0625rem' }}>{icon}</span>
+      <span style={{ display: 'inline-flex', color: '#FF6B2C' }}>{icon}</span>
       <h3 style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#1B2A4A', margin: 0 }}>{title}</h3>
     </div>
   );
@@ -110,11 +111,8 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
           className="b2b-tap"
           style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 38, height: 38, border: '1px solid #E2E8F0', borderRadius: '0.75rem', backgroundColor: '#F8FAFC', color: '#1B2A4A', cursor: 'pointer', flexShrink: 0 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
+<FiArrowLeft size={18} strokeWidth={2.5} />
+          </button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontWeight: 700, fontSize: '0.9375rem', color: '#1B2A4A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -131,7 +129,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '1rem 1rem 6.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {manifest.cargo.isHazmat && (
           <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D', borderRadius: '0.75rem', padding: '0.625rem 0.875rem', fontSize: '0.8125rem', fontWeight: 700 }}>
-            <span>⚠️</span>
+            <span style={{ display: 'inline-flex', color: '#B45309' }}><FiAlertTriangle size={16} strokeWidth={2.5} /></span>
             HAZMAT CLASS {manifest.cargo.hazmatClass ? manifest.cargo.hazmatClass.split(' ')[0] : '3'}
           </div>
         )}
@@ -142,7 +140,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
               <div style={{ fontSize: '0.625rem', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 700 }}>Pickup · Origin</div>
               <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#1E293B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{manifest.origin}</div>
             </div>
-            <div style={{ color: '#FF6B2C', fontSize: '1.375rem', fontWeight: 800, flexShrink: 0 }}>➔</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', color: '#FF6B2C', fontSize: '1.375rem', flexShrink: 0 }}><FiArrowRight size={24} /></div>
             <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
               <div style={{ fontSize: '0.625rem', color: '#94A3B8', textTransform: 'uppercase', fontWeight: 700 }}>Delivery · Destination</div>
               <div style={{ fontSize: '0.9375rem', fontWeight: 800, color: '#1E293B', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{manifest.destination}</div>
@@ -165,7 +163,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
         </Card>
 
         <Card>
-          <CardHeader icon="📦" title="Cargo Specifications" />
+          <CardHeader icon={<FiPackage size={16} />} title="Cargo Specifications" />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem', padding: '1rem' }}>
             <InfoItem label="Total Weight" value={formatWeight(manifest.cargo.weightKg)} />
             <InfoItem label="Total Volume" value={formatVolume(manifest.cargo.volumeM3)} />
@@ -179,7 +177,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
         </Card>
 
         <Card>
-          <CardHeader icon="🕒" title="Schedule & Windows" />
+          <CardHeader icon={<FiClock size={16} />} title="Schedule & Windows" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', padding: '1rem' }}>
             <InfoItem label="Scheduled Pickup" value={formatDateTime(manifest.schedule.pickupTime)} />
             <InfoItem label="Delivery Window Close" value={formatDateTime(manifest.schedule.deliveryWindowClose)} valueColor="#DC2626" />
@@ -192,7 +190,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
         </Card>
 
         <Card>
-          <CardHeader icon="🧾" title="Activity Log" />
+          <CardHeader icon={<FiFileText size={16} />} title="Activity Log" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem', padding: '1rem' }}>
             {manifest.activityLog.map((item, index) => (
               <div key={item.id || index} style={{ display: 'flex', gap: '0.75rem' }}>
@@ -253,9 +251,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
               gap: '8px',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
+            <FiPlay size={18} fill="currentColor" />
             Start Trip
           </button>
         )}
@@ -310,9 +306,7 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
 
         {manifest.status === 'Delivered' && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', backgroundColor: '#D1FAE5', color: '#065F46', padding: '0.9375rem 1rem', borderRadius: '0.875rem', fontWeight: 800, fontSize: '0.9375rem' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+            <FiCheck size={18} strokeWidth={3} />
             Delivery Completed & Verified
           </div>
         )}

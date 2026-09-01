@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { FiCheck } from 'react-icons/fi';
 
 interface ProgressStepperProps {
   currentStatus?: string;
@@ -86,9 +87,7 @@ export default function ProgressStepper({ currentStatus = 'Assigned' }: Progress
                   }}
                 >
                   {stepState === 'completed' ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <FiCheck size={18} strokeWidth={3} />
                   ) : (
                     index + 1
                   )}

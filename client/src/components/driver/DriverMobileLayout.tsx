@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getUnreadCount } from '../../services/notificationService';
+import { FiBell, FiBarChart2 } from 'react-icons/fi';
+import { BiSignal4 } from 'react-icons/bi';
+import { BsWifi, BsBatteryFull } from 'react-icons/bs';
 
 const TRUCK_BG = encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="840" height="240" viewBox="0 0 840 240" fill="none" stroke="#FFFFFF" stroke-width="3">
@@ -46,19 +49,9 @@ function StatusBar() {
     >
       <span>{time}</span>
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-        <svg width="14" height="11" viewBox="0 0 24 24" fill="currentColor">
-          <rect x="1" y="13" width="4" height="8" rx="1" />
-          <rect x="7" y="9" width="4" height="12" rx="1" />
-          <rect x="13" y="5" width="4" height="16" rx="1" />
-          <rect x="19" y="1" width="4" height="20" rx="1" />
-        </svg>
-        <svg width="15" height="11" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M1 9.5 12 1l11 8.5v11a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" />
-        </svg>
-        <svg width="16" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="1" y="6" width="18" height="12" rx="2" />
-          <line x1="23" y1="10" x2="23" y2="14" />
-        </svg>
+        <BiSignal4 size={14} />
+        <BsWifi size={15} />
+        <BsBatteryFull size={16} />
       </span>
     </div>
   );
@@ -178,10 +171,7 @@ export default function DriverMobileLayout() {
                 position: 'relative',
               }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
+              <FiBell size={17} strokeWidth={2} />
               {unread > 0 && (
                 <span
                   style={{
@@ -225,11 +215,7 @@ export default function DriverMobileLayout() {
                 flexShrink: 0,
               }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
+              <FiBarChart2 size={17} strokeWidth={2.5} />
             </button>
           </div>
         </header>

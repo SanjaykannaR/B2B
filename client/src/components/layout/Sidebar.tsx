@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import type { Role } from '../../utils/constants';
+import { FiBarChart2, FiTruck, FiFilePlus, FiMapPin, FiHome, FiPackage, FiSearch, FiFileText } from 'react-icons/fi';
+import type { ReactNode } from 'react';
 
 interface NavItem {
   to: string;
   label: string;
-  icon: string;
+  icon: ReactNode;
 }
 
 interface NavSection {
@@ -18,10 +20,10 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       label: 'Admin',
       items: [
-        { to: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-        { to: '/admin/fleet', label: 'Fleet Monitor', icon: '🚛' },
-        { to: '/admin/manifest/create', label: 'Create Manifest', icon: '📝' },
-        { to: '/admin/live-ops', label: 'Live Operations', icon: '📍' },
+        { to: '/admin/dashboard', label: 'Dashboard', icon: <FiBarChart2 size={17} /> },
+        { to: '/admin/fleet', label: 'Fleet Monitor', icon: <FiTruck size={17} /> },
+        { to: '/admin/manifest/create', label: 'Create Manifest', icon: <FiFilePlus size={17} /> },
+        { to: '/admin/live-ops', label: 'Live Operations', icon: <FiMapPin size={17} /> },
       ],
     },
   ],
@@ -29,23 +31,23 @@ const NAV_BY_ROLE: Record<Role, NavSection[]> = {
     {
       label: 'Client',
       items: [
-        { to: '/client/dashboard', label: 'Dashboard', icon: '🏠' },
-        { to: '/client/place-order', label: 'Place Order', icon: '📦' },
-        { to: '/client/track', label: 'Track Shipment', icon: '🔍' },
-        { to: '/client/invoices', label: 'Invoices', icon: '🧾' },
+        { to: '/client/dashboard', label: 'Dashboard', icon: <FiHome size={17} /> },
+        { to: '/client/place-order', label: 'Place Order', icon: <FiPackage size={17} /> },
+        { to: '/client/track', label: 'Track Shipment', icon: <FiSearch size={17} /> },
+        { to: '/client/invoices', label: 'Invoices', icon: <FiFileText size={17} /> },
       ],
     },
   ],
   driver: [
     {
       label: 'Driver',
-      items: [{ to: '/driver', label: 'My Deliveries', icon: '🚚' }],
+      items: [{ to: '/driver', label: 'My Deliveries', icon: <FiTruck size={17} /> }],
     },
   ],
   executive: [
     {
       label: 'Executive',
-      items: [{ to: '/executive/analytics', label: 'Analytics', icon: '📊' }],
+      items: [{ to: '/executive/analytics', label: 'Analytics', icon: <FiBarChart2 size={17} /> }],
     },
   ],
 };
@@ -129,7 +131,7 @@ export default function Sidebar({ collapsed = false, onClose }: SidebarProps) {
                   transition: 'all 0.2s ease',
                 })}
               >
-                <span style={{ fontSize: '1rem', flexShrink: 0 }}>{item.icon}</span>
+                <span style={{ display: 'inline-flex', flexShrink: 0 }}>{item.icon}</span>
                 {!isCollapsed && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.label}</span>}
               </NavLink>
             ))}
