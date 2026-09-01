@@ -31,7 +31,7 @@ const loginStyles = `
   .login-form-wrap { padding: 24px 0; }
   .login-form-wrap h2 { font-size: 22px; }
   .login-demo-grid { grid-template-columns: 1fr; }
-  .login-quote { display: none; }
+  .login-quote { margin-top: 16px; }
 }
 
 /* ── Small mobile (≤400px) ── */

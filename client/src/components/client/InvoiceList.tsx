@@ -38,7 +38,6 @@ export default function InvoiceList() {
           },
           {
             header: 'Date',
-            hiddenOnMobile: true,
             render: (invoice) => <span className="text-sm text-slate-600 font-medium">{invoice.date}</span>
           },
           {
@@ -54,7 +53,6 @@ export default function InvoiceList() {
           {
             header: 'Action',
             align: 'right',
-            hiddenOnMobile: true,
             render: (invoice) => (
               <button 
                 onClick={(e) => {

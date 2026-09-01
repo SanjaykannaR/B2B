@@ -63,10 +63,10 @@ export default function ShipmentTracker() {
   const activeShipment = (mockShipments.find(s => s.id === activeId) || mockShipments[0]) as typeof mockShipments[0];
 
   return (
-    <div className="flex flex-col md:flex-row h-[75vh] border border-slate-200 rounded-2xl overflow-hidden shadow-xl bg-[#f5f6f8] animate-[dashPopIn_0.7s_ease-out_both]">
+    <div className="flex flex-col md:flex-row min-h-[80vh] border border-slate-200 rounded-2xl overflow-hidden shadow-xl bg-[#f5f6f8] animate-[dashPopIn_0.7s_ease-out_both]">
       
       {/* LEFT PANEL: SEARCH & LIST */}
-      <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col h-[40%] md:h-full relative z-20">
+      <div className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col h-64 md:h-auto shrink-0 relative z-20">
         <div className="p-3 border-b border-slate-200 bg-white">
           <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

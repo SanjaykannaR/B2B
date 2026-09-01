@@ -185,7 +185,7 @@ export default function ClientInvoices() {
       {/* ── Global Navbar ── */}
       <ClientNavbar active="invoices" />
 
-      <div className="max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 flex-1">
+      <div className="max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 flex-1 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-[dashPopIn_0.4s_ease-out]">
@@ -245,7 +245,6 @@ export default function ClientInvoices() {
             },
             {
               header: 'Manifest',
-              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => <span className="font-semibold text-slate-700">{invoice.clientName}</span>
             },
             {
@@ -254,7 +253,6 @@ export default function ClientInvoices() {
             },
             {
               header: 'Due Date',
-              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => <span className="font-medium text-slate-600">{invoice.dueDate}</span>
             },
             {
@@ -290,7 +288,6 @@ export default function ClientInvoices() {
             {
               header: 'Action',
               align: 'right',
-              hiddenOnMobile: true,
               render: (invoice: InvoiceView) => (
                 invoice.status !== 'Paid' ? (
                   <button

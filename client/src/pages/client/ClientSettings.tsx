@@ -50,7 +50,7 @@ export default function ClientSettings() {
       <ClientNavbar active="settings" />
 
       {/* Main Content */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start pt-6 md:pt-8 pb-10 md:pb-12 px-4 md:px-8">
+      <div className="flex-1 w-full flex flex-col items-center justify-start pt-6 md:pt-8 pb-10 md:pb-12 px-4 md:px-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         <div className="w-full max-w-6xl mx-auto">
           
           <div className="mb-6 md:mb-8">
@@ -258,7 +258,7 @@ export default function ClientSettings() {
                     </div>
 
                     {/* Animated Security Image from Outside */}
-                    <div className="hidden lg:flex lg:w-1/3 flex-col items-center justify-center opacity-90 border-l border-slate-100 pl-8">
+                    <div className="flex flex-col lg:w-1/3 items-center justify-center opacity-90 lg:border-l border-slate-100 lg:pl-8 mt-8 lg:mt-0">
                       <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f512/512.gif" alt="Animated Security Lock" width="220" height="220" className="drop-shadow-2xl opacity-80" />
                       <p className="mt-8 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">AES-256 Encrypted</p>
                     </div>

@@ -129,7 +129,7 @@ export default function TrackShipment() {
       <ClientNavbar active="track" />
 
       {/* Main Layout Area */}
-      <div className="flex-1 flex flex-col lg:flex-row relative">
+      <div className="flex-1 flex flex-col lg:flex-row relative animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         {/* LEFT PANEL: SEARCH & LIST */}
         <div className="track-list-panel w-full lg:w-96 bg-white border-b lg:border-b-0 lg:border-r border-slate-200 flex flex-col max-h-[50vh] lg:max-h-[calc(100vh-76px)] lg:sticky lg:top-[76px] z-50">
 

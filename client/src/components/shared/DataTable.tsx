@@ -5,7 +5,6 @@ export interface Column<T> {
   accessor?: keyof T;
   render?: (item: T) => ReactNode;
   align?: 'left' | 'center' | 'right';
-  hiddenOnMobile?: boolean;
 }
 
 interface DataTableProps<T> {
@@ -33,7 +32,7 @@ export default function DataTable<T>({ columns, data, onRowClick, emptyMessage =
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
               {columns.map((col, i) => (
-                <th key={i} className={`dash-table-cell p-4 text-xs font-bold text-slate-600 uppercase tracking-wider ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.hiddenOnMobile ? 'hidden md:table-cell' : ''}`}>
+                <th key={i} className={`dash-table-cell p-4 text-xs font-bold text-slate-600 uppercase tracking-wider ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
                   {col.header}
                 </th>
               ))}
@@ -48,7 +47,7 @@ export default function DataTable<T>({ columns, data, onRowClick, emptyMessage =
                 style={{ animationDelay: `${rowIdx * 0.05}s` }}
               >
                 {columns.map((col, colIdx) => (
-                  <td key={colIdx} className={`dash-table-cell p-4 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.hiddenOnMobile ? 'hidden md:table-cell' : ''}`}>
+                  <td key={colIdx} className={`dash-table-cell p-4 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}>
                     {col.render ? col.render(row) : (col.accessor ? String(row[col.accessor]) : null)}
                   </td>
                 ))}

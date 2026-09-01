@@ -13,16 +13,9 @@ const corsOptions: cors.CorsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    // In development, allow any localhost / 127.0.0.1 origin (Vite may run on any port)
+    // In development, allow any origin to prevent CORS errors during local testing
     if (env.NODE_ENV !== 'production') {
-      try {
-        const { hostname } = new URL(origin);
-        if (hostname === 'localhost' || hostname === '127.0.0.1') {
-          return callback(null, true);
-        }
-      } catch {
-        /* invalid origin URL — fall through to rejection */
-      }
+      return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
   },

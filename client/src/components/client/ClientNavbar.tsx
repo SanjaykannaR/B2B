@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
@@ -6,6 +6,8 @@ import {
   Bell, Settings, Menu, X, LogOut, type LucideIcon,
 } from 'lucide-react';
 import { logout } from '../../store/authSlice';
+import { getNotifications, markRead, markAllRead, type NotificationItem } from '../../services/notificationApi';
+import toast from 'react-hot-toast';
 
 type NavKey = 'dashboard' | 'track' | 'invoices' | 'place-order' | 'settings';
 
@@ -23,6 +25,50 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifications(data);
+      } catch (err) {
+        console.error('Failed to load notifications', err);
+      }
+    };
+
+    fetchNotifs();
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await markRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch {
+      toast.error('Failed to mark read');
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      toast.success('All notifications marked as read');
+    } catch {
+      toast.error('Failed to mark all read');
+    }
+  };
 
   const go = (path: string) => {
     setMenuOpen(false);
@@ -44,6 +90,39 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
     `relative text-slate-600 hover:text-orange-600 hover:bg-orange-50 p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center ${
       isActive ? 'text-orange-600 bg-orange-50' : ''
     }`;
+
+  const renderNotificationDropdown = () => (
+    <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden z-50 animate-[slideDown_0.2s_ease-out_forwards] origin-top-right">
+      <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <h3 className="font-bold text-slate-800">Notifications</h3>
+        {unreadCount > 0 && (
+          <button onClick={handleMarkAllRead} className="text-xs text-orange-600 hover:text-orange-700 font-bold hover:underline">
+            Mark all read
+          </button>
+        )}
+      </div>
+      <div className="max-h-[300px] overflow-y-auto">
+        {notifications.length === 0 ? (
+          <div className="p-6 text-center text-sm text-slate-500 font-medium">No notifications yet.</div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {notifications.map(n => (
+              <div key={n._id} onClick={() => !n.isRead && handleMarkRead(n._id)} className={`p-4 transition-colors cursor-pointer hover:bg-slate-50 ${n.isRead ? 'opacity-60' : 'bg-orange-50/30'}`}>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800">{n.title}</h4>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-2">{n.message}</p>
+                    <p className="text-[10px] text-slate-400 mt-2 font-medium">{new Date(n.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  {!n.isRead && <div className="w-2 h-2 bg-orange-500 rounded-full shrink-0 mt-1" />}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <nav className="bg-white border-b border-slate-200 py-3 md:py-4 px-4 md:px-8 sticky top-0 z-[100] shadow-md">
@@ -92,13 +171,18 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
               <span className="hidden lg:inline">Shipment</span>
             </button>
 
-            <button className={actionBtn()} title="Notifications">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500 border border-white"></span>
-              </span>
-            </button>
+            <div className="relative" ref={notifRef}>
+              <button onClick={() => setShowNotifications(!showNotifications)} className={actionBtn(showNotifications)} title="Notifications">
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500 border border-white"></span>
+                  </span>
+                )}
+              </button>
+              {showNotifications && renderNotificationDropdown()}
+            </div>
 
             <button onClick={() => go('/client/settings')} className={actionBtn(active === 'settings')} title="Settings">
               <Settings className="w-5 h-5" />
@@ -149,10 +233,25 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
               <Package className="w-5 h-5" />
               <span className="text-[10px] font-bold">Shipment</span>
             </button>
-            <button className="flex flex-col items-center gap-1.5 text-slate-600 hover:text-orange-600 px-2 py-2.5 rounded-xl hover:bg-orange-50 transition-all duration-300">
-              <Bell className="w-5 h-5" />
-              <span className="text-[10px] font-bold">Alerts</span>
-            </button>
+            <div className="relative">
+              <button onClick={() => setShowNotifications(!showNotifications)} className="w-full flex flex-col items-center gap-1.5 text-slate-600 hover:text-orange-600 px-2 py-2.5 rounded-xl hover:bg-orange-50 transition-all duration-300">
+                <div className="relative">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500 border border-white"></span>
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-bold">Alerts</span>
+              </button>
+              {showNotifications && (
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-72 text-left z-50">
+                  {renderNotificationDropdown()}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => go('/client/settings')}
               className={`flex flex-col items-center gap-1.5 px-2 py-2.5 rounded-xl transition-all duration-300 ${

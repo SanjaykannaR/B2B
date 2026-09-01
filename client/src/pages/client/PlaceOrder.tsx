@@ -9,7 +9,7 @@ export default function PlaceOrder() {
       <ClientNavbar active="place-order" />
 
       {/* ── Main Content ── */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start p-5 md:p-4">
+      <div className="flex-1 w-full flex flex-col items-center justify-start p-5 md:p-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         <div className="w-full max-w-5xl mx-auto">
           <OrderForm />
         </div>

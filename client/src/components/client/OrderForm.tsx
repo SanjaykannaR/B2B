@@ -235,7 +235,7 @@ export default function OrderForm() {
       </div>
 
       {/* Right Main Content Area */}
-      <div className="flex-1 bg-slate-50/30 p-1 md:p-6 relative overflow-hidden h-[70vh] lg:h-auto">
+      <div className="flex-1 bg-slate-50/30 p-1 md:p-6 relative overflow-hidden min-h-[600px] lg:h-auto">
         
         {/* Step 1: Routing */}
         <div className={`absolute inset-0 p-5 md:p-12 overflow-y-auto transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${step === 1 ? 'opacity-100 translate-x-0 z-10' : 'opacity-0 -translate-x-32 pointer-events-none'}`}>

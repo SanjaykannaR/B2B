@@ -97,7 +97,6 @@ const dashboardStyles = `
   .dash-header-actions button { flex: 1; justify-content: center; }
   .dash-header-actions button span { display: inline; }
   .dash-search-bar { gap: 12px; }
-  .dash-search-bar .flex-1 { display: none; }
   .dash-main-grid { gap: 16px; }
   .dash-section-header { padding: 16px; }
   .dash-invoice-item { padding: 16px; }
@@ -291,7 +290,7 @@ export default function ClientDashboard() {
       {/* ── Global Navbar ── */}
       <ClientNavbar active="dashboard" />
 
-      <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
 
         {/* ═══ Header ═══ */}
         <div className="dash-header flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">

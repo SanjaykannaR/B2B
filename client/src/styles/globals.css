@@ -126,6 +126,14 @@
   .dash-table { min-width: 560px; }
   .dash-table-cell { padding: 12px; }
   .dash-shipment-table { min-width: 640px; }
+  
+  /* Additional global typography and layout tweaks for mobile */
+  h1 { font-size: 1.5rem !important; line-height: 2rem !important; }
+  h2 { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+  
+  .dash-container { padding: 10px !important; }
+  .stat-card-title { font-size: 0.8rem !important; }
+  .stat-card-value { font-size: 1.5rem !important; }
 }
 
 /* ── Tablet (641px–1024px) ── */
