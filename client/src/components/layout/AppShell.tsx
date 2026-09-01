@@ -86,7 +86,7 @@ export default function AppShell() {
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
         <Topbar onMenuClick={handleToggleSidebar} />
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
           <Outlet />
         </main>
       </div>

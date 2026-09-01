@@ -28,7 +28,7 @@ export default function RevenueSummary({ data }: RevenueSummaryProps) {
   }));
 
   return (
-    <div className="card" style={{ padding: '1.5rem', backgroundColor: '#FFFFFF', height: '100%' }}>
+    <div className="card" style={{ padding: '1.5rem', backgroundColor: '#FFFFFF', height: '100%', minWidth: 0, maxWidth: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#1B2A4A', margin: 0 }}>

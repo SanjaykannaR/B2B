@@ -70,7 +70,7 @@ export default function ExecutiveAnalytics() {
   const totalShipments = data.capacity?.monthly.reduce((sum, row) => sum + row.shipments, 0) ?? 0;
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem' }}>
+    <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden' }}>
       <div
         style={{
           backgroundColor: '#1B2A4A',
@@ -120,7 +120,7 @@ export default function ExecutiveAnalytics() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(230px, 100%), 1fr))',
               gap: '1.25rem',
               marginBottom: '2rem',
             }}
@@ -158,7 +158,7 @@ export default function ExecutiveAnalytics() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(480px, 100%), 1fr))',
               gap: '1.5rem',
               marginBottom: '1.5rem',
             }}
