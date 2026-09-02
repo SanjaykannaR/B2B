@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { NotFound } from './pages/NotFound';
+import Login from './pages/Login';
 // Admin
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { FleetMonitor } from './pages/admin/FleetMonitor';
@@ -17,12 +18,20 @@ import { Users as UsersPage } from './pages/admin/Users';
 // import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
 // Executive
 import { ExecutiveAnalytics } from './pages/executive/ExecutiveAnalytics';
+// Team placeholders — will be replaced when teammates merge their pages
+import ClientDashboard from './pages/client/ClientDashboard';
+import ClientInvoices from './pages/client/ClientInvoices';
+import TrackShipment from './pages/client/TrackShipment';
+import PlaceOrder from './pages/client/PlaceOrder';
+import DriverDashboard from './pages/driver/DriverDashboard';
+import ActiveDelivery from './pages/driver/ActiveDelivery';
 
 export default function App() {
   return (
     <Routes>
-      {/* Root goes straight to the admin console (login page removed for now — pending a decision on how auth will work) */}
-      <Route path="/" element={<Navigate to="/admin" replace />} />
+      {/* Public */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Authenticated — admin can access every role's routes */}
       <Route element={<ProtectedRoute />}>
@@ -41,8 +50,22 @@ export default function App() {
           <Route path="/admin/settings" element={<SettingsPage />} />
 
           {/* Executive */}
-          <Route element={<ProtectedRoute allowedRoles={['executive']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['executive', 'admin']} />}>
             <Route path="/executive/analytics" element={<ExecutiveAnalytics />} />
+          </Route>
+
+          {/* Client pages (placeholder — teammates will replace these) */}
+          <Route element={<ProtectedRoute allowedRoles={['client', 'admin']} />}>
+            <Route path="/client/dashboard" element={<ClientDashboard />} />
+            <Route path="/client/invoices" element={<ClientInvoices />} />
+            <Route path="/client/track" element={<TrackShipment />} />
+            <Route path="/client/order" element={<PlaceOrder />} />
+          </Route>
+
+          {/* Driver pages (placeholder — teammates will replace these) */}
+          <Route element={<ProtectedRoute allowedRoles={['driver', 'admin']} />}>
+            <Route path="/driver/dashboard" element={<DriverDashboard />} />
+            <Route path="/driver/delivery" element={<ActiveDelivery />} />
           </Route>
         </Route>
       </Route>

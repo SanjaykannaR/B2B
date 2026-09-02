@@ -23,12 +23,21 @@ export const listInvoices = async (req: Request, res: Response, next: NextFuncti
     const filter: Record<string, unknown> = {};
 
     if (req.query.status) filter.status = String(req.query.status).toUpperCase();
-    if (req.query.client) {
+
+    // IDOR fix: clients can only see their own invoices
+    const role = (req as any).user?.role;
+    const userId = (req as any).user?._id;
+    if (role === 'client') {
+      filter.client = userId;
+    } else if (req.query.client) {
       const cid = toObjectId(String(req.query.client));
       if (cid) filter.client = cid;
     }
     const search = String(req.query.search || '').trim();
-    if (search) filter.invoiceNumber = new RegExp(search, 'i');
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.invoiceNumber = new RegExp(escaped, 'i');
+    }
 
     const [invoices, total] = await Promise.all([
       Invoice.find(filter)

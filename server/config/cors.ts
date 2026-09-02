@@ -5,8 +5,15 @@ const allowedOrigins = env.clientUrl ? env.clientUrl.split(',').map((o) => o.tri
 
 export const corsOptions: CorsOptions = {
   origin(origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+    // Allow requests with no origin (same-origin, curl, server-to-server) only in dev
+    if (!origin) {
+      if (env.nodeEnv === 'development') return callback(null, true);
+      return callback(new Error('CORS: No origin header'));
+    }
+    if (allowedOrigins.length === 0 && env.nodeEnv === 'development') {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));

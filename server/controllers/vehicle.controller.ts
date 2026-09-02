@@ -32,7 +32,8 @@ export const listVehicles = async (req: Request, res: Response, next: NextFuncti
     if (req.query.status) filter.status = String(req.query.status);
     const search = String(req.query.search || '').trim();
     if (search) {
-      const re = new RegExp(search, 'i');
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'i');
       filter.$or = [{ registrationNumber: re }, { make: re }, { model: re }];
     }
 

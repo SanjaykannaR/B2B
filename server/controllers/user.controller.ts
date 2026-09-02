@@ -13,7 +13,8 @@ export const listUsers = async (req: Request, res: Response, next: NextFunction)
 
     const search = String(req.query.search || '').trim();
     if (search) {
-      const re = new RegExp(search, 'i');
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'i');
       filter.$or = [
         { firstName: re },
         { lastName: re },

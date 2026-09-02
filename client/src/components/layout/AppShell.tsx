@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import type { RootState } from '../../store/store';
 
 /**
  * AppShell — main authenticated layout (sidebar + topbar + content outlet).
@@ -9,7 +11,8 @@ import { Topbar } from './Topbar';
  */
 export const AppShell: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const role = (JSON.parse(localStorage.getItem('user') || 'null') || {}).role || 'admin';
+  const { user } = useSelector((s: RootState) => s.auth);
+  const role = user?.role || 'admin';
 
   return (
     <div

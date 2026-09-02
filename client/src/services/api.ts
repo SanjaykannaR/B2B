@@ -1,10 +1,5 @@
-// This file is for: Axios instance with base URL, JWT interceptor, 401 auto-redirect
-// Module: Frontend API Services (Module 10)
-// Owner: Developer 2 (Web Frontend Engineer)
-
 import axios from 'axios';
 
-// Get base API URL from environment variables, fallback to Vite proxy path (/api → localhost:5000)
 const baseURL = (import.meta as any).env.VITE_API_URL || '/api';
 
 const api = axios.create({
@@ -14,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor: Attach JWT token from localStorage if it exists
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,20 +17,19 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor: Handle errors, particularly 401 Unauthorized
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear local storage auth credentials on token expiration / unauthorized.
-      // No login page anymore — pages fall back to demo data on API failure.
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      // Redirect to login if not already there
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

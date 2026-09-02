@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { ApiError } from '../utils/ApiError';
 import { sendError } from '../utils/ApiResponse';
+import { isProd } from '../config/env';
 
 /**
  * Centralized error handler. Registered last in server.ts.
@@ -19,10 +20,9 @@ export const errorHandler = (
     return sendError(res, err.statusCode, err.message, err.errors);
   }
 
-  // Duplicate key (unique index) — e.g. email, registrationNumber, trackingId
+  // Duplicate key (unique index) — don't leak field name in production
   if (anyErr && anyErr.code === 11000) {
-    const field = Object.keys(anyErr.keyValue || {})[0] || 'field';
-    return sendError(res, 409, `Duplicate value for '${field}'`);
+    return sendError(res, 409, isProd ? 'Duplicate value' : `Duplicate value for '${Object.keys(anyErr.keyValue || {})[0] || 'field'}'`);
   }
 
   // Mongoose validation error
@@ -35,9 +35,14 @@ export const errorHandler = (
 
   // Invalid ObjectId
   if (anyErr && anyErr.name === 'CastError') {
-    return sendError(res, 400, `Invalid id format for '${anyErr.path}'`);
+    return sendError(res, 400, 'Invalid ID format');
   }
 
-  console.error(`[error] ${req.method} ${req.originalUrl}`, err);
+  // Sanitized logging — no full URLs in production
+  if (isProd) {
+    console.error(`[error] ${req.method} ${req.path}`, anyErr?.message || 'unknown');
+  } else {
+    console.error(`[error] ${req.method} ${req.originalUrl}`, err);
+  }
   return sendError(res, 500, 'Internal server error');
 };

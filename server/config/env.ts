@@ -8,9 +8,12 @@ const env = {
   mongoUri:
     process.env.MONGODB_URI ||
     'mongodb://localhost:27017/b2b-logistics',
-  jwtSecret:
-    process.env.JWT_SECRET ||
-    'b2b-logistics-super-secret-key-change-in-production-2026',
+  jwtSecret: (() => {
+    if ((process.env.NODE_ENV || 'development') === 'production' && !process.env.JWT_SECRET) {
+      throw new Error('[FATAL] JWT_SECRET environment variable is required in production');
+    }
+    return process.env.JWT_SECRET || 'dev-only-local-secret-do-not-deploy';
+  })(),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   nodeEnv: process.env.NODE_ENV || 'development',
   smtp: {

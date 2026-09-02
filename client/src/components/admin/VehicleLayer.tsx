@@ -13,6 +13,7 @@ import {
   bearing,
   type LatLng,
 } from '../../utils/geo';
+import { escapeHtml, escapeAttr } from '../../utils/sanitize';
 import { routeCache } from './RouteLayer';
 
 /** Status → marker color */
@@ -65,7 +66,7 @@ const buildTruckHtml = (color: string, status: string): string => {
   const isDelayed = (status || '').toUpperCase() === 'DELAYED';
   const ringColor = isDelayed ? '#EF4444' : color;
   const glowColor = isDelayed ? 'rgba(239,68,68,0.35)' : `${color}55`;
-  return `<div class="truck-marker-3d" style="--truck-color:${color}; --ring-color:${ringColor}; --glow-color:${glowColor}" data-status="${status}">` +
+  return `<div class="truck-marker-3d" style="--truck-color:${color}; --ring-color:${ringColor}; --glow-color:${glowColor}" data-status="${escapeAttr(status)}">` +
     '<div class="truck-glow"></div>' +
     '<div class="truck-pulse-ring"></div>' +
     `<div class="truck-icon-3d">${TRUCK_SVG_3D}</div>` +
@@ -75,17 +76,17 @@ const buildTruckHtml = (color: string, status: string): string => {
 
 /** Build rich HTML popup */
 const buildPopupHtml = (mnf: any): string => {
-  const id = mnf.trackingId || mnf._id || '—';
+  const id = escapeHtml(mnf.trackingId || mnf._id || '—');
   const status = (mnf.status || 'UNKNOWN').toUpperCase();
-  const driver = mnf.driver?.name || 'Unassigned';
-  const phone = mnf.driver?.phone || '';
-  const goods = mnf.cargoDetails?.description || 'General Cargo';
+  const driver = escapeHtml(mnf.driver?.name || 'Unassigned');
+  const phone = escapeHtml(mnf.driver?.phone || '');
+  const goods = escapeHtml(mnf.cargoDetails?.description || 'General Cargo');
   const weight = mnf.cargoDetails?.totalWeightKg;
-  const origin = mnf.origin?.city || '—';
-  const dest = mnf.destination?.city || '—';
-  const vehicle = mnf.vehicle?.registrationNumber || '—';
-  const vehicleMake = mnf.vehicle?.make || '';
-  const delayReason = mnf.delayReason || '';
+  const origin = escapeHtml(mnf.origin?.city || '—');
+  const dest = escapeHtml(mnf.destination?.city || '—');
+  const vehicle = escapeHtml(mnf.vehicle?.registrationNumber || '—');
+  const vehicleMake = escapeHtml(mnf.vehicle?.make || '');
+  const delayReason = escapeHtml(mnf.delayReason || '');
   const isDelayed = status === 'DELAYED';
   const isHazardous = mnf.cargoDetails?.isHazardous;
 
@@ -97,6 +98,8 @@ const buildPopupHtml = (mnf: any): string => {
   };
   const c = sc[status] || { bg: '#64748B', text: '#fff' };
 
+  const driverInitials = driver.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+
   return `
     <div style="font-family:Inter,system-ui,sans-serif;min-width:260px;max-width:300px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -107,10 +110,10 @@ const buildPopupHtml = (mnf: any): string => {
         ${isHazardous ? '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEE2E2;color:#EF4444;">HAZ</span>' : ''}
       </div>
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:8px;">
-        <div style="width:32px;height:32px;border-radius:50%;background:#FF6B2C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${driver.split(' ').map((n:string)=>n[0]).join('').slice(0,2)}</div>
+        <div style="width:32px;height:32px;border-radius:50%;background:#FF6B2C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${driverInitials}</div>
         <div style="min-width:0;">
           <div style="font-size:12px;font-weight:600;color:#1e293b;">${driver}</div>
-          <div style="font-size:10px;color:#64748B;">${vehicle}${vehicleMake?' • '+vehicleMake:''}</div>
+          <div style="font-size:10px;color:#64748B;">${vehicle}${vehicleMake ? ' • ' + vehicleMake : ''}</div>
         </div>
         ${phone ? `<a href="tel:${phone}" style="margin-left:auto;width:28px;height:28px;border-radius:50%;background:#10B981;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" title="Call ${driver}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>` : ''}
       </div>
@@ -122,7 +125,7 @@ const buildPopupHtml = (mnf: any): string => {
       <div style="padding:8px 10px;background:#f8fafc;border-radius:8px;margin-bottom:8px;">
         <div style="font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Cargo</div>
         <div style="font-size:12px;font-weight:500;color:#1e293b;">${goods}</div>
-        ${weight ? `<div style="font-size:10px;color:#64748B;margin-top:2px;">${weight.toLocaleString()} kg</div>` : ''}
+        ${weight ? `<div style="font-size:10px;color:#64748B;margin-top:2px;">${Number(weight).toLocaleString()} kg</div>` : ''}
       </div>
       ${isDelayed && delayReason ? `<div style="padding:8px 10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;"><div style="font-size:10px;font-weight:700;color:#EF4444;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Delay Reason</div><div style="font-size:11px;color:#991B1B;line-height:1.4;">${delayReason}</div></div>` : ''}
     </div>`;

@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { connectDB } from './config/db';
-import env from './config/env';
+import env, { isProd } from './config/env';
 import { corsOptions } from './config/cors';
 import { startOverdueSweep } from './cron/overdueSweep';
 import { errorHandler } from './middleware/errorHandler';
@@ -15,10 +16,16 @@ import analyticsRoutes from './routes/analytics.routes';
 
 const app = express();
 
+// ── Security headers ────────────────────────────────────────────
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // ── Core middleware ───────────────────────────────────────────────
 app.use(cors(corsOptions));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: isProd ? '100kb' : '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: isProd ? '100kb' : '5mb' }));
+
+// Hide server fingerprint
+app.disable('x-powered-by');
 
 // ── Health check ──────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

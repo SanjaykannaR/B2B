@@ -95,12 +95,17 @@ export const listManifests = async (req: Request, res: Response, next: NextFunct
     const { page, limit, skip } = paginate(req.query.page, req.query.limit);
     const filter: Record<string, unknown> = {};
 
-    if (req.query.status) filter.currentStatus = String(req.query.status).toUpperCase();
-    if (req.query.requestStatus) filter.requestStatus = String(req.query.requestStatus).toUpperCase();
-    if (req.query.client) {
+    // IDOR fix: clients can only see their own manifests
+    const role = (req as any).user?.role;
+    const userId = (req as any).user?._id;
+    if (role === 'client') {
+      filter.client = userId;
+    } else if (req.query.client) {
       const cid = toObjectId(String(req.query.client));
       if (cid) filter.client = cid;
     }
+    if (req.query.status) filter.currentStatus = String(req.query.status).toUpperCase();
+    if (req.query.requestStatus) filter.requestStatus = String(req.query.requestStatus).toUpperCase();
     if (req.query.startDate || req.query.endDate) {
       const dateFilter: { $gte?: Date; $lte?: Date } = {};
       if (req.query.startDate) dateFilter.$gte = new Date(String(req.query.startDate));
@@ -110,7 +115,8 @@ export const listManifests = async (req: Request, res: Response, next: NextFunct
 
     const search = String(req.query.search || '').trim();
     if (search) {
-      const re = new RegExp(search, 'i');
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'i');
       filter.$or = [
         { trackingId: re },
         { 'routing.origin.city': re },

@@ -1,9 +1,8 @@
 import { Types } from 'mongoose';
+import crypto from 'crypto';
 
 export const randomDigits = (len: number): string => {
-  let out = '';
-  for (let i = 0; i < len; i++) out += Math.floor(Math.random() * 10).toString();
-  return out;
+  return crypto.randomInt(0, 10 ** len).toString().padStart(len, '0');
 };
 
 export const generateTrackingId = (): string => `TRK-${randomDigits(6)}`;
