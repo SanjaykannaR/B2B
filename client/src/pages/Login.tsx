@@ -58,6 +58,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleKey>('admin');
   const [mounted, setMounted] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
 
   const from = (location.state as any)?.from?.pathname || '/admin';
 
@@ -78,20 +79,34 @@ const Login: React.FC = () => {
     setEmail(demos[selectedRole].email);
     setPassword(demos[selectedRole].password);
     dispatch(clearError());
+    setRoleError(null);
   }, [selectedRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setRoleError(null);
     const result = await dispatch(loginUser({ email, password }) as any);
     if (!result.error) {
-      const role = result.payload?.user?.role;
+      const actualRole = result.payload?.user?.role;
+      const roleLabels: Record<string, string> = {
+        admin: 'Admin',
+        executive: 'Executive',
+        client: 'Client',
+        driver: 'Driver',
+      };
+      if (actualRole && actualRole !== selectedRole) {
+        setRoleError(
+          `This account is registered as ${roleLabels[actualRole] || actualRole}, not ${roleLabels[selectedRole]}. Please select the correct role.`
+        );
+        return;
+      }
       const redirectMap: Record<string, string> = {
         admin: '/admin',
         executive: '/executive/analytics',
         client: '/client/dashboard',
         driver: '/driver/dashboard',
       };
-      navigate(redirectMap[role] || '/admin', { replace: true });
+      navigate(redirectMap[actualRole] || '/admin', { replace: true });
     }
   };
 
@@ -281,7 +296,7 @@ const Login: React.FC = () => {
 
           {/* Error */}
           <AnimatePresence>
-            {error && (
+            {(error || roleError) && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -289,7 +304,7 @@ const Login: React.FC = () => {
                 className="mt-3 px-4 py-2.5 rounded-xl text-sm"
                 style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#FCA5A5' }}
               >
-                {String(error)}
+                {roleError || String(error)}
               </motion.div>
             )}
           </AnimatePresence>
