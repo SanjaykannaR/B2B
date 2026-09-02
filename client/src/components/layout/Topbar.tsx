@@ -474,7 +474,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
               ))}
             </div>
             <button
-              onClick={() => navigate('/admin/notifications')}
+              onClick={() => { setNotifOpen(false); navigate('/admin/notifications'); }}
               className="w-full text-left px-4 py-3 border-t text-xs font-bold transition-colors min-h-[44px]"
               style={{ borderColor: 'var(--color-border-light)', color: 'var(--color-accent)' }}
             >
