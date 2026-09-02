@@ -73,8 +73,8 @@ const Login: React.FC = () => {
     const demos: Record<RoleKey, { email: string; password: string }> = {
       admin: { email: 'admin@logistics.com', password: 'admin123' },
       executive: { email: 'exec@logistics.com', password: 'exec123' },
-      client: { email: 'client@example.com', password: 'client123' },
-      driver: { email: 'driver@logistics.com', password: 'driver123' },
+      client: { email: 'client@abc.com', password: 'client123' },
+      driver: { email: 'driver1@logistics.com', password: 'driver123' },
     };
     setEmail(demos[selectedRole].email);
     setPassword(demos[selectedRole].password);
