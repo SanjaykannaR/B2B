@@ -371,10 +371,10 @@ export const Invoices: React.FC = () => {
 
       {/* Generate Invoice modal */}
       {generateOpen && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 10000 }}>
           <div className="absolute inset-0 bg-black/50" onClick={() => setGenerateOpen(false)} />
           <div
-            className="relative w-full max-w-xl rounded-2xl border p-5 sm:p-6 max-h-[80vh] overflow-y-auto"
+            className="relative w-full max-w-xl rounded-2xl border p-5 sm:p-6 max-h-[calc(100vh-32px)] overflow-y-auto overscroll-contain"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-modal)' }}
           >
             <div className="flex items-center justify-between pb-4 border-b" style={{ borderColor: 'var(--color-border-light)' }}>

@@ -676,6 +676,90 @@
   100% { transform: scale(1.9); opacity: 0; }
 }
 
+/* ============================================================
+   SIDEBAR — Collapsible Desktop Sidebar
+   ============================================================ */
+.sidebar-desktop {
+  will-change: width;
+}
+
+.sidebar-desktop .sidebar-nav-item {
+  position: relative;
+}
+
+/* Tooltip for collapsed sidebar nav items */
+.sidebar-desktop:not(:hover) .sidebar-nav-item[title]::after {
+  display: none;
+}
+
+.sidebar-nav-item {
+  position: relative;
+}
+
+/* Native tooltip via title attribute works, but we add a visual hover glow */
+.sidebar-nav-item:hover {
+  z-index: 1;
+}
+
+/* ============================================================
+   SEARCH DROPDOWN — Global Search Results
+   ============================================================ */
+.search-dropdown-enter {
+  animation: scale-in 150ms ease-out;
+}
+
+/* ============================================================
+   MODAL — Fix z-index stacking and overflow
+   ============================================================ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal-overlay > .modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-overlay > .modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-card);
+  box-shadow: var(--shadow-modal);
+}
+
+/* Ensure modals are always above the sticky topbar */
+.modal-overlay {
+  z-index: 10000;
+}
+
+/* ============================================================
+   TOPBAR — Ensure it stays below modals
+   ============================================================ */
+header {
+  z-index: 40 !important;
+}
+
+/* ============================================================
+   CONTENT AREA — Prevent overflow issues
+   ============================================================ */
+.content-area {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* ── Accessibility: calm it down for reduced-motion users ── */
 @media (prefers-reduced-motion: reduce) {
   .route-flow,

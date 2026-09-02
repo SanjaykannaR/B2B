@@ -55,8 +55,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-      style={{ background: 'var(--color-surface-modal)' }}
+      className="fixed inset-0 flex items-center justify-center p-4 animate-fade-in"
+      style={{ background: 'var(--color-surface-modal)', zIndex: 10000 }}
     >
       <div
         className="w-full max-w-md rounded-2xl p-6 animate-scale-in"

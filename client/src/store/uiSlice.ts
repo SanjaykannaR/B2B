@@ -12,12 +12,14 @@ interface ModalState {
 
 interface UiState {
   sidebarOpen: boolean;
+  sidebarExpanded: boolean;
   modalState: ModalState;
   globalLoading: boolean;
 }
 
 const initialState: UiState = {
-  sidebarOpen: true, // Typically open by default on desktop
+  sidebarOpen: true,
+  sidebarExpanded: false,
   modalState: {
     isOpen: false,
     modalType: null,
@@ -30,13 +32,15 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    // Toggles or sets the sidebar visibility state
     toggleSidebar: (state, action: PayloadAction<boolean | undefined>) => {
       if (action.payload !== undefined) {
         state.sidebarOpen = action.payload;
       } else {
         state.sidebarOpen = !state.sidebarOpen;
       }
+    },
+    toggleSidebarExpanded: (state) => {
+      state.sidebarExpanded = !state.sidebarExpanded;
     },
     // Opens a generic modal by type string, passing optional props
     openModal: (
@@ -62,6 +66,7 @@ const uiSlice = createSlice({
 
 export const {
   toggleSidebar,
+  toggleSidebarExpanded,
   openModal,
   closeModal,
   setGlobalLoading,

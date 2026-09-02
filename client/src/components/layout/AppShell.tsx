@@ -20,7 +20,12 @@ export const AppShell: React.FC = () => {
 
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         <Topbar onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-0">
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden relative z-0"
+          style={{
+            marginLeft: 0,
+          }}
+        >
           <Outlet />
         </main>
       </div>

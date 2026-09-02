@@ -35,8 +35,8 @@ const ROLE_META: Record<string, { color: string; bg: string }> = {
 
 const DEFAULT_META = { color: '#F59E0B', bg: '#FEF3C7' };
 
-const inputCls = `w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200
-  focus:ring-2 focus:ring-[var(--color-accent)] border min-h-[44px]`;
+  const inputCls = `w-full px-3 py-2 rounded-xl text-sm outline-none transition-all duration-200
+  focus:ring-2 focus:ring-[var(--color-accent)] border min-h-[40px]`;
 
 interface UserFormState {
   firstName: string;
@@ -518,13 +518,13 @@ export const Users: React.FC = () => {
 
       {/* Create / Edit user modal */}
       {formOpen && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 10000 }}>
           <div className="absolute inset-0 bg-black/50" onClick={() => setFormOpen(false)} />
           <div
-            className="relative w-full max-w-lg rounded-2xl border p-5 sm:p-6 max-h-[85vh] overflow-y-auto"
+            className="relative w-full max-w-lg rounded-2xl border max-h-[calc(100vh-32px)] overflow-y-auto overscroll-contain"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-modal)' }}
           >
-            <div className="flex items-center justify-between pb-4 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
+            <div className="flex items-center justify-between px-5 sm:px-6 pt-4 pb-3 border-b sticky top-0 z-10" style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface-card)' }}>
               <div>
                 <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {editing ? 'Edit User' : 'Create User'}
@@ -543,16 +543,16 @@ export const Users: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3 mt-3 px-5 sm:px-6 pb-5 sm:pb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                     First Name *
                   </label>
                   <input type="text" className={inputCls} style={inputStyle} value={form.firstName} onChange={set('firstName')} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                     Last Name *
                   </label>
                   <input type="text" className={inputCls} style={inputStyle} value={form.lastName} onChange={set('lastName')} />
@@ -560,21 +560,21 @@ export const Users: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                   Email *
                 </label>
                 <input type="email" className={inputCls} style={inputStyle} value={form.email} onChange={set('email')} />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                   {editing ? 'Password (leave blank to keep current)' : 'Password *'}
                 </label>
                 <input type="password" className={inputCls} style={inputStyle} value={form.password} onChange={set('password')} placeholder="Min 6 characters" />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                   Role *
                 </label>
                 <select className={inputCls} style={inputStyle} value={form.role} onChange={set('role')}>
@@ -583,20 +583,20 @@ export const Users: React.FC = () => {
                   <option value="executive">Executive</option>
                   <option value="admin">Admin</option>
                 </select>
-                <p className="text-[11px] mt-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                <p className="text-[10px] mt-1" style={{ color: 'var(--color-text-muted)' }}>
                   New accounts log in and auto-redirect to their own page via JWT role.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                     Company
                   </label>
                   <input type="text" className={inputCls} style={inputStyle} value={form.company} onChange={set('company')} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                     Phone
                   </label>
                   <input type="tel" className={inputCls} style={inputStyle} value={form.phone} onChange={set('phone')} />
@@ -604,10 +604,10 @@ export const Users: React.FC = () => {
               </div>
 
               {(form.role === 'driver' || form.role === 'client') && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {form.role === 'driver' && (
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                         License Number
                       </label>
                       <input type="text" className={inputCls} style={inputStyle} value={form.licenseNumber} onChange={set('licenseNumber')} />
@@ -615,7 +615,7 @@ export const Users: React.FC = () => {
                   )}
                   {form.role === 'client' && (
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--color-text-muted)' }}>
                         Contract Rate (₹/km)
                       </label>
                       <input type="number" className={inputCls} style={inputStyle} value={form.contractRate} onChange={set('contractRate')} />
@@ -648,10 +648,10 @@ export const Users: React.FC = () => {
 
       {/* Reset password modal */}
       {resetTarget && (
-        <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 10000 }}>
           <div className="absolute inset-0 bg-black/50" onClick={() => { setResetTarget(null); setNewPassword(''); }} />
           <div
-            className="relative w-full max-w-sm rounded-2xl border p-5 sm:p-6"
+            className="relative w-full max-w-sm rounded-2xl border p-5 sm:p-6 max-h-[calc(100vh-32px)] overflow-y-auto overscroll-contain"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-modal)' }}
           >
             <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>Reset Password</h2>

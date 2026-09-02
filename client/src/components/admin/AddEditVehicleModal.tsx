@@ -44,8 +44,8 @@ export const AddEditVehicleModal: React.FC<AddEditVehicleModalProps> = ({ isOpen
   const inputCls = 'w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent)] border';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-      style={{ background: 'var(--color-surface-modal)' }}>
+    <div className="fixed inset-0 flex items-center justify-center p-4 animate-fade-in"
+      style={{ background: 'var(--color-surface-modal)', zIndex: 10000 }}>
       <div className="w-full max-w-lg rounded-2xl overflow-hidden animate-scale-in"
         style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-modal)' }}>
         {/* Header */}

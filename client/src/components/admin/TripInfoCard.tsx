@@ -97,8 +97,8 @@ export const TripInfoCard: React.FC<TripInfoCardProps> = ({
       style={{ background: 'rgba(15, 27, 51, 0.92)', backdropFilter: 'blur(12px)', boxShadow: 'var(--shadow-xl)' }}
     >
       {/* Header — tracking ID + status + close */}
-      <div className="flex items-start justify-between gap-2 px-4 pt-3.5">
-        <div className="min-w-0">
+      <div className="flex items-start justify-between gap-2 px-4 pt-3.5 pb-2">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm font-bold" style={{ color: '#fff' }}>
               #{manifest.trackingId || manifestId}
@@ -111,7 +111,7 @@ export const TripInfoCard: React.FC<TripInfoCardProps> = ({
         </div>
         <button
           onClick={() => onSelect?.(manifest)}
-          className="shrink-0 rounded-full p-2.5 transition-colors hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="shrink-0 rounded-full p-2 transition-colors hover:bg-white/10 min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Close trip details"
           style={{ color: 'rgba(255,255,255,0.6)' }}
         >

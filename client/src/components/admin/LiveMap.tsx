@@ -107,8 +107,8 @@ export const LiveMap: React.FC<LiveMapProps> = ({
           onMapClick={handleMapClick}
         />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <RouteLayer manifests={manifests} selectedId={selectedId} />
         <VehicleLayer
@@ -136,8 +136,8 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         <LocateFixed size={16} className={follow ? 'animate-pulse' : ''} />
       </button>
 
-      {/* Trip info / fleet summary card */}
-      <div className="absolute top-3 left-3 z-[1100] w-[220px] sm:w-[280px] max-w-[calc(100%-24px)]">
+      {/* Trip info / fleet summary card - positioned to avoid overlap with follow button */}
+      <div className="absolute top-3 left-3 right-48 z-[1100] max-w-[calc(100%-80px)]">
         <TripInfoCard
           manifest={selected}
           fleet={fleet}

@@ -21,8 +21,8 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
-      style={{ background: 'var(--color-surface-modal)' }}
+      className="fixed inset-0 flex items-center justify-center p-4 animate-fade-in"
+      style={{ background: 'var(--color-surface-modal)', zIndex: 10000 }}
     >
       <div
         className="w-full max-w-4xl max-h-[90vh] rounded-2xl flex flex-col overflow-hidden animate-scale-in"
