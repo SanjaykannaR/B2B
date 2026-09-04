@@ -72,35 +72,21 @@ export default function ExecutiveAnalytics() {
 
   return (
     <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden' }}>
-      <div
-        style={{
-          backgroundColor: '#1B2A4A',
-          color: '#FFFFFF',
-          borderRadius: '1rem',
-          padding: '2rem',
-          marginBottom: '2rem',
-          boxShadow: '0 10px 25px -5px rgba(27, 42, 74, 0.25)',
-          background: 'linear-gradient(135deg, #1B2A4A 0%, #0F1B33 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-            <span style={{ backgroundColor: '#FF6B2C', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
-              EXECUTIVE ANALYTICS
-            </span>
-            <span style={{ fontSize: '0.8125rem', color: '#94A3B8' }}>Leadership overview · Current period</span>
-          </div>
-
-          <h1 style={{ fontSize: '1.875rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#FFFFFF' }}>
-            Executive Analytics
-          </h1>
-          <p style={{ color: '#94A3B8', margin: 0, fontSize: '0.9375rem', maxWidth: '640px' }}>
-            Fleet utilization, route efficiency, monthly capacity, and delivery performance — fetched live with
-            automatic fallback to reference data when the analytics service is unavailable.
-          </p>
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+          <span style={{ backgroundColor: '#FF6B2C', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+            EXECUTIVE ANALYTICS
+          </span>
+          <span style={{ fontSize: '0.8125rem', color: '#94A3B8' }}>Leadership overview · Current period</span>
         </div>
+
+        <h1 style={{ fontSize: '1.875rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1B2A4A' }}>
+          Executive Analytics
+        </h1>
+        <p style={{ color: '#64748B', margin: 0, fontSize: '0.9375rem', maxWidth: '640px' }}>
+          Fleet utilization, route efficiency, monthly capacity, and delivery performance — fetched live with
+          automatic fallback to reference data when the analytics service is unavailable.
+        </p>
       </div>
 
       {loading ? (
