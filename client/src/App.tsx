@@ -4,6 +4,7 @@ import AppShell from './components/layout/AppShell';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import PlaceholderPage from './components/shared/PlaceholderPage';
 import DriverMobileLayout from './components/driver/DriverMobileLayout';
 import DriverDashboard from './pages/driver/DriverDashboard';
@@ -48,7 +49,7 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route
             path="/admin/dashboard"
-            element={<PlaceholderPage title="Admin Dashboard" description="Fleet, manifest, and operational overview for dispatchers and admins." />}
+            element={<AdminDashboard />}
           />
           <Route
             path="/admin/fleet"
