@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { FiPackage, FiDollarSign, FiTruck, FiClock } from 'react-icons/fi';
-import StatCard from '../../components/shared/StatCard';
+import { FiPackage, FiTruck, FiClock, FiAlertTriangle } from 'react-icons/fi';
+import MetricCard from '../../components/shared/MetricCard';
 import RevenueSummary from '../../components/executive/RevenueSummary';
 import FleetUtilizationChart from '../../components/executive/FleetUtilizationChart';
 import RouteEfficiencyChart from '../../components/executive/RouteEfficiencyChart';
@@ -118,41 +118,34 @@ export default function ExecutiveAnalytics() {
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(230px, 100%), 1fr))',
-              gap: '1.25rem',
-              marginBottom: '2rem',
-            }}
-          >
-            <StatCard
-              title="Total Shipments"
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <MetricCard
+              label="TOTAL MANIFESTS"
               value={totalShipments.toLocaleString()}
-              icon={<FiPackage size={22} color="#FF6B2C" />}
-              change={data.revenue?.shipmentsDelta ?? 0}
-              changeType="up"
+              icon={<FiPackage size={22} color="#2563EB" />}
+              accentColor="#2563EB"
+              themeColor="#2563EB"
             />
-            <StatCard
-              title="Revenue"
-              value={`$${((data.revenue?.totalRevenue ?? 0) / 1000000).toFixed(1)}M`}
-              icon={<FiDollarSign size={22} color="#10B981" />}
-              change={data.revenue?.revenueDelta ?? 0}
-              changeType="up"
+            <MetricCard
+              label="ACTIVE VEHICLES"
+              value={data.fleet?.statusDistribution.find(s => s.name === 'In-Transit')?.value?.toString() ?? '0'}
+              icon={<FiTruck size={22} color="#10B981" />}
+              accentColor="#10B981"
+              themeColor="#10B981"
             />
-            <StatCard
-              title="Fleet Utilization"
-              value={`${(data.fleet?.utilizationRate ?? 0).toFixed(1)}%`}
-              icon={<FiTruck size={22} color="#2563EB" />}
-              change={data.fleet?.utilizationDelta ?? 0}
-              changeType="up"
+            <MetricCard
+              label="PENDING ORDERS"
+              value={data.performance?.breakdown.find(s => s.name === 'On-Time')?.value?.toString() ?? '0'}
+              icon={<FiClock size={22} color="#F59E0B" />}
+              accentColor="#F59E0B"
+              themeColor="#F59E0B"
             />
-            <StatCard
-              title="On-Time Rate"
-              value={`${(data.performance?.onTimeRate ?? 0).toFixed(1)}%`}
-              icon={<FiClock size={22} color="#8B5CF6" />}
-              change={data.performance?.onTimeDelta ?? 0}
-              changeType="up"
+            <MetricCard
+              label="ALERTS / DELAYS"
+              value={data.performance?.breakdown.find(s => s.name === 'Delayed')?.value?.toString() ?? '0'}
+              icon={<FiAlertTriangle size={22} color="#EF4444" />}
+              accentColor="#EF4444"
+              themeColor="#EF4444"
             />
           </div>
 
