@@ -97,10 +97,8 @@ export default function App() {
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={[ROLES.EXECUTIVE]} />}>
-        <Route element={<AppShell />}>
           <Route path="/executive" element={<ExecutiveAnalytics />} />
           <Route path="/executive/analytics" element={<ExecutiveAnalytics />} />
-        </Route>
       </Route>
 
       <Route path="/" element={<HomeRedirect />} />
