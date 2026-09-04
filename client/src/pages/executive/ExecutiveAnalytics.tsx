@@ -42,7 +42,7 @@ export const ExecutiveAnalytics: React.FC = () => {
   const perfData = perf?.data || [];
 
   return (
-    <div className="p-5 sm:p-7 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+    <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
           Executive Analytics

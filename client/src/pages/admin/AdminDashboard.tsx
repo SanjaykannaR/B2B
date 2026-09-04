@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Truck, Clock, AlertTriangle, ArrowRight, Plus, FileDown } from 'lucide-react';
 import { StatCard } from '../../components/admin/shared/StatCard';
@@ -28,6 +28,39 @@ const STATUS_SEGMENTS = [
 export const AdminDashboard: React.FC = () => {
   const [manifests, setManifests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = useCallback(async () => {
+    try {
+      setExporting(true);
+      const res = await manifestApi.getManifests({ limit: 1000 });
+      const all = res.manifests || res || [];
+      if (!all.length) return;
+
+      const headers = ['Tracking ID', 'Client', 'Origin', 'Destination', 'Status', 'Updated At'];
+      const rows = all.map((m: any) => [
+        m.trackingId || '',
+        m.client?.name || '',
+        m.origin?.city || '',
+        m.destination?.city || '',
+        m.status || '',
+        m.updatedAt || '',
+      ]);
+
+      const csv = [headers.join(','), ...rows.map((r: string[]) => r.map(v => `"${v}"`).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `manifests-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent fail
+    } finally {
+      setExporting(false);
+    }
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -47,7 +80,7 @@ export const AdminDashboard: React.FC = () => {
   const total = STATUS_SEGMENTS.reduce((s, x) => s + x.count, 0);
 
   return (
-    <div className="p-5 sm:p-7 lg:p-8 max-w-[1400px] mx-auto space-y-7">
+    <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-7">
       {/* ── Header ── */}
       <AnimatedCard>
         <PageHeader
@@ -55,15 +88,18 @@ export const AdminDashboard: React.FC = () => {
           subtitle="Welcome back, Admin. Here's what's happening today."
           secondaryAction={
             <button
+              onClick={handleExport}
+              disabled={exporting}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-                transition-all duration-200 border shrink-0 min-h-[44px]"
+                transition-all duration-200 border shrink-0 min-h-[44px] disabled:opacity-50
+                hover:-translate-y-0.5 hover:shadow-md"
               style={{
                 background: 'var(--color-surface-card)',
                 borderColor: 'var(--color-border)',
                 color: 'var(--color-text-secondary)',
               }}
             >
-              <FileDown size={16} /> Export
+              <FileDown size={16} /> {exporting ? 'Exporting…' : 'Export'}
             </button>
           }
           action={

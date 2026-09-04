@@ -83,7 +83,7 @@ export const FleetMonitor: React.FC = () => {
   const pageVehicles = vehicles.slice(start, start + pageSize);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[2560px] mx-auto space-y-6">
       <AnimatedCard>
         <PageHeader
           title="Fleet Monitor"

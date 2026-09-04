@@ -53,6 +53,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [showName, setShowName] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -412,6 +413,8 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
 
       <div className="flex-1 hidden sm:block" />
 
+      {/* Right side — aligned with content max-width */}
+      <div className="flex items-center gap-2 max-w-[2560px] ml-auto pr-2 sm:pr-4">
       {/* Notifications */}
       <div className="relative">
         <button
@@ -486,20 +489,24 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
 
       {/* User chip */}
       <div className="flex items-center gap-2.5 pl-1">
-        <div
-          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+        <button
+          onClick={() => setShowName((v) => !v)}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 cursor-pointer transition-transform duration-200 hover:scale-105"
           style={{ background: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1px rgba(255,107,44,0.4)' }}
         >
           {initials || <PackageSearch size={16} />}
-        </div>
-        <div className="hidden sm:block min-w-0">
-          <p className="text-[13px] font-bold leading-tight truncate max-w-[140px]" style={{ color: 'var(--color-text-primary)' }}>
-            {displayName}
-          </p>
-          <p className="text-[10px] font-semibold uppercase tracking-wider leading-tight" style={{ color: 'var(--color-accent)' }}>
-            {role || 'user'}
-          </p>
-        </div>
+        </button>
+        {showName && (
+          <div className="hidden sm:block min-w-0 animate-scale-in">
+            <p className="text-[13px] font-bold leading-tight truncate max-w-[140px]" style={{ color: 'var(--color-text-primary)' }}>
+              {displayName}
+            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider leading-tight" style={{ color: 'var(--color-accent)' }}>
+              {role || 'user'}
+            </p>
+          </div>
+        )}
+      </div>
       </div>
     </header>
   );
