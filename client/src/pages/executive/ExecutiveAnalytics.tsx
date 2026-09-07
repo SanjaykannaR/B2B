@@ -71,7 +71,7 @@ export default function ExecutiveAnalytics() {
   const totalShipments = data.capacity?.monthly.reduce((sum, row) => sum + row.shipments, 0) ?? 0;
 
   return (
-    <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden' }}>
+    <div className="theme-light" style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden', minHeight: '100vh' }}>
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
           <span style={{ backgroundColor: '#FF6B2C', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>

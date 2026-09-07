@@ -285,6 +285,34 @@
   --shadow-modal:         0 24px 48px rgba(0, 0, 0, 0.50);
 }
 
+/* ------------------------------------------------------------
+   11b. FORCED LIGHT THEME (scoped)
+   Applied to a page wrapper to keep it light even when the
+   system or app is in dark mode.
+   ============================================================ */
+.theme-light {
+  background-color: #F1F5F9;
+  --color-surface:        #F8F9FC;
+  --color-surface-card:   #FFFFFF;
+  --color-surface-hover:  #F0F2F8;
+  --color-surface-active: #E8EBF3;
+
+  --color-border:         #E2E8F0;
+  --color-border-light:   #EEF1F6;
+  --color-border-focus:   #2563EB;
+
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #64748B;
+  --color-text-link:      #2563EB;
+  --color-text-link-hover:#1D4ED8;
+
+  --shadow-card:          0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover:    0 8px 16px rgba(15, 23, 42, 0.10), 0 2px 4px rgba(15, 23, 42, 0.06);
+  --shadow-modal:         0 24px 48px rgba(15, 23, 42, 0.20);
+  min-height: 100vh;
+}
+
 
 /* ============================================================
    12. BASE RESET & GLOBAL STYLES
