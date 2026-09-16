@@ -1,46 +1,48 @@
-// This file is for: Centralized error handler middleware
-// Module: Backend Middleware (Module 2)
-// Owner: Developer 1 (Backend Engineer)
-//
-// What goes here:
-// - Catches all errors from route handlers
-// - Logs error details
-// - Returns structured JSON: { success: false, message, statusCode }
-// - Handles ApiError instances, mongoose validation errors, duplicate key errors
+import { NextFunction, Request, Response } from 'express';
+import { ApiError } from '../utils/ApiError';
+import { sendError } from '../utils/ApiResponse';
+import { isProd } from '../config/env';
 
-import { Request, Response, NextFunction } from 'express';
-import { Error as MongooseError } from 'mongoose';
-import ApiError from '../utils/ApiError';
-
-export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction): void {
-  let statusCode = 500;
-  let message = 'Internal server error';
+/**
+ * Centralized error handler. Registered last in server.ts.
+ * Maps ApiError / Mongoose validation / duplicate-key / CastError into
+ * the standardized { success: false, message, errors? } JSON envelope.
+ */
+export const errorHandler = (
+  err: unknown,
+  req: Request,
+  res: Response,
+  _next: NextFunction,
+) => {
+  const anyErr = err as any;
 
   if (err instanceof ApiError) {
-    statusCode = err.statusCode;
-    message = err.message;
-  } else if (err instanceof MongooseError.ValidationError) {
-    statusCode = 400;
-    message = Object.values(err.errors)
-      .map((e) => e.message)
-      .join('; ');
-  } else if ((err as { code?: number }).code === 11000) {
-    statusCode = 409;
-    const key = Object.keys((err as { keyValue?: Record<string, unknown> }).keyValue ?? {}).join(', ');
-    message = `Duplicate value${key ? ` for field${key.includes(',') ? 's' : ''}: ${key}` : ''}.`;
-  } else if (err instanceof Error) {
-    message = err.message;
+    return sendError(res, err.statusCode, err.message, err.errors);
   }
 
-  console.error(`[Error] ${statusCode} — ${message}`);
-  if (statusCode >= 500) {
-    console.error(err);
+  // Duplicate key (unique index) — don't leak field name in production
+  if (anyErr && anyErr.code === 11000) {
+    return sendError(res, 409, isProd ? 'Duplicate value' : `Duplicate value for '${Object.keys(anyErr.keyValue || {})[0] || 'field'}'`);
   }
 
-  res.status(statusCode).json({
-    success: false,
-    message,
-  });
-}
+  // Mongoose validation error
+  if (anyErr && anyErr.name === 'ValidationError') {
+    const messages: string[] = Object.values(anyErr.errors || {}).map(
+      (e: any) => e.message,
+    );
+    return sendError(res, 400, messages[0] || 'Validation error', messages);
+  }
 
-export default errorHandler;
+  // Invalid ObjectId
+  if (anyErr && anyErr.name === 'CastError') {
+    return sendError(res, 400, 'Invalid ID format');
+  }
+
+  // Sanitized logging — no full URLs in production
+  if (isProd) {
+    console.error(`[error] ${req.method} ${req.path}`, anyErr?.message || 'unknown');
+  } else {
+    console.error(`[error] ${req.method} ${req.originalUrl}`, err);
+  }
+  return sendError(res, 500, 'Internal server error');
+};

@@ -1,234 +1,194 @@
-// Controller for: Analytics - MongoDB aggregation pipelines
-// Module: Backend Controllers (Module 5) | Owner: Developer 1
-// Handles: fleet utilization, route efficiency, monthly capacity, delivery performance, revenue
+import { NextFunction, Request, Response } from 'express';
+import { Vehicle } from '../models/Vehicle';
+import { Manifest } from '../models/Manifest';
+import { Invoice } from '../models/Invoice';
+import { sendSuccess } from '../utils/ApiResponse';
 
-import { Request, Response, NextFunction } from 'express';
-import Manifest from '../models/Manifest';
-import Vehicle from '../models/Vehicle';
-import Invoice from '../models/Invoice';
-import { ok } from '../utils/ApiResponse';
-
-export async function getFleetUtilization(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const fleetUtilization = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const [byStatus, total] = await Promise.all([
+    const [byStatus, totalCapacity, avgEfficiency, counts] = await Promise.all([
       Vehicle.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Vehicle.countDocuments(),
+      Vehicle.aggregate([{ $group: { _id: null, total: { $sum: '$maxWeightKg' } } }]),
+      Vehicle.aggregate([
+        { $group: { _id: null, avg: { $avg: '$fuelEfficiencyKmPerLiter' } } },
+      ]),
+      Vehicle.aggregate([
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            available: { $sum: { $cond: [{ $eq: ['$status', 'AVAILABLE'] }, 1, 0] } },
+            inTransit: { $sum: { $cond: [{ $eq: ['$status', 'IN_TRANSIT'] }, 1, 0] } },
+            maintenance: { $sum: { $cond: [{ $eq: ['$status', 'MAINTENANCE'] }, 1, 0] } },
+          },
+        },
+      ]),
     ]);
 
-    const breakdown = byStatus.reduce<Record<string, number>>((acc, s) => {
-      acc[s._id] = s.count;
-      return acc;
-    }, {});
-
-    const available = breakdown.Available ?? 0;
-    const inTransit = breakdown['In-Transit'] ?? 0;
-    const maintenance = breakdown.Maintenance ?? 0;
-
-    res.json(ok({
-      total,
-      available,
-      inTransit,
-      maintenance,
-      availablePct: total ? Math.round((available / total) * 1000) / 10 : 0,
-      inTransitPct: total ? Math.round((inTransit / total) * 1000) / 10 : 0,
-      maintenancePct: total ? Math.round((maintenance / total) * 1000) / 10 : 0,
-    }));
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function getRouteEfficiency(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const manifests = await Manifest.find({
-      currentStatus: { $in: ['Delivered', 'Delayed'] },
-      actualDeliveryTime: { $ne: null },
-    }).select('trackingId routing currentStatus scheduledDeliveryWindowClose actualDeliveryTime');
-
-    let onTime = 0;
-    let late = 0;
-
-    const rows = manifests.map((m) => {
-      const isOnTime = m.actualDeliveryTime! <= m.scheduledDeliveryWindowClose;
-      if (isOnTime) onTime += 1;
-      else late += 1;
-      return {
-        trackingId: m.trackingId,
-        origin: m.routing.origin.name,
-        destination: m.routing.destination.name,
-        distanceKm: m.routing.distanceKm,
-        estimatedDurationMinutes: m.routing.estimatedDurationMinutes,
-        status: m.currentStatus,
-        onTime: isOnTime,
-      };
+    return sendSuccess(res, {
+      byStatus: byStatus.map((s) => ({ status: s._id, count: s.count })),
+      total: counts[0]?.total ?? 0,
+      available: counts[0]?.available ?? 0,
+      inTransit: counts[0]?.inTransit ?? 0,
+      maintenance: counts[0]?.maintenance ?? 0,
+      totalCapacityKg: totalCapacity[0]?.total ?? 0,
+      avgEfficiencyKmPerLiter: Math.round((avgEfficiency[0]?.avg ?? 0) * 10) / 10,
     });
-
-    const total = rows.length;
-    res.json(ok({
-      total,
-      onTime,
-      late,
-      onTimePct: total ? Math.round((onTime / total) * 1000) / 10 : 0,
-      averageDistanceKm: total
-        ? Math.round((rows.reduce((sum, r) => sum + r.distanceKm, 0) / total) * 10) / 10
-        : 0,
-      rows,
-    }));
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getMonthlyCapacity(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const routeEfficiency = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const results = await Manifest.aggregate([
+    const delivered = await Manifest.aggregate([
       {
         $match: {
-          currentStatus: { $in: ['Delivered', 'In-Transit', 'Assigned'] },
+          currentStatus: 'DELIVERED',
+          'routing.estimatedDurationMinutes': { $exists: true, $gt: 0 },
+          actualDeliveryTime: { $exists: true },
         },
       },
       {
-        $group: {
-          _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' },
+        $project: {
+          trackingId: 1,
+          estimatedMinutes: '$routing.estimatedDurationMinutes',
+          actualMinutes: {
+            $divide: [
+              { $subtract: ['$actualDeliveryTime', '$tripStartTime'] },
+              60000,
+            ],
           },
-          totalWeightKg: { $sum: '$cargoDetails.weight' },
-          totalVolumeM3: { $sum: '$cargoDetails.volume' },
-          shipmentCount: { $sum: 1 },
         },
       },
-      { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
 
-    const months = results.map((r) => ({
-      month: `${r._id.year}-${String(r._id.month).padStart(2, '0')}`,
-      totalWeightKg: r.totalWeightKg,
-      totalVolumeM3: r.totalVolumeM3,
-      shipmentCount: r.shipmentCount,
-    }));
+    const total = delivered.length;
+    const late = delivered.filter((d) => d.actualMinutes > d.estimatedMinutes).length;
 
-    res.json(ok({ months }));
-  } catch (err) {
-    next(err);
-  }
-}
+    const avg = (key: 'estimatedMinutes' | 'actualMinutes') =>
+      total === 0
+        ? 0
+        : Math.round(
+            (delivered.reduce((sum, d) => sum + (d[key] || 0), 0) / total) * 10,
+          ) / 10;
 
-export async function getDeliveryPerformance(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const manifests = await Manifest.find({
-      currentStatus: { $in: ['Delivered', 'Delayed', 'Cancelled'] },
-    }).select('currentStatus actualDeliveryTime scheduledDeliveryWindowClose');
-
-    let onTime = 0;
-    let delayed = 0;
-    let cancelled = 0;
-
-    for (const m of manifests) {
-      if (m.currentStatus === 'Cancelled') {
-        cancelled += 1;
-      } else if (m.currentStatus === 'Delayed' || (m.actualDeliveryTime && m.actualDeliveryTime > m.scheduledDeliveryWindowClose)) {
-        delayed += 1;
-      } else {
-        onTime += 1;
-      }
-    }
-
-    const total = manifests.length;
-    res.json(ok({
+    return sendSuccess(res, {
       total,
-      onTime,
-      delayed,
-      cancelled,
-      onTimePct: total ? Math.round((onTime / total) * 1000) / 10 : 0,
-      delayedPct: total ? Math.round((delayed / total) * 1000) / 10 : 0,
-      cancelledPct: total ? Math.round((cancelled / total) * 1000) / 10 : 0,
-    }));
+      onTime: total - late,
+      late,
+      onTimeRate: total === 0 ? 0 : Math.round(((total - late) / total) * 1000) / 10,
+      avgEstimatedMinutes: avg('estimatedMinutes'),
+      avgActualMinutes: avg('actualMinutes'),
+      data: delivered.slice(0, 30),
+    });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getRevenueSummary(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const monthlyCapacity = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const results = await Invoice.aggregate([
-      { $match: { status: { $in: ['Paid', 'Pending', 'Overdue'] } } },
+    const rows = await Manifest.aggregate([
+      { $match: { currentStatus: 'DELIVERED' } },
       {
         $group: {
-          _id: {
-            year: { $year: '$issuedDate' },
-            month: { $month: '$issuedDate' },
-            status: '$status',
-          },
-          amount: { $sum: '$amount' },
+          _id: { $dateToString: { format: '%Y-%m', date: '$actualDeliveryTime' } },
+          totalWeightKg: { $sum: '$cargoDetails.totalWeightKg' },
+          totalVolumeCubicMeters: { $sum: '$cargoDetails.totalVolumeCubicMeters' },
+          count: { $sum: 1 },
         },
       },
-      { $sort: { '_id.year': 1, '_id.month': 1 } },
+      { $sort: { _id: 1 } },
+      { $limit: 12 },
     ]);
 
-    const byMonth = new Map<string, { month: string; total: number; paid: number; pending: number; overdue: number }>();
-    for (const r of results) {
-      const key = `${r._id.year}-${String(r._id.month).padStart(2, '0')}`;
-      if (!byMonth.has(key)) {
-        byMonth.set(key, { month: key, total: 0, paid: 0, pending: 0, overdue: 0 });
-      }
-      const entry = byMonth.get(key)!;
-      entry.total += r.amount;
-      if (r._id.status === 'Paid') entry.paid += r.amount;
-      if (r._id.status === 'Pending') entry.pending += r.amount;
-      if (r._id.status === 'Overdue') entry.overdue += r.amount;
-    }
+    return sendSuccess(
+      res,
+      rows.map((r) => ({
+        month: r._id,
+        totalWeightKg: Math.round(r.totalWeightKg * 10) / 10,
+        totalVolumeCubicMeters: Math.round(r.totalVolumeCubicMeters * 10) / 10,
+        count: r.count,
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+};
 
-    const months = Array.from(byMonth.values());
+export const deliveryPerformance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [delivered, delayed, total] = await Promise.all([
+      Manifest.countDocuments({ currentStatus: 'DELIVERED' }),
+      Manifest.countDocuments({ currentStatus: 'DELAYED' }),
+      Manifest.countDocuments({ currentStatus: { $in: ['DELIVERED', 'DELAYED'] } }),
+    ]);
+
+    const deliveredRate = total === 0 ? 0 : Math.round((delivered / total) * 1000) / 10;
+    const delayedRate = total === 0 ? 0 : Math.round((delayed / total) * 1000) / 10;
+
+    return sendSuccess(res, {
+      delivered,
+      delayed,
+      total,
+      deliveredRate,
+      delayedRate,
+      data: [
+        { name: 'On-time delivered', value: delivered },
+        { name: 'Delayed', value: delayed },
+      ],
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const revenueSummary = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rows = await Invoice.aggregate([
+      { $match: { status: { $ne: 'CANCELLED' } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$issuedDate' } },
+          revenue: { $sum: '$amount' },
+          paid: {
+            $sum: { $cond: [{ $eq: ['$status', 'PAID'] }, '$amount', 0] },
+          },
+          pending: {
+            $sum: { $cond: [{ $eq: ['$status', 'PENDING'] }, '$amount', 0] },
+          },
+        },
+      },
+      { $sort: { _id: 1 } },
+      { $limit: 12 },
+    ]);
 
     const totals = await Invoice.aggregate([
-      { $match: { status: { $in: ['Paid', 'Pending', 'Overdue'] } } },
-      { $group: { _id: '$status', amount: { $sum: '$amount' } } },
+      { $match: { status: { $ne: 'CANCELLED' } } },
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: '$amount' },
+          paid: { $sum: { $cond: [{ $eq: ['$status', 'PAID'] }, '$amount', 0] } },
+          pending: { $sum: { $cond: [{ $eq: ['$status', 'PENDING'] }, '$amount', 0] } },
+        },
+      },
     ]);
 
-    const summary = totals.reduce<Record<string, number>>((acc, t) => {
-      acc[t._id] = t.amount;
-      return acc;
-    }, {});
-
-    res.json(ok({
-      months,
-      summary: {
-        paid: summary.Paid ?? 0,
-        pending: summary.Pending ?? 0,
-        overdue: summary.Overdue ?? 0,
-        total: (summary.Paid ?? 0) + (summary.Pending ?? 0) + (summary.Overdue ?? 0),
-      },
-    }));
+    return sendSuccess(res, {
+      monthly: rows.map((r) => ({
+        month: r._id,
+        revenue: Math.round(r.revenue * 100) / 100,
+        paid: Math.round(r.paid * 100) / 100,
+        pending: Math.round(r.pending * 100) / 100,
+      })),
+      totalRevenue: Math.round((totals[0]?.revenue ?? 0) * 100) / 100,
+      totalPaid: Math.round((totals[0]?.paid ?? 0) * 100) / 100,
+      totalPending: Math.round((totals[0]?.pending ?? 0) * 100) / 100,
+      currency: 'INR',
+    });
   } catch (err) {
     next(err);
   }
-}
-
-export default {
-  getFleetUtilization,
-  getRouteEfficiency,
-  getMonthlyCapacity,
-  getDeliveryPerformance,
-  getRevenueSummary,
 };

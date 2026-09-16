@@ -1,182 +1,196 @@
-// Controller for: Vehicle CRUD - create, update, status, delete, availability
-// Module: Backend Controllers (Module 5) | Owner: Developer 1
+import { NextFunction, Request, Response } from 'express';
+import { Vehicle, VEHICLE_STATUSES } from '../models/Vehicle';
+import { sendError, sendSuccess } from '../utils/ApiResponse';
+import { paginate, toObjectId } from '../utils/helpers';
 
-import { Request, Response, NextFunction } from 'express';
-import Vehicle, { VehicleDocument, VehicleStatus } from '../models/Vehicle';
-import ApiError from '../utils/ApiError';
-import { ok } from '../utils/ApiResponse';
-import { parsePage, toPaginationMeta } from '../utils/helpers';
+/** Client-facing vehicle shape: capacity + driver mapped for the UI. */
+const serializeVehicle = (v: any): any => {
+  const doc = v.toObject ? v.toObject() : v;
+  const { currentDriver, maxWeightKg, maxVolumeCubicMeters, fuelEfficiencyKmPerLiter, ...rest } = doc;
 
-export async function listVehicles(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+  const driver = currentDriver
+    ? {
+        name: `${currentDriver.firstName || ''} ${currentDriver.lastName || ''}`.trim(),
+        phone: currentDriver.phone,
+        license: currentDriver.licenseNumber,
+      }
+    : undefined;
+
+  return {
+    ...rest,
+    capacity: { weight: maxWeightKg ?? 0, volume: maxVolumeCubicMeters ?? 0 },
+    fuelEfficiency: fuelEfficiencyKmPerLiter ?? 0,
+    driver,
+  };
+};
+
+export const listVehicles = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = parsePage(req.query as Record<string, unknown>);
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
     const filter: Record<string, unknown> = {};
 
-    const status = req.query.status as string | undefined;
-    if (status) {
-      const valid = ['Available', 'In-Transit', 'Maintenance'];
-      if (!valid.includes(status)) {
-        throw new ApiError(400, `Invalid status filter. Allowed: ${valid.join(', ')}`);
-      }
-      filter.status = status;
-    }
-
-    const search = req.query.search as string | undefined;
+    if (req.query.status) filter.status = String(req.query.status);
+    const search = String(req.query.search || '').trim();
     if (search) {
-      filter.$or = [
-        { registrationNumber: { $regex: search, $options: 'i' } },
-        { make: { $regex: search, $options: 'i' } },
-        { model: { $regex: search, $options: 'i' } },
-      ];
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'i');
+      filter.$or = [{ registrationNumber: re }, { make: re }, { model: re }];
     }
 
-    const total = await Vehicle.countDocuments(filter);
-    const vehicles = await Vehicle.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('currentDriver', 'firstName lastName email');
+    const [vehicles, total] = await Promise.all([
+      Vehicle.find(filter).populate('currentDriver').sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Vehicle.countDocuments(filter),
+    ]);
 
-    res.json(ok({ items: vehicles, ...toPaginationMeta(total, page, limit) }));
+    return sendSuccess(res, {
+      vehicles: vehicles.map(serializeVehicle),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getAvailableVehicles(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const getAvailable = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const vehicles = await Vehicle.find({ status: 'Available' }).sort({ maxWeightKg: 1 }).populate('currentDriver', 'firstName lastName email');
-    res.json(ok(vehicles));
+    const vehicles = await Vehicle.find({ status: 'AVAILABLE' })
+      .populate('currentDriver')
+      .sort({ maxWeightKg: 1 });
+    return sendSuccess(res, { vehicles: vehicles.map(serializeVehicle) });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getVehicleStats(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const getStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const [total, available, inTransit, maintenance] = await Promise.all([
-      Vehicle.countDocuments(),
-      Vehicle.countDocuments({ status: 'Available' }),
-      Vehicle.countDocuments({ status: 'In-Transit' }),
-      Vehicle.countDocuments({ status: 'Maintenance' }),
+      Vehicle.countDocuments({}),
+      Vehicle.countDocuments({ status: 'AVAILABLE' }),
+      Vehicle.countDocuments({ status: 'IN_TRANSIT' }),
+      Vehicle.countDocuments({ status: 'MAINTENANCE' }),
     ]);
-    res.json(ok({ total, available, inTransit, maintenance }));
+    return sendSuccess(res, { total, available, inTransit, maintenance });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getVehicle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+/** Map flexible create/update payloads (capacity.weight/volume) to schema fields. */
+const mapVehicleInput = (body: Record<string, any>) => {
+  const capacity = body.capacity || {};
+  return {
+    registrationNumber: body.registrationNumber,
+    make: body.make,
+    model: body.model,
+    year: body.year,
+    maxWeightKg: Number(body.weightCapacity ?? capacity.weight ?? body.maxWeightKg ?? 0),
+    maxVolumeCubicMeters: Number(
+      body.volumeCapacity ?? capacity.volume ?? body.maxVolumeCubicMeters ?? 0,
+    ),
+    status: body.status ?? 'AVAILABLE',
+    currentDriver: body.currentDriver ?? body.driverId,
+    fuelEfficiencyKmPerLiter: Number(body.fuelEfficiency ?? body.fuelEfficiencyKmPerLiter ?? 0),
+    lastMaintenanceDate: body.lastMaintenanceDate,
+  };
+};
+
+export const createVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const vehicle = await Vehicle.findById(req.params.id).populate('currentDriver', 'firstName lastName email');
-    if (!vehicle) {
-      throw new ApiError(404, 'Vehicle not found.');
+    const data = mapVehicleInput(req.body);
+    if (!data.registrationNumber || !data.make || !data.model) {
+      return sendError(res, 400, 'registrationNumber, make and model are required');
     }
-    res.json(ok(vehicle));
+    if (!VEHICLE_STATUSES.includes(data.status)) {
+      return sendError(res, 400, 'Invalid vehicle status');
+    }
+
+    const dup = await Vehicle.findOne({ registrationNumber: data.registrationNumber });
+    if (dup) return sendError(res, 409, 'A vehicle with this registration number already exists');
+
+    const vehicle = await Vehicle.create(data);
+    return sendSuccess(
+      res,
+      { vehicle: serializeVehicle(vehicle) },
+      'Vehicle created',
+      201,
+    );
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function createVehicle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const updateVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const existing = await Vehicle.findOne({ registrationNumber: (req.body.registrationNumber || '').toUpperCase() });
-    if (existing) {
-      throw new ApiError(409, 'A vehicle with this registration number already exists.');
-    }
-    const vehicle = await Vehicle.create(req.body);
-    res.status(201).json(ok(vehicle, 'Vehicle created successfully.'));
-  } catch (err) {
-    next(err);
-  }
-}
+    const id = toObjectId(req.params.id);
+    const vehicle = id ? await Vehicle.findById(id).populate('currentDriver') : null;
+    if (!vehicle) return sendError(res, 404, 'Vehicle not found');
 
-export async function updateVehicle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).populate('currentDriver', 'firstName lastName email');
-    if (!vehicle) {
-      throw new ApiError(404, 'Vehicle not found.');
-    }
-    res.json(ok(vehicle, 'Vehicle updated successfully.'));
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function updateVehicleStatus(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const { status } = req.body as { status?: VehicleStatus };
-    const valid: VehicleStatus[] = ['Available', 'In-Transit', 'Maintenance'];
-    if (!status || !valid.includes(status)) {
-      throw new ApiError(400, `Invalid status. Allowed: ${valid.join(', ')}`);
+    const data = mapVehicleInput(req.body);
+    if (data.status && !VEHICLE_STATUSES.includes(data.status)) {
+      return sendError(res, 400, 'Invalid vehicle status');
     }
 
-    const vehicle = await Vehicle.findById(req.params.id);
-    if (!vehicle) {
-      throw new ApiError(404, 'Vehicle not found.');
-    }
-    vehicle.status = status;
+    Object.assign(vehicle, {
+      ...(data.registrationNumber ? { registrationNumber: data.registrationNumber } : {}),
+      ...(data.make ? { make: data.make } : {}),
+      ...(data.model ? { model: data.model } : {}),
+      ...(data.year ? { year: data.year } : {}),
+      ...(data.maxWeightKg !== 0 ? { maxWeightKg: data.maxWeightKg } : {}),
+      ...(data.maxVolumeCubicMeters !== 0
+        ? { maxVolumeCubicMeters: data.maxVolumeCubicMeters }
+        : {}),
+      ...(data.status ? { status: data.status } : {}),
+      ...(data.fuelEfficiencyKmPerLiter !== 0
+        ? { fuelEfficiencyKmPerLiter: data.fuelEfficiencyKmPerLiter }
+        : {}),
+      ...(data.lastMaintenanceDate ? { lastMaintenanceDate: data.lastMaintenanceDate } : {}),
+    });
+    if (data.currentDriver !== undefined) vehicle.currentDriver = data.currentDriver;
+
     await vehicle.save();
-    res.json(ok(vehicle, `Vehicle status updated to ${status}.`));
+    const updated = await Vehicle.findById(vehicle._id).populate('currentDriver');
+    return sendSuccess(res, { vehicle: serializeVehicle(updated) }, 'Vehicle updated');
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function deleteVehicle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const updateVehicleStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
-    if (!vehicle) {
-      throw new ApiError(404, 'Vehicle not found.');
+    const id = toObjectId(req.params.id);
+    const vehicle = id ? await Vehicle.findById(id).populate('currentDriver') : null;
+    if (!vehicle) return sendError(res, 404, 'Vehicle not found');
+
+    const { status } = req.body;
+    if (!VEHICLE_STATUSES.includes(status)) {
+      return sendError(res, 400, 'Invalid vehicle status');
     }
-    res.json(ok({ id: req.params.id, deleted: true }, 'Vehicle deleted successfully.'));
+
+    vehicle.status = status;
+    if (status === 'AVAILABLE') vehicle.currentDriver = undefined;
+
+    await vehicle.save();
+    const updated = await Vehicle.findById(vehicle._id).populate('currentDriver');
+    return sendSuccess(res, { vehicle: serializeVehicle(updated) }, 'Vehicle status updated');
   } catch (err) {
     next(err);
   }
-}
+};
 
-export default {
-  listVehicles,
-  getVehicle,
-  getAvailableVehicles,
-  getVehicleStats,
-  createVehicle,
-  updateVehicle,
-  updateVehicleStatus,
-  deleteVehicle,
+export const deleteVehicle = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = toObjectId(req.params.id);
+    const vehicle = id ? await Vehicle.findById(id) : null;
+    if (!vehicle) return sendError(res, 404, 'Vehicle not found');
+
+    if (vehicle.status === 'IN_TRANSIT') {
+      return sendError(res, 400, 'Cannot delete a vehicle that is currently In-Transit');
+    }
+
+    await vehicle.deleteOne();
+    return sendSuccess(res, {}, 'Vehicle deleted');
+  } catch (err) {
+    next(err);
+  }
 };

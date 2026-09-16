@@ -1,121 +1,186 @@
-// This file is for: Manifest Mongoose model — core shipment lifecycle model
-// Module: Database Models (Module 3)
-// Owner: Developer 1 (Backend Engineer)
-// Schema: trackingId, client, driver, vehicle, cargoDetails (description, weight, volume, itemCount, hazardous),
-//         routing (origin/destination with coordinates), currentStatus, statusTimeline[],
-//         scheduledPickup, scheduledDeliveryWindowClose, actualDeliveryTime, tripStartTimestamp
-// Status lifecycle: Pending → Assigned → In-Transit → Delivered (or → Delayed/Cancelled)
-// Indexes: trackingId, currentStatus, client+createdAt, driver+status, deliveryWindow+status
+import { Schema, model, Model, Types } from 'mongoose';
 
-import { Schema, model, Document, Types } from 'mongoose';
+export const MANIFEST_STATUSES = [
+  'PENDING',
+  'ASSIGNED',
+  'IN_TRANSIT',
+  'DELIVERED',
+  'DELAYED',
+  'CANCELLED',
+] as const;
+export type ManifestStatus = (typeof MANIFEST_STATUSES)[number];
 
-export type ManifestStatus = 'Pending' | 'Assigned' | 'In-Transit' | 'Delivered' | 'Delayed' | 'Cancelled';
+export const REQUEST_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'CONTACTED'] as const;
+export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 
-export interface GeoPoint {
-  name: string;
-  latitude: number;
-  longitude: number;
-}
+export const DRIVER_REQUEST_STATUSES = ['pending', 'accepted', 'declined', 'cancelled'] as const;
+export type DriverRequestStatus = (typeof DRIVER_REQUEST_STATUSES)[number];
 
-export interface RoutingInfo {
-  origin: GeoPoint;
-  destination: GeoPoint;
-  distanceKm: number;
-  estimatedDurationMinutes: number;
-}
-
-export interface CargoDetails {
-  description: string;
-  weight: number;
-  volume: number;
-  itemCount: number;
-  hazardous: boolean;
-}
-
-export interface StatusTimelineEntry {
-  status: ManifestStatus;
-  at: Date;
+export interface ITimelineEntry {
+  status: string;
+  timestamp: Date;
   note?: string;
+  updatedBy?: string;
 }
 
-export interface ManifestDocument extends Document {
-  trackingId: string;
-  client: Types.ObjectId;
-  driver?: Types.ObjectId;
-  vehicle?: Types.ObjectId;
-  cargoDetails: CargoDetails;
-  routing: RoutingInfo;
-  currentStatus: ManifestStatus;
-  statusTimeline: StatusTimelineEntry[];
-  scheduledPickup: Date;
-  scheduledDeliveryWindowClose: Date;
-  actualDeliveryTime?: Date;
-  tripStartTimestamp?: Date;
-  createdAt: Date;
+export interface ICargoDetails {
+  description: string;
+  totalWeightKg: number;
+  totalVolumeCubicMeters?: number;
+  itemCount?: number;
+  isHazardous?: boolean;
+}
+
+export interface IPlace {
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  coordinates?: [number, number];
+}
+
+export interface IRouting {
+  origin: IPlace;
+  destination: IPlace;
+  estimatedDistanceKm?: number;
+  estimatedDurationMinutes?: number;
+}
+
+export interface IDriverRequest {
+  driverId: Types.ObjectId;
+  vehicleId: Types.ObjectId;
+  status: DriverRequestStatus;
+  sentAt: Date;
+  respondedAt?: Date;
+}
+
+export interface ILastLocation {
+  lat: number;
+  lng: number;
+  heading?: number;
   updatedAt: Date;
 }
 
-const manifestSchema = new Schema<ManifestDocument>(
+export interface IManifest {
+  trackingId: string;
+  client: Types.ObjectId;
+  gstNumber?: string;
+  driver?: Types.ObjectId;
+  vehicle?: Types.ObjectId;
+  cargoDetails: ICargoDetails;
+  routing: IRouting;
+  currentStatus: ManifestStatus;
+  requestStatus: RequestStatus;
+  driverRequest?: IDriverRequest;
+  lastLocation?: ILastLocation;
+  statusTimeline: ITimelineEntry[];
+  delayReason?: string;
+  scheduledPickup?: Date;
+  scheduledDeliveryWindowClose?: Date;
+  actualDeliveryTime?: Date;
+  tripStartTime?: Date;
+  tripStartTimestamp?: number;
+}
+
+export interface ManifestModel extends Model<IManifest> {}
+
+const timelineEntrySchema = new Schema<ITimelineEntry>(
   {
-    trackingId: {
-      type: String,
-      required: [true, 'Tracking ID is required'],
-      unique: true,
-      trim: true,
-    },
+    status: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+    note: { type: String },
+    updatedBy: { type: String },
+  },
+  { _id: false },
+);
+
+const placeSchema = new Schema<IPlace>(
+  {
+    address: { type: String, trim: true },
+    city: { type: String, trim: true },
+    state: { type: String, trim: true },
+    zipCode: { type: String, trim: true },
+    country: { type: String, trim: true },
+    coordinates: { type: [Number], default: undefined },
+  },
+  { _id: false },
+);
+
+const cargoDetailsSchema = new Schema<ICargoDetails>(
+  {
+    description: { type: String, required: true, trim: true },
+    totalWeightKg: { type: Number, required: true, min: 0 },
+    totalVolumeCubicMeters: { type: Number, min: 0 },
+    itemCount: { type: Number, min: 1, default: 1 },
+    isHazardous: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
+const driverRequestSchema = new Schema<IDriverRequest>(
+  {
+    driverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    vehicleId: { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true },
+    status: { type: String, enum: DRIVER_REQUEST_STATUSES, default: 'pending' },
+    sentAt: { type: Date, default: Date.now },
+    respondedAt: { type: Date },
+  },
+  { _id: true },
+);
+
+const lastLocationSchema = new Schema<ILastLocation>(
+  {
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true },
+    heading: { type: Number },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
+);
+
+const manifestSchema = new Schema<IManifest, ManifestModel>(
+  {
+    trackingId: { type: String, unique: true, index: true },
     client: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    driver: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    vehicle: { type: Schema.Types.ObjectId, ref: 'Vehicle', default: null },
-    cargoDetails: {
-      description: { type: String, required: [true, 'Cargo description is required'], trim: true },
-      weight: { type: Number, required: [true, 'Cargo weight is required'], min: 0 },
-      volume: { type: Number, required: [true, 'Cargo volume is required'], min: 0 },
-      itemCount: { type: Number, required: [true, 'Item count is required'], min: 1 },
-      hazardous: { type: Boolean, default: false },
-    },
+    gstNumber: { type: String, trim: true },
+    driver: { type: Schema.Types.ObjectId, ref: 'User' },
+    vehicle: { type: Schema.Types.ObjectId, ref: 'Vehicle' },
+    cargoDetails: { type: cargoDetailsSchema, required: true },
     routing: {
-      origin: {
-        name: { type: String, required: true, trim: true },
-        latitude: { type: Number, required: true, min: -90, max: 90 },
-        longitude: { type: Number, required: true, min: -180, max: 180 },
-      },
-      destination: {
-        name: { type: String, required: true, trim: true },
-        latitude: { type: Number, required: true, min: -90, max: 90 },
-        longitude: { type: Number, required: true, min: -180, max: 180 },
-      },
-      distanceKm: { type: Number, required: true, min: 0 },
-      estimatedDurationMinutes: { type: Number, required: true, min: 0 },
+      origin: { type: placeSchema, default: () => ({}) },
+      destination: { type: placeSchema, default: () => ({}) },
+      estimatedDistanceKm: { type: Number },
+      estimatedDurationMinutes: { type: Number },
     },
     currentStatus: {
       type: String,
-      enum: ['Pending', 'Assigned', 'In-Transit', 'Delivered', 'Delayed', 'Cancelled'],
-      default: 'Pending',
-      required: true,
+      enum: MANIFEST_STATUSES,
+      default: 'PENDING',
+      index: true,
     },
-    statusTimeline: [
-      {
-        status: {
-          type: String,
-          enum: ['Pending', 'Assigned', 'In-Transit', 'Delivered', 'Delayed', 'Cancelled'],
-          required: true,
-        },
-        at: { type: Date, default: Date.now },
-        note: { type: String, trim: true },
-      },
-    ],
-    scheduledPickup: { type: Date, required: true },
-    scheduledDeliveryWindowClose: { type: Date, required: true },
+    requestStatus: {
+      type: String,
+      enum: REQUEST_STATUSES,
+      default: 'PENDING',
+      index: true,
+    },
+    driverRequest: { type: driverRequestSchema },
+    lastLocation: { type: lastLocationSchema },
+    statusTimeline: { type: [timelineEntrySchema], default: [] },
+    delayReason: { type: String, trim: true },
+    scheduledPickup: { type: Date },
+    scheduledDeliveryWindowClose: { type: Date },
     actualDeliveryTime: { type: Date },
-    tripStartTimestamp: { type: Date },
+    tripStartTime: { type: Date },
+    tripStartTimestamp: { type: Number },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-manifestSchema.index({ currentStatus: 1 });
-manifestSchema.index({ client: 1, createdAt: 1 });
+manifestSchema.index({ client: 1, createdAt: -1 });
 manifestSchema.index({ driver: 1, currentStatus: 1 });
 manifestSchema.index({ scheduledDeliveryWindowClose: 1, currentStatus: 1 });
+manifestSchema.index({ 'driverRequest.driverId': 1, 'driverRequest.status': 1 });
 
-const Manifest = model<ManifestDocument>('Manifest', manifestSchema);
-export default Manifest;
+export const Manifest = model<IManifest, ManifestModel>('Manifest', manifestSchema);

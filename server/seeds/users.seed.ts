@@ -1,79 +1,134 @@
-// Seed data: Demo users (admin, clients, drivers, executive)
-// Module: Database Seed (Module 7) | Owner: Developer 1
+import { User } from '../models/User';
 
-import type { UserRole } from '../types';
+export const seedUsers = async () => {
+  const users = [
+    {
+      firstName: 'Admin',
+      lastName: 'Logistics',
+      email: 'admin@logistics.com',
+      password: 'admin123',
+      role: 'admin',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00001',
+    },
+    {
+      firstName: 'Executive',
+      lastName: 'Analytics',
+      email: 'exec@logistics.com',
+      password: 'exec123',
+      role: 'executive',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00002',
+    },
+    // ── Clients ──
+    {
+      firstName: 'Rajesh',
+      lastName: 'Kumar',
+      email: 'client@abc.com',
+      password: 'client123',
+      role: 'client',
+      company: 'Acme Industries',
+      phone: '+91 90000 00101',
+      contractRate: 12,
+    },
+    {
+      firstName: 'Priya',
+      lastName: 'Sharma',
+      email: 'priya@globaltrade.co.in',
+      password: 'client123',
+      role: 'client',
+      company: 'GlobalTrade Exports',
+      phone: '+91 90000 00102',
+      contractRate: 14,
+    },
+    {
+      firstName: 'Amit',
+      lastName: 'Patel',
+      email: 'amit@fastfreight.com',
+      password: 'client123',
+      role: 'client',
+      company: 'FastFreight Logistics',
+      phone: '+91 90000 00103',
+      contractRate: 11,
+    },
+    {
+      firstName: 'Sneha',
+      lastName: 'Reddy',
+      email: 'sneha@quickship.in',
+      password: 'client123',
+      role: 'client',
+      company: 'QuickShip Solutions',
+      phone: '+91 90000 00104',
+      contractRate: 13,
+    },
+    {
+      firstName: 'Vikram',
+      lastName: 'Singh',
+      email: 'vikram@logiprime.com',
+      password: 'client123',
+      role: 'client',
+      company: 'LogiPrime Transport',
+      phone: '+91 90000 00105',
+      contractRate: 12.5,
+    },
+    // ── Drivers ──
+    {
+      firstName: 'Ramesh',
+      lastName: 'Patil',
+      email: 'driver1@logistics.com',
+      password: 'driver123',
+      role: 'driver',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00201',
+      licenseNumber: 'MH-12-2024-001',
+    },
+    {
+      firstName: 'Suresh',
+      lastName: 'Kumar',
+      email: 'driver2@logistics.com',
+      password: 'driver123',
+      role: 'driver',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00202',
+      licenseNumber: 'DL-01-2023-045',
+    },
+    {
+      firstName: 'Anil',
+      lastName: 'Sharma',
+      email: 'driver3@logistics.com',
+      password: 'driver123',
+      role: 'driver',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00203',
+      licenseNumber: 'TN-07-2025-012',
+    },
+    {
+      firstName: 'Venkat',
+      lastName: 'Reddy',
+      email: 'driver4@logistics.com',
+      password: 'driver123',
+      role: 'driver',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00204',
+      licenseNumber: 'KA-05-2024-078',
+    },
+    {
+      firstName: 'Mohammed',
+      lastName: 'Khan',
+      email: 'driver5@logistics.com',
+      password: 'driver123',
+      role: 'driver',
+      company: 'B2B Logistics',
+      phone: '+91 90000 00205',
+      licenseNumber: 'GJ-06-2023-033',
+    },
+  ];
 
-export interface UserSeed {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  phone: string;
-  company?: string;
-  licenseNumber?: string;
-  contractRate: number;
-}
-
-export const userSeeds: UserSeed[] = [
-  {
-    firstName: 'Admin',
-    lastName: 'Platform',
-    email: 'admin@logistics.com',
-    password: 'admin123',
-    role: 'admin',
-    phone: '+1-555-0100',
-    company: 'B2B Logistics',
-    contractRate: 0,
-  },
-  {
-    firstName: 'Alex',
-    lastName: 'Executive',
-    email: 'exec@logistics.com',
-    password: 'exec123',
-    role: 'executive',
-    phone: '+1-555-0101',
-    company: 'B2B Logistics',
-    contractRate: 0,
-  },
-  {
-    firstName: 'ABC',
-    lastName: 'Manufacturing',
-    email: 'client@abc.com',
-    password: 'client123',
-    role: 'client',
-    phone: '+1-555-0102',
-    company: 'ABC Manufacturing',
-    contractRate: 2.75,
-  },
-  {
-    firstName: 'XYZ',
-    lastName: 'Distributors',
-    email: 'client@xyz.com',
-    password: 'client123',
-    role: 'client',
-    phone: '+1-555-0103',
-    company: 'XYZ Distributors',
-    contractRate: 3.1,
-  },
-  {
-    firstName: 'Mike',
-    lastName: 'Rodriguez',
-    email: 'driver1@logistics.com',
-    password: 'driver123',
-    role: 'driver',
-    phone: '+1-555-0104',
-    licenseNumber: 'DL-77821',
-    contractRate: 0,
-  },
-  {
-    firstName: 'Sarah',
-    lastName: 'Chen',
-    email: 'driver2@logistics.com',
-    password: 'driver123',
-    role: 'driver',
-    phone: '+1-555-0105',
-    licenseNumber: 'DL-55890',
-    contractRate: 0,
-  },
-];
+  // Use create() (not insertMany) so the pre('save') bcrypt hook hashes passwords.
+  const created: any[] = [];
+  for (const u of users) {
+    created.push(await User.create(u));
+  }
+  console.log(`[seed] ${created.length} users created`);
+  return created;
+};

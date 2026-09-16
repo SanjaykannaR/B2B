@@ -1,92 +1,55 @@
-// Analytics API service — executive aggregation endpoints
-// Module: Frontend API Services (Module 10) | Owner: Developer 2
+// This file is for: Analytics API service — all executive endpoints
+// Module: Frontend API Services (Module 10)
+// Owner: Developer 2 (Web Frontend Engineer)
 
 import api from './api';
 
-export interface FleetUtilization {
-  total: number;
-  available: number;
-  inTransit: number;
-  maintenance: number;
-  availablePct: number;
-  inTransitPct: number;
-  maintenancePct: number;
-}
+/**
+ * Retrieves fleet utilization statistics (e.g. active vs idle ratio).
+ * @returns Promise with fleet utilization data points
+ */
+export const getFleetUtilization = async () => {
+  // Call GET /analytics/fleet-utilization to fetch active vehicles analytics
+  const response = await api.get('/analytics/fleet-utilization');
+  return response.data;
+};
 
-export interface RouteEfficiencyRow {
-  trackingId: string;
-  origin: string;
-  destination: string;
-  distanceKm: number;
-  estimatedDurationMinutes: number;
-  status: string;
-  onTime: boolean;
-}
+/**
+ * Retrieves route efficiency statistics (e.g. distance/duration optimization).
+ * @returns Promise with route efficiency data points
+ */
+export const getRouteEfficiency = async () => {
+  // Call GET /analytics/route-efficiency to analyze transit paths
+  const response = await api.get('/analytics/route-efficiency');
+  return response.data;
+};
 
-export interface RouteEfficiency {
-  total: number;
-  onTime: number;
-  late: number;
-  onTimePct: number;
-  averageDistanceKm: number;
-  rows: RouteEfficiencyRow[];
-}
+/**
+ * Retrieves monthly load capacity statistics (e.g. total volume/weight capacity used).
+ * @returns Promise with monthly load capacity data points
+ */
+export const getMonthlyCapacity = async () => {
+  // Call GET /analytics/monthly-capacity to audit load parameters
+  const response = await api.get('/analytics/monthly-capacity');
+  return response.data;
+};
 
-export interface MonthlyCapacityEntry {
-  month: string;
-  totalWeightKg: number;
-  totalVolumeM3: number;
-  shipmentCount: number;
-}
+/**
+ * Retrieves delivery performance metrics (e.g. SLA success rate, late delivery count).
+ * @returns Promise with delivery performance charts data
+ */
+export const getDeliveryPerformance = async () => {
+  // Call GET /analytics/delivery-performance to retrieve fulfillment ratios
+  const response = await api.get('/analytics/delivery-performance');
+  return response.data;
+};
 
-export interface MonthlyCapacity {
-  months: MonthlyCapacityEntry[];
-}
-
-export interface DeliveryPerformance {
-  total: number;
-  onTime: number;
-  delayed: number;
-  cancelled: number;
-  onTimePct: number;
-  delayedPct: number;
-  cancelledPct: number;
-}
-
-export interface RevenueMonth {
-  month: string;
-  total: number;
-  paid: number;
-  pending: number;
-  overdue: number;
-}
-
-export interface RevenueSummary {
-  months: RevenueMonth[];
-  summary: { paid: number; pending: number; overdue: number; total: number };
-}
-
-export async function getFleetUtilization(): Promise<FleetUtilization> {
-  const { data } = await api.get<FleetUtilization>('/analytics/fleet-utilization');
-  return data;
-}
-
-export async function getRouteEfficiency(): Promise<RouteEfficiency> {
-  const { data } = await api.get<RouteEfficiency>('/analytics/route-efficiency');
-  return data;
-}
-
-export async function getMonthlyCapacity(): Promise<MonthlyCapacity> {
-  const { data } = await api.get<MonthlyCapacity>('/analytics/monthly-capacity');
-  return data;
-}
-
-export async function getDeliveryPerformance(): Promise<DeliveryPerformance> {
-  const { data } = await api.get<DeliveryPerformance>('/analytics/delivery-performance');
-  return data;
-}
-
-export async function getRevenueSummary(): Promise<RevenueSummary> {
-  const { data } = await api.get<RevenueSummary>('/analytics/revenue-summary');
-  return data;
-}
+/**
+ * Retrieves monthly revenue details (e.g. gross billed amounts, unpaid invoices total).
+ * @returns Promise with revenue summaries
+ */
+export const getRevenueSummary = async () => {
+  // Call GET /analytics/revenue-summary to inspect business cashflows
+  const response = await api.get('/analytics/revenue-summary');
+  return response.data;
+};

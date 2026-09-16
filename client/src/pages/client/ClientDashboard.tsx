@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import type { RootState } from '../../store/store';
 import ClientNavbar from '../../components/client/ClientNavbar';
-import { getMyManifests, Manifest } from '../../services/manifestApi';
-import { getMyInvoices, markInvoicePaid, Invoice } from '../../services/invoiceApi';
+import { getManifests } from '../../services/manifestApi';
+import { getMyInvoices, markPaid } from '../../services/invoiceApi';
 import { getErrorMessage } from '../../services/errorMessage';
 
 /* ─────────────────────── Types ─────────────────────── */
@@ -44,22 +44,31 @@ function formatDuration(min: number): string {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-function toShipment(m: Manifest): Shipment {
+function toTitleCase(status: string): string {
+  if (!status) return status;
+  return status
+    .toLowerCase()
+    .split('_')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join('-');
+}
+
+function toShipment(m: any): Shipment {
   return {
     id: m.trackingId,
-    origin: m.routing.origin.name,
-    destination: m.routing.destination.name,
-    status: m.currentStatus,
+    origin: m.routing?.origin?.city || m.routing?.origin?.name || '—',
+    destination: m.routing?.destination?.city || m.routing?.destination?.name || '—',
+    status: toTitleCase(m.status),
     date: formatDate(m.scheduledPickup),
-    eta: m.currentStatus === 'Delivered' || m.currentStatus === 'Cancelled'
+    eta: m.status === 'DELIVERED' || m.status === 'CANCELLED'
       ? '—'
-      : `${m.routing.distanceKm.toFixed(0)} km · ${formatDuration(m.routing.estimatedDurationMinutes)}`,
-    weight: `${m.cargoDetails.weight.toLocaleString()} kg`,
+      : `${(m.routing?.estimatedDistanceKm ?? 0).toFixed(0)} km · ${formatDuration(m.routing?.estimatedDurationMinutes ?? 0)}`,
+    weight: `${((m.cargoDetails?.totalWeightKg ?? m.cargoDetails?.weight ?? 0)).toLocaleString()} kg`,
   };
 }
 
-function toInvoiceView(i: Invoice): InvoiceView {
-  return { _id: i._id, id: i.invoiceNumber, amount: i.amount, dueDate: formatDate(i.dueDate), status: i.status };
+function toInvoiceView(i: any): InvoiceView {
+  return { _id: i._id, id: i.invoiceNumber, amount: i.amount, dueDate: formatDate(i.dueDate), status: toTitleCase(i.status) };
 }
 
 /* ─────────────────────── Responsive Styles ─────────────────────── */
@@ -226,11 +235,11 @@ export default function ClientDashboard() {
     setLoading(true);
     try {
       const [manifestsRes, invoicesRes] = await Promise.all([
-        getMyManifests({ limit: 5 }),
-        getMyInvoices({ limit: 5 }),
+        getManifests({ limit: 5 }),
+        getMyInvoices(),
       ]);
-      setShipments(manifestsRes.items.map(toShipment));
-      setInvoices(invoicesRes.items.map(toInvoiceView));
+      setShipments((manifestsRes.manifests || manifestsRes.data?.manifests || []).map(toShipment));
+      setInvoices((invoicesRes.invoices || invoicesRes.data?.invoices || []).map(toInvoiceView));
     } catch (err: any) {
       toast.error(getErrorMessage(err, 'Failed to load dashboard data.'));
     } finally {
@@ -275,7 +284,7 @@ export default function ClientDashboard() {
   // ── Actions ──
   const markAsPaid = useCallback(async (invoice: InvoiceView) => {
     try {
-      await markInvoicePaid(invoice._id);
+      await markPaid(invoice._id);
       setInvoices(prev => prev.map(inv => inv._id === invoice._id ? { ...inv, status: 'Paid' } : inv));
       toast.success('Invoice marked as paid.');
     } catch (err: any) {

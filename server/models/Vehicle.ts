@@ -1,45 +1,44 @@
-// This file is for: Vehicle Mongoose model — fleet asset registry
-// Module: Database Models (Module 3)
-// Owner: Developer 1 (Backend Engineer)
-// Schema fields: registrationNumber, model, make, year, maxWeightKg, maxVolumeCubicMeters,
-//                status (Available|In-Transit|Maintenance), currentDriver, fuelEfficiency, lastMaintenanceDate
-// Indexes: status, registrationNumber
+import { Schema, model, Model, Types } from 'mongoose';
 
-import { Schema, model, Types, InferSchemaType } from 'mongoose';
+export const VEHICLE_STATUSES = ['AVAILABLE', 'IN_TRANSIT', 'MAINTENANCE'] as const;
+export type VehicleStatus = (typeof VEHICLE_STATUSES)[number];
 
-const vehicleSchema = new Schema(
-  {
-    registrationNumber: {
-      type: String,
-      required: [true, 'Registration number is required'],
-      unique: true,
-      trim: true,
-      uppercase: true,
-    },
-    make: { type: String, required: [true, 'Make is required'], trim: true },
-    model: { type: String, required: [true, 'Model is required'], trim: true },
-    year: { type: Number, required: [true, 'Year is required'], min: 1980, max: 2100 },
-    maxWeightKg: { type: Number, required: [true, 'Max weight is required'], min: 0 },
-    maxVolumeCubicMeters: { type: Number, required: [true, 'Max volume is required'], min: 0 },
-    status: {
-      type: String,
-      enum: ['Available', 'In-Transit', 'Maintenance'],
-      default: 'Available',
-      required: true,
-    },
-    currentDriver: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    fuelEfficiency: { type: Number, min: 0 },
-    lastMaintenanceDate: { type: Date },
-  },
-  { timestamps: true }
-);
-
-export type VehicleStatus = InferSchemaType<typeof vehicleSchema>['status'];
-export interface VehicleDocument extends InferSchemaType<typeof vehicleSchema> {
-  _id: Types.ObjectId;
+export interface IVehicle {
+  registrationNumber: string;
+  make: string;
+  model: string;
+  year: number;
+  maxWeightKg: number;
+  maxVolumeCubicMeters: number;
+  status: VehicleStatus;
+  currentDriver?: Types.ObjectId;
+  fuelEfficiencyKmPerLiter?: number;
+  lastMaintenanceDate?: Date;
 }
 
-vehicleSchema.index({ status: 1 });
+export interface VehicleModel extends Model<IVehicle> {}
 
-const Vehicle = model<VehicleDocument>('Vehicle', vehicleSchema);
-export default Vehicle;
+const vehicleSchema = new Schema<IVehicle, VehicleModel>(
+  {
+    registrationNumber: { type: String, required: true, unique: true, uppercase: true, trim: true },
+    make: { type: String, required: true, trim: true },
+    model: { type: String, required: true, trim: true },
+    year: { type: Number, required: true, min: 1990, max: 2100 },
+    maxWeightKg: { type: Number, required: true, min: 0, default: 0 },
+    maxVolumeCubicMeters: { type: Number, required: true, min: 0, default: 0 },
+    status: {
+      type: String,
+      enum: VEHICLE_STATUSES,
+      default: 'AVAILABLE',
+    },
+    currentDriver: { type: Schema.Types.ObjectId, ref: 'User' },
+    fuelEfficiencyKmPerLiter: { type: Number, min: 0 },
+    lastMaintenanceDate: { type: Date },
+  },
+  { timestamps: true },
+);
+
+vehicleSchema.index({ status: 1 });
+vehicleSchema.index({ registrationNumber: 1 });
+
+export const Vehicle = model<IVehicle, VehicleModel>('Vehicle', vehicleSchema);

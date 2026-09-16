@@ -1,30 +1,16 @@
-// Service for: Auto-match cargo to compatible vehicles by weight/volume
-// Module: Backend Services (Module 6) | Owner: Developer 1
-
-import Vehicle, { VehicleDocument } from '../models/Vehicle';
-
-export interface CargoRequirements {
-  weight: number;
-  volume: number;
-}
+import { Vehicle } from '../models/Vehicle';
 
 /**
- * Find available vehicles that can carry the given weight & volume.
- * Results are sorted by total capacity (ascending) so the smallest
- * adequate vehicle is preferred.
+ * Auto-suggest compatible vehicles for a manifest's weight/volume.
+ * Used by Manifest Wizard Step 3 / capacity hints.
+ * Returns only AVAILABLE vehicles that fit BOTH constraints (when provided).
  */
-export async function findMatchingVehicles(
-  cargo: CargoRequirements,
-  limit = 5
-): Promise<VehicleDocument[]> {
-  return Vehicle.find({
-    status: 'Available',
-    maxWeightKg: { $gte: cargo.weight },
-    maxVolumeCubicMeters: { $gte: cargo.volume },
-  })
-    .sort({ maxWeightKg: 1, maxVolumeCubicMeters: 1 })
-    .limit(limit)
-    .lean<VehicleDocument[]>();
-}
-
-export default { findMatchingVehicles };
+export const capacityMatcher = async (
+  weightKg?: number,
+  volumeM3?: number,
+): Promise<any[]> => {
+  const query: Record<string, unknown> = { status: 'AVAILABLE' };
+  if (weightKg && weightKg > 0) query.maxWeightKg = { $gte: weightKg };
+  if (volumeM3 && volumeM3 > 0) query.maxVolumeCubicMeters = { $gte: volumeM3 };
+  return Vehicle.find(query).populate('currentDriver').sort({ maxWeightKg: 1 }).exec();
+};

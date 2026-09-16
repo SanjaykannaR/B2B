@@ -1,36 +1,108 @@
-import { ReactNode } from 'react';
-import { X } from 'lucide-react';
+// This file is for: ConfirmModal — reusable confirmation dialog
+// Module: Shared UI Components (Module 12)
+// Owner: Developer 3 (Mobile Frontend Engineer)
+//
+// What goes here:
+// - Modal overlay with dark backdrop (--color-surface-modal)
+// - Title, message, confirm button, cancel button
+// - Props: isOpen, onConfirm, onCancel, title, message, confirmText?, variant?
+// - Variant: 'danger' (red confirm) or 'default' (accent confirm)
+// - Keyboard: Escape to close, Enter to confirm
+// - Focus trap inside modal
+
+import React, { useEffect, useRef } from 'react';
+import { AlertTriangle, Check } from 'lucide-react';
 
 interface ConfirmModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  children: ReactNode;
+  onConfirm: () => void;
+  onCancel: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  variant?: 'danger' | 'default';
 }
 
-export default function ConfirmModal({ isOpen, onClose, title, children }: ConfirmModalProps) {
+export const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  isOpen,
+  onConfirm,
+  onCancel,
+  title,
+  message,
+  confirmText = 'Confirm',
+  variant = 'default',
+}) => {
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    // Focus the confirm button so Enter triggers it natively
+    confirmRef.current?.focus();
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCancel();
+      } else if (e.key === 'Enter' && e.target !== confirmRef.current) {
+        onConfirm();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onCancel, onConfirm]);
+
   if (!isOpen) return null;
 
+  const confirmColor = variant === 'danger' ? 'var(--color-error)' : 'var(--color-accent)';
+
   return (
-    <div 
-      className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-5 animate-dashFadeIn" 
-      onClick={onClose}
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4 animate-fade-in"
+      style={{ background: 'var(--color-surface-modal)', zIndex: 10000 }}
     >
-      <div 
-        className="bg-white border border-slate-200 rounded-[24px] max-w-[450px] w-full p-6 md:p-10 shadow-[0_32px_80px_rgba(0,0,0,0.4)] animate-dashPopIn relative max-h-[90vh] overflow-y-auto" 
-        onClick={(e) => e.stopPropagation()}
+      <div
+        className="w-full max-w-md rounded-2xl p-6 animate-scale-in"
+        style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-modal)' }}
       >
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
-        
-        {title && <h3 className="text-xl font-extrabold text-slate-900 mb-6">{title}</h3>}
-        
-        {children}
+        <div className="flex items-start gap-3">
+          <div
+            className="p-2.5 rounded-xl shrink-0"
+            style={{
+              background: variant === 'danger' ? 'rgba(239,68,68,0.08)' : 'rgba(255,107,44,0.08)',
+              color: confirmColor,
+            }}
+          >
+            {variant === 'danger' ? <AlertTriangle size={20} /> : <Check size={20} />}
+          </div>
+          <div className="pt-0.5">
+            <h3 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>{title}</h3>
+            <p className="text-sm mt-1.5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>{message}</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-6">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px]"
+            style={{
+              background: 'var(--color-surface-card)',
+              borderColor: 'var(--color-border)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            ref={confirmRef}
+            onClick={onConfirm}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:-translate-y-0.5 min-h-[44px]"
+            style={{
+              background: confirmColor,
+              boxShadow: `0 4px 14px ${variant === 'danger' ? 'rgba(239,68,68,0.3)' : 'rgba(255,107,44,0.3)'}`,
+            }}
+          >
+            {confirmText}
+          </button>
+        </div>
       </div>
     </div>
   );
-}
+};

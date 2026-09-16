@@ -1,22 +1,47 @@
+// This file is for: React DOM render — app entry point
+// Module: Frontend Configuration (Module 8)
+// Owner: Developer 2 (Web Frontend Engineer)
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
-import './styles/globals.css';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 
-// Reclaim this origin from any stale service worker left behind by a previous app
-// (e.g. a different site that previously ran on this port). Otherwise the browser
-// keeps serving the old cached app and this project's UI/errors never appear.
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => registration.unregister());
-  });
-  if (caches) {
-    caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
-  }
-}
+import App from './App';
+import store from './store/store';
+import './globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <App />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#FFFFFF',
+              color: '#1A1D26',
+              border: '1px solid var(--color-border)',
+              fontFamily: 'var(--font-sans)',
+            },
+            success: {
+              iconTheme: {
+                primary: 'var(--color-success)',
+                secondary: '#FFFFFF',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: 'var(--color-error)',
+                secondary: '#FFFFFF',
+              },
+            },
+          }}
+        />
+      </BrowserRouter>
+    </Provider>
   </React.StrictMode>
 );

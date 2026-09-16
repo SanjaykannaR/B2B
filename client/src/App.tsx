@@ -1,67 +1,76 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { Toaster } from 'react-hot-toast';
-import { store } from './store/store';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AppShell } from './components/layout/AppShell';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { NotFound } from './pages/NotFound';
 import Login from './pages/Login';
+// Admin
+import { AdminDashboard } from './pages/admin/AdminDashboard';
+import { FleetMonitor } from './pages/admin/FleetMonitor';
+import { LiveOperations } from './pages/admin/LiveOperations';
+import { AllManifests } from './pages/admin/AllManifests';
+import { ClientRequests } from './pages/admin/ClientRequests';
+import { ManifestCreate } from './pages/admin/ManifestCreate';
+import { Settings as SettingsPage } from './pages/admin/Settings';
+import { Invoices as InvoicesPage } from './pages/admin/Invoices';
+import { Notifications as NotificationsPage } from './pages/admin/Notifications';
+import { Users as UsersPage } from './pages/admin/Users';
+// Analytics page is owned by another developer — currently disabled (see pages/admin/Analytics.tsx).
+// import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
+// Executive
+import { ExecutiveAnalytics } from './pages/executive/ExecutiveAnalytics';
+// Team placeholders — will be replaced when teammates merge their pages
 import ClientDashboard from './pages/client/ClientDashboard';
-import TrackShipment from './pages/client/TrackShipment';
-
 import ClientInvoices from './pages/client/ClientInvoices';
+import TrackShipment from './pages/client/TrackShipment';
 import PlaceOrder from './pages/client/PlaceOrder';
-import ClientSettings from './pages/client/ClientSettings';
-
-import AdminDashboard from './pages/admin/AdminDashboard';
-import FleetMonitor from './pages/admin/FleetMonitor';
-import LiveOperations from './pages/admin/LiveOperations';
-import ManifestCreate from './pages/admin/ManifestCreate';
-
-// Temporary placeholders for role dashboards not yet wired (Modules 14/16/17).
-function RolePlaceholder({ title }: { title: string }) {
-  return (
-    <div className="min-h-screen bg-[#f5f6f8] flex items-center justify-center font-sans">
-      <div className="text-center p-6 sm:p-10">
-        <h1 className="text-2xl font-extrabold text-slate-900 mb-2">{title}</h1>
-        <p className="text-slate-500">This workspace is under construction. Log in with a client account to use the live portal.</p>
-        <a href="/login" className="inline-block mt-6 text-orange-500 font-bold hover:underline">Sign out</a>
-      </div>
-    </div>
-  );
-}
+import DriverDashboard from './pages/driver/DriverDashboard';
+import ActiveDelivery from './pages/driver/ActiveDelivery';
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: { fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600 },
-          }}
-        />
+    <Routes>
+      {/* Public */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Navigate to="/client/dashboard" replace />} />
-
-          <Route path="/client/dashboard" element={<ClientDashboard />} />
-          <Route path="/client/place-order" element={<PlaceOrder />} />
-          <Route path="/client/track" element={<TrackShipment />} />
-          <Route path="/client/invoices" element={<ClientInvoices />} />
-          <Route path="/client/settings" element={<ClientSettings />} />
-
-          {/* Admin Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      {/* Authenticated — admin can access every role's routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          {/* Admin */}
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/fleet" element={<FleetMonitor />} />
-          <Route path="/admin/operations" element={<LiveOperations />} />
-          <Route path="/admin/manifest/create" element={<ManifestCreate />} />
+          <Route path="/admin/live" element={<LiveOperations />} />
+          <Route path="/admin/manifests" element={<AllManifests />} />
+          <Route path="/admin/requests" element={<ClientRequests />} />
+          <Route path="/admin/invoices" element={<InvoicesPage />} />
+          <Route path="/admin/notifications" element={<NotificationsPage />} />
+          <Route path="/admin/users" element={<UsersPage />} />
+          {/* <Route path="/admin/analytics" element={<AnalyticsPage />} /> */}
+          <Route path="/admin/manifests/new" element={<ManifestCreate />} />
+          <Route path="/admin/settings" element={<SettingsPage />} />
 
-          {/* Role dashboards — replace placeholders when Modules 16/17 land */}
-          <Route path="/driver/dashboard" element={<RolePlaceholder title="Driver Dashboard" />} />
-          <Route path="/executive/analytics" element={<RolePlaceholder title="Executive Analytics" />} />
+          {/* Executive */}
+          <Route element={<ProtectedRoute allowedRoles={['executive', 'admin']} />}>
+            <Route path="/executive/analytics" element={<ExecutiveAnalytics />} />
+          </Route>
 
-          <Route path="*" element={<Navigate to="/client/dashboard" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </Provider>
+          {/* Client pages (placeholder — teammates will replace these) */}
+          <Route element={<ProtectedRoute allowedRoles={['client', 'admin']} />}>
+            <Route path="/client/dashboard" element={<ClientDashboard />} />
+            <Route path="/client/invoices" element={<ClientInvoices />} />
+            <Route path="/client/track" element={<TrackShipment />} />
+            <Route path="/client/order" element={<PlaceOrder />} />
+          </Route>
+
+          {/* Driver pages (placeholder — teammates will replace these) */}
+          <Route element={<ProtectedRoute allowedRoles={['driver', 'admin']} />}>
+            <Route path="/driver/dashboard" element={<DriverDashboard />} />
+            <Route path="/driver/delivery" element={<ActiveDelivery />} />
+          </Route>
+        </Route>
+      </Route>
+
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
