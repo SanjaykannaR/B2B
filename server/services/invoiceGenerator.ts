@@ -6,7 +6,7 @@ export const DEFAULT_CONTRACT_RATE = 12; // ₹ per km
 
 /**
  * Build + persist an invoice from a delivered manifest.
- * Cost = distance × client.contractRate. 30-day payment window.
+
  * Idempotent: returns the existing invoice if one already exists for the manifest.
  */
 export const generateInvoiceForManifest = async (
