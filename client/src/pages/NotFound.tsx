@@ -1,57 +1,33 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { DEFAULT_ROUTES } from '../utils/constants';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { PackageSearch, Home } from 'lucide-react';
 
-export default function NotFound() {
-  const navigate = useNavigate();
-  const { isAuthenticated, role } = useAuth();
-
-  const handleHome = () => {
-    if (isAuthenticated && role) {
-      navigate(DEFAULT_ROUTES[role]);
-    } else {
-      navigate('/login');
-    }
-  };
+export const NotFound: React.FC = () => {
+  const role = (JSON.parse(localStorage.getItem('user') || 'null') || {}).role;
+  const home = role ? `/${role}` : '/admin';
 
   return (
-    <div
-      style={{
-        minHeight: 'calc(100vh - 60px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center',
-      }}
-    >
-      <div style={{ maxWidth: 420 }}>
-        <div style={{ fontSize: '4rem', fontWeight: 800, color: '#1B2A4A', fontFamily: "'IBM Plex Mono', monospace" }}>
-          404
-        </div>
-        <h1 style={{ fontSize: '1.375rem', fontWeight: 700, color: '#1E293B', margin: '0.5rem 0' }}>
-          Page Not Found
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: '#64748B', margin: '0 0 1.5rem 0' }}>
-          The page you are looking for doesn't exist or has been moved.
-        </p>
-        <button
-          onClick={handleHome}
-          style={{
-            backgroundColor: '#1B2A4A',
-            color: '#FFFFFF',
-            border: 'none',
-            padding: '0.625rem 1.5rem',
-            borderRadius: '0.5rem',
-            fontWeight: 600,
-            fontSize: '0.875rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--color-surface)' }}>
+      <div className="text-center max-w-sm">
+        <div
+          className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5"
+          style={{ background: 'var(--color-primary-dark)', boxShadow: '0 8px 24px rgba(15,27,51,0.25)' }}
         >
-          Back to Dashboard
-        </button>
+          <PackageSearch size={28} style={{ color: 'var(--color-accent)' }} />
+        </div>
+        <p className="text-6xl font-bold" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>404</p>
+        <h1 className="text-xl font-bold mt-2" style={{ color: 'var(--color-text-primary)' }}>Page not found</h1>
+        <p className="text-sm mt-2 mb-6" style={{ color: 'var(--color-text-muted)' }}>
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <Link
+          to={home}
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200"
+          style={{ background: 'var(--color-accent)', boxShadow: '0 8px 20px rgba(255,107,44,0.3)' }}
+        >
+          <Home size={15} /> Go Home
+        </Link>
       </div>
     </div>
   );
-}
+};

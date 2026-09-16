@@ -1,129 +1,55 @@
-import { Fragment } from 'react';
-import { FiCheck } from 'react-icons/fi';
+import { Clock, Package, Truck, CheckCircle2 } from 'lucide-react';
 
-interface ProgressStepperProps {
-  currentStatus?: string;
-}
-
-const STEPS = [
-  { id: 'Pending', label: 'Pending', description: 'Order Placed' },
-  { id: 'Assigned', label: 'Assigned', description: 'Driver Dispatched' },
-  { id: 'In-Transit', label: 'In-Transit', description: 'On the Road' },
-  { id: 'Delivered', label: 'Delivered', description: 'Completed' },
-];
-
-export default function ProgressStepper({ currentStatus = 'Assigned' }: ProgressStepperProps) {
-  const getStepStatus = (index: number) => {
-    const statusOrder = ['Pending', 'Assigned', 'In-Transit', 'Delivered'];
-    
-    let activeStatus = currentStatus;
-    if (currentStatus === 'Delayed') {
-      activeStatus = 'In-Transit';
-    }
-
-    const currentIndex = statusOrder.indexOf(activeStatus);
-
-    if (index < currentIndex) return 'completed';
-    if (index === currentIndex) return currentStatus === 'Delayed' ? 'delayed' : 'active';
-    return 'upcoming';
-  };
+export default function ProgressStepper({ currentStatus }: { currentStatus: string }) {
+  const steps = [
+    { label: 'Pending', icon: Clock },
+    { label: 'Assigned', icon: Package },
+    { label: 'In-Transit', icon: Truck },
+    { label: 'Delivered', icon: CheckCircle2 }
+  ];
+  
+  const stepLabels = steps.map(s => s.label);
+  let currentIndex = stepLabels.indexOf(currentStatus);
+  if (currentIndex === -1) currentIndex = 0;
 
   return (
-    <div style={{ width: '100%', padding: '1.25rem 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-        {STEPS.map((step, index) => {
-          const stepState = getStepStatus(index);
-          const isLast = index === STEPS.length - 1;
+    <div className="w-full max-w-3xl mx-auto px-4 py-4">
+      <div className="relative">
+        {/* The background line connecting the icons */}
+        <div className="absolute top-5 left-[12.5%] right-[12.5%] h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
+        {/* The active colored line */}
+        <div 
+          className="absolute top-5 left-[12.5%] h-1 bg-accent -translate-y-1/2 z-0 transition-all duration-1000 shadow-[0_0_8px_rgba(255,107,44,0.4)]"
+          style={{ width: `${(currentIndex / 3) * 75}%` }}
+        ></div>
 
-          let circleBg = '#E2E8F0';
-          let circleColor = '#64748B';
-          let borderColor = '#CBD5E1';
-          let lineBg = '#E2E8F0';
-
-          if (stepState === 'completed') {
-            circleBg = '#10B981';
-            circleColor = '#FFFFFF';
-            borderColor = '#10B981';
-            lineBg = '#10B981';
-          } else if (stepState === 'active') {
-            circleBg = '#1B2A4A';
-            circleColor = '#FFFFFF';
-            borderColor = '#FF6B2C';
-            lineBg = '#E2E8F0';
-          } else if (stepState === 'delayed') {
-            circleBg = '#EF4444';
-            circleColor = '#FFFFFF';
-            borderColor = '#DC2626';
-            lineBg = '#FEE2E2';
-          }
-
-          return (
-            <Fragment key={step.id}>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  zIndex: 2,
-                  flex: 1,
-                  textAlign: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    backgroundColor: circleBg,
-                    color: circleColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    border: `2px solid ${borderColor}`,
-                    boxShadow: stepState === 'active' ? '0 0 0 4px rgba(255, 107, 44, 0.2)' : 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  {stepState === 'completed' ? (
-                    <FiCheck size={18} strokeWidth={3} />
-                  ) : (
-                    index + 1
-                  )}
+        {/* The icons and text */}
+        <div className="relative z-10 flex justify-between w-full">
+          {steps.map((step, idx) => {
+            const isCompleted = idx <= currentIndex;
+            const isActive = idx === currentIndex;
+            const Icon = step.icon;
+            
+            return (
+              <div key={step.label} className="flex flex-col items-center w-1/4">
+                <div className={`w-10 h-10 rounded-full border-4 flex items-center justify-center bg-white transition-all duration-300 ${
+                  isActive ? 'border-accent text-accent shadow-md scale-110' : 
+                  isCompleted ? 'border-accent text-accent' : 
+                  'border-slate-200 text-slate-400'
+                }`}>
+                  <Icon className="w-4 h-4" />
                 </div>
-
-                <div style={{ marginTop: '8px' }}>
-                  <div
-                    style={{
-                      fontSize: '0.8125rem',
-                      fontWeight: stepState !== 'upcoming' ? 700 : 500,
-                      color: stepState === 'delayed' ? '#DC2626' : stepState !== 'upcoming' ? '#1B2A4A' : '#64748B',
-                    }}
-                  >
-                    {stepState === 'delayed' ? 'Delayed' : step.label}
-                  </div>
-                  <div style={{ fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
-                    {step.description}
-                  </div>
+                <div className={`mt-3 text-[11px] font-bold text-center uppercase tracking-wider w-full px-1 break-words ${
+                  isActive ? 'text-accent' : 
+                  isCompleted ? 'text-slate-900' : 
+                  'text-slate-400'
+                }`}>
+                  {step.label}
                 </div>
               </div>
-
-              {!isLast && (
-                <div
-                  style={{
-                    height: '3px',
-                    flex: 1,
-                    backgroundColor: lineBg,
-                    marginTop: '-24px',
-                    zIndex: 1,
-                    transition: 'all 0.3s ease',
-                  }}
-                />
-              )}
-            </Fragment>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

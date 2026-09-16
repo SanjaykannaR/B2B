@@ -1,101 +1,302 @@
-import { useEffect, useState } from 'react';
-import { FiPackage, FiTruck, FiClock, FiAlertTriangle } from 'react-icons/fi';
-import MetricCard from '../../components/shared/MetricCard';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Package, Truck, Clock, AlertTriangle, ArrowRight, Plus, FileDown } from 'lucide-react';
+import { StatCard } from '../../components/admin/shared/StatCard';
+import { StatusBadge } from '../../components/admin/shared/StatusBadge';
+import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
+import { PageHeader } from '../../components/admin/shared/PageHeader';
+import { Skeleton } from '../../components/admin/shared/Skeleton';
+import * as manifestApi from '../../services/manifestApi';
+import { formatDateTime } from '../../utils/formatters';
 
-interface DashboardStats {
-  totalManifests: number;
-  activeVehicles: number;
-  pendingOrders: number;
-  alerts: number;
-}
+/** Demo data shown when backend is offline */
+const DEMO_MANIFESTS = [
+  { _id: '1', trackingId: 'TRK-8841', status: 'IN_TRANSIT', client: { name: 'Acme Corp' }, origin: { city: 'Mumbai' }, destination: { city: 'Delhi' }, updatedAt: new Date(Date.now() - 3600000).toISOString() },
+  { _id: '2', trackingId: 'TRK-8842', status: 'DELIVERED', client: { name: 'GlobalTrade' }, origin: { city: 'Chennai' }, destination: { city: 'Bangalore' }, updatedAt: new Date(Date.now() - 7200000).toISOString() },
+  { _id: '3', trackingId: 'TRK-8843', status: 'PENDING', client: { name: 'QuickShip' }, origin: { city: 'Kolkata' }, destination: { city: 'Hyderabad' }, updatedAt: new Date(Date.now() - 10800000).toISOString() },
+  { _id: '4', trackingId: 'TRK-8844', status: 'DELAYED', client: { name: 'FastFreight' }, origin: { city: 'Pune' }, destination: { city: 'Ahmedabad' }, updatedAt: new Date(Date.now() - 14400000).toISOString() },
+  { _id: '5', trackingId: 'TRK-8845', status: 'ASSIGNED', client: { name: 'LogiPrime' }, origin: { city: 'Jaipur' }, destination: { city: 'Lucknow' }, updatedAt: new Date(Date.now() - 18000000).toISOString() },
+];
 
-const STATS: DashboardStats = {
-  totalManifests: 1248,
-  activeVehicles: 34,
-  pendingOrders: 12,
-  alerts: 3,
-};
+const STATUS_SEGMENTS = [
+  { label: 'Pending', count: 28, color: '#F59E0B' },
+  { label: 'In Transit', count: 45, color: '#8B5CF6' },
+  { label: 'Delivered', count: 112, color: '#10B981' },
+  { label: 'Delayed', count: 8, color: '#EF4444' },
+];
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>(STATS);
-  const [, setLoading] = useState(true);
+export const AdminDashboard: React.FC = () => {
+  const [manifests, setManifests] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { getDashboardStats } = await import('../../services/dashboardApi');
-        const data = await getDashboardStats();
-        if (!cancelled && data) setStats(data);
-      } catch {
-        /* use defaults */
-      }
-      if (!cancelled) setLoading(false);
-    })();
-    return () => { cancelled = true; };
+  const handleExport = useCallback(async () => {
+    try {
+      setExporting(true);
+      const res = await manifestApi.getManifests({ limit: 1000 });
+      const all = res.manifests || res || [];
+      if (!all.length) return;
+
+      const headers = ['Tracking ID', 'Client', 'Origin', 'Destination', 'Status', 'Updated At'];
+      const rows = all.map((m: any) => [
+        m.trackingId || '',
+        m.client?.name || '',
+        m.origin?.city || '',
+        m.destination?.city || '',
+        m.status || '',
+        m.updatedAt || '',
+      ]);
+
+      const csv = [headers.join(','), ...rows.map((r: string[]) => r.map(v => `"${v}"`).join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `manifests-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // silent fail
+    } finally {
+      setExporting(false);
+    }
   }, []);
 
-  return (
-    <div style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden' }}>
-      <div
-        style={{
-          backgroundColor: '#1B2A4A',
-          color: '#FFFFFF',
-          borderRadius: '1rem',
-          padding: '2rem',
-          marginBottom: '2rem',
-          background: 'linear-gradient(135deg, #1B2A4A 0%, #0F1B33 100%)',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-            <span style={{ backgroundColor: '#FF6B2C', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
-              ADMIN DASHBOARD
-            </span>
-            <span style={{ fontSize: '0.8125rem', color: '#94A3B8' }}>Fleet &amp; manifest overview</span>
-          </div>
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await manifestApi.getManifests({ limit: 5 });
+        setManifests(res.manifests || res || []);
+      } catch {
+        setManifests(DEMO_MANIFESTS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
-          <h1 style={{ fontSize: '1.875rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#FFFFFF' }}>
-            Admin Dashboard
-          </h1>
-          <p style={{ color: '#94A3B8', margin: 0, fontSize: '0.9375rem', maxWidth: '640px' }}>
-            Fleet utilization, manifest totals, pending orders, and active alerts — real-time operational overview for dispatchers and admins.
-          </p>
-        </div>
+  const total = STATUS_SEGMENTS.reduce((s, x) => s + x.count, 0);
+
+  return (
+    <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-7">
+      {/* ── Header ── */}
+      <AnimatedCard>
+        <PageHeader
+          title="Dashboard"
+          subtitle="Welcome back, Admin. Here's what's happening today."
+          secondaryAction={
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
+                transition-all duration-200 border shrink-0 min-h-[44px] disabled:opacity-50
+                hover:-translate-y-0.5 hover:shadow-md"
+              style={{
+                background: 'var(--color-surface-card)',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
+              <FileDown size={16} /> {exporting ? 'Exporting…' : 'Export'}
+            </button>
+          }
+          action={
+            <Link
+              to="/admin/manifests/new"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg shrink-0 whitespace-nowrap min-h-[44px]"
+              style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
+            >
+              <Plus size={16} /> New Manifest
+            </Link>
+          }
+        />
+      </AnimatedCard>
+
+      {/* ── KPI Cards ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <AnimatedCard delay={80}>
+          <StatCard title="Total Manifests" value={1248} icon={Package} color="#3B82F6" trend={{ value: '12%', isPositive: true }} to="/admin/manifests" />
+        </AnimatedCard>
+        <AnimatedCard delay={160}>
+          <StatCard title="Active Vehicles" value={34} icon={Truck} color="#10B981" trend={{ value: '4%', isPositive: true }} to="/admin/fleet" />
+        </AnimatedCard>
+        <AnimatedCard delay={240}>
+          <StatCard title="Pending Orders" value={12} icon={Clock} color="#F59E0B" trend={{ value: '8%', isPositive: false }} to="/admin/manifests" />
+        </AnimatedCard>
+        <AnimatedCard delay={320}>
+          <StatCard title="Alerts / Delayed" value={3} icon={AlertTriangle} color="#EF4444" to="/admin/live" />
+        </AnimatedCard>
       </div>
 
-      <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-        <MetricCard
-          label="TOTAL MANIFESTS"
-          value={stats.totalManifests.toLocaleString()}
-          icon={<FiPackage size={22} color="#2563EB" />}
-          accentColor="#2563EB"
-          themeColor="#2563EB"
-        />
-        <MetricCard
-          label="ACTIVE VEHICLES"
-          value={stats.activeVehicles.toString()}
-          icon={<FiTruck size={22} color="#10B981" />}
-          accentColor="#10B981"
-          themeColor="#10B981"
-        />
-        <MetricCard
-          label="PENDING ORDERS"
-          value={stats.pendingOrders.toString()}
-          icon={<FiClock size={22} color="#F59E0B" />}
-          accentColor="#F59E0B"
-          themeColor="#F59E0B"
-        />
-        <MetricCard
-          label="ALERTS / DELAYS"
-          value={stats.alerts.toString()}
-          icon={<FiAlertTriangle size={22} color="#EF4444" />}
-          accentColor="#EF4444"
-          themeColor="#EF4444"
-        />
+      {/* ── Bottom Grid: Table + Status Sidebar ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Manifests Table — 2 cols */}
+        <AnimatedCard delay={400} className="lg:col-span-2">
+          <div
+            className="rounded-2xl border overflow-hidden"
+            style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
+          >
+            <div
+              className="px-6 py-4 flex items-center justify-between border-b"
+              style={{ borderColor: 'var(--color-border-light)' }}
+            >
+              <h2 className="text-base font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                Recent Manifests
+              </h2>
+              <Link
+                to="/admin/manifests"
+                className="flex items-center gap-1 text-xs font-semibold transition-colors"
+                style={{ color: 'var(--color-accent)' }}
+              >
+                View All <ArrowRight size={14} />
+              </Link>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-light)' }}>
+                    <th className="px-5 sm:px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Tracking ID</th>
+                    <th className="hidden sm:table-cell px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Client</th>
+                    <th className="hidden md:table-cell px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Route</th>
+                    <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">Status</th>
+                    <th className="hidden lg:table-cell px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">Updated</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <tr key={i}>
+                        <td className="px-5 sm:px-6 py-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="hidden sm:table-cell px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="hidden md:table-cell px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-5 py-4"><Skeleton className="h-5 w-20 rounded-full" /></td>
+                        <td className="hidden lg:table-cell px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                      </tr>
+                    ))
+                  ) : manifests.length > 0 ? (
+                    manifests.map((m, i) => (
+                      <tr
+                        key={m._id || m.trackingId}
+                        className="row-glow transition-colors cursor-pointer"
+                        style={{
+                          borderBottom: '1px solid var(--color-border-light)',
+                          animationDelay: `${i * 60}ms`,
+                        }}
+                      >
+                        <td
+                          className="px-5 sm:px-6 py-3.5 font-bold whitespace-nowrap"
+                          style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-accent)' }}
+                        >
+                          #{m.trackingId || 'MNF-XX'}
+                        </td>
+                        <td className="hidden sm:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
+                          {m.client?.name || 'Unknown'}
+                        </td>
+                        <td className="hidden md:table-cell px-5 py-3.5 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                          {m.origin?.city} → {m.destination?.city}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <StatusBadge status={m.status} />
+                        </td>
+                        <td className="hidden lg:table-cell px-5 py-3.5 text-right whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
+                          {formatDateTime(m.updatedAt)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-5 sm:px-6 py-16 text-center" style={{ color: 'var(--color-text-muted)' }}>
+                        No recent manifests found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </AnimatedCard>
+
+        {/* ── Right Sidebar: Status Distribution + Quick Actions ── */}
+        <AnimatedCard delay={480} className="space-y-5">
+          {/* Status Distribution */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
+          >
+            <h3 className="text-sm font-bold mb-5" style={{ color: 'var(--color-text-primary)' }}>
+              Status Distribution
+            </h3>
+            <div className="space-y-4">
+              {STATUS_SEGMENTS.map((seg) => (
+                <div key={seg.label}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                      {seg.label}
+                    </span>
+                    <span className="text-xs font-bold" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+                      {seg.count}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--color-surface-hover)' }}>
+                    <div
+                      className="h-full rounded-full animate-bar-grow"
+                      style={{
+                        width: `${(seg.count / total) * 100}%`,
+                        background: seg.color,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
+          >
+            <h3 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+              Quick Actions
+            </h3>
+            <div className="space-y-1.5">
+              {[
+                { label: 'Create Manifest', icon: Plus, href: '/admin/manifests/new', color: '#3B82F6' },
+                { label: 'Fleet Monitor', icon: Truck, href: '/admin/fleet', color: '#10B981' },
+                { label: 'Live Operations', icon: Package, href: '/admin/live', color: '#8B5CF6' },
+              ].map(({ label, icon: I, href, color }) => (
+                <a
+                  key={href}
+                  href={href}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                    hover:-translate-x-0.5 group/action min-h-[44px]"
+                  style={{ color: 'var(--color-text-primary)' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'var(--color-surface-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-center w-8 h-8 rounded-lg transition-transform duration-200 group-hover/action:scale-110 shrink-0"
+                    style={{ background: `${color}15`, color }}
+                  >
+                    <I size={16} />
+                  </div>
+                  <span className="text-sm font-semibold">{label}</span>
+                  <ArrowRight size={14} className="ml-auto opacity-0 group-hover/action:opacity-100 transition-opacity shrink-0"
+                    style={{ color: 'var(--color-text-muted)' }} />
+                </a>
+              ))}
+            </div>
+          </div>
+        </AnimatedCard>
       </div>
     </div>
   );
-}
+};

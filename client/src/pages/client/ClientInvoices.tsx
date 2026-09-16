@@ -1,5 +1,6 @@
-// This file is for: Client Invoices page — invoice stats + filterable invoice table
-// Module: Client Pages (Module 15)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// Uses: InvoiceList, StatCard (total billed, paid, pending, overdue), filter tabs, "Mark Paid" action
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+/** Placeholder — client invoices page, owned by another developer. */
+const ClientInvoices: React.FC = () => <Navigate to="/admin" replace />;
+export default ClientInvoices;

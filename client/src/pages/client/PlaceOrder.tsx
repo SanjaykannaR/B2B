@@ -1,5 +1,6 @@
-// This file is for: Place Order page — simplified bulk freight request form for clients
-// Module: Client Pages (Module 15)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// Uses: OrderForm component. Submits to POST /manifests with status=Pending
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+/** Placeholder — client order page, owned by another developer. */
+const PlaceOrder: React.FC = () => <Navigate to="/admin" replace />;
+export default PlaceOrder;

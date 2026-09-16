@@ -1,42 +1,74 @@
-export const ROLES = {
-  ADMIN: 'admin',
-  CLIENT: 'client',
-  DRIVER: 'driver',
-  EXECUTIVE: 'executive',
-} as const;
+// This file is for: Constants — status enums, role names, route paths, status-to-color mapping
+// Module: Frontend Utilities (Module 10)
+// Owner: Developer 2 (Web Frontend Engineer)
 
-export type Role = (typeof ROLES)[keyof typeof ROLES];
+export enum ROLES {
+  ADMIN = 'admin',
+  CLIENT = 'client',
+  DRIVER = 'driver',
+  EXECUTIVE = 'executive',
+}
 
-export const MANIFEST_STATUSES = {
-  PENDING: 'Pending',
-  ASSIGNED: 'Assigned',
-  IN_TRANSIT: 'In-Transit',
-  DELIVERED: 'Delivered',
-  DELAYED: 'Delayed',
-  CANCELLED: 'Cancelled',
-} as const;
+export enum MANIFEST_STATUSES {
+  PENDING = 'Pending',
+  ASSIGNED = 'Assigned',
+  IN_TRANSIT = 'In-Transit',
+  DELIVERED = 'Delivered',
+  DELAYED = 'Delayed',
+  CANCELLED = 'Cancelled',
+}
 
-export const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  'Pending': { bg: '#FEF3C7', color: '#D97706', border: '#FCD34D' },
-  'Assigned': { bg: '#DBEAFE', color: '#2563EB', border: '#93C5FD' },
-  'In-Transit': { bg: '#EDE9FE', color: '#7C3AED', border: '#C4B5FD' },
-  'Delivered': { bg: '#D1FAE5', color: '#059669', border: '#6EE7B7' },
-  'Delayed': { bg: '#FEE2E2', color: '#DC2626', border: '#FCA5A5' },
-  'Cancelled': { bg: '#F3F4F6', color: '#4B5563', border: '#D1D5DB' },
+export enum VEHICLE_STATUSES {
+  AVAILABLE = 'Available',
+  IN_TRANSIT = 'In-Transit',
+  MAINTENANCE = 'Maintenance',
+}
+
+export enum INVOICE_STATUSES {
+  PENDING = 'Pending',
+  PAID = 'Paid',
+  OVERDUE = 'Overdue',
+  CANCELLED = 'Cancelled',
+}
+
+export enum NOTIFICATION_TYPES {
+  INFO = 'info',
+  WARNING = 'warning',
+  SUCCESS = 'success',
+  ERROR = 'error',
+}
+
+export const STATUS_COLORS: Record<string, { text: string; bg: string }> = {
+  Pending: { text: 'var(--color-status-pending)', bg: 'var(--color-status-pending-bg)' },
+  Assigned: { text: 'var(--color-status-assigned)', bg: 'var(--color-status-assigned-bg)' },
+  'In-Transit': { text: 'var(--color-status-in-transit)', bg: 'var(--color-status-in-transit-bg)' },
+  Delivered: { text: 'var(--color-status-delivered)', bg: 'var(--color-status-delivered-bg)' },
+  Delayed: { text: 'var(--color-status-delayed)', bg: 'var(--color-status-delayed-bg)' },
+  Cancelled: { text: 'var(--color-status-cancelled)', bg: 'var(--color-status-cancelled-bg)' },
+  Available: { text: 'var(--color-status-available)', bg: 'var(--color-status-available-bg)' },
+  Maintenance: { text: 'var(--color-status-maintenance)', bg: 'var(--color-status-maintenance-bg)' },
+  Paid: { text: 'var(--color-status-delivered)', bg: 'var(--color-status-delivered-bg)' },
+  Overdue: { text: 'var(--color-status-delayed)', bg: 'var(--color-status-delayed-bg)' },
 };
 
 export const ROUTE_PATHS = {
-  LOGIN: '/login',
-  DRIVER_DASHBOARD: '/driver',
-  ACTIVE_DELIVERY: '/driver/delivery/:id',
-  ADMIN_DASHBOARD: '/admin/dashboard',
-  CLIENT_DASHBOARD: '/client/dashboard',
-  EXECUTIVE_ANALYTICS: '/executive/analytics',
-} as const;
+  // Login route removed for now (auth decision pending). Admin console is the entry point.
 
-export const DEFAULT_ROUTES: Record<Role, string> = {
-  admin: '/admin/dashboard',
-  client: '/client/dashboard',
-  driver: '/driver',
-  executive: '/executive/analytics',
+  // Admin routes
+  ADMIN_DASHBOARD: '/admin/dashboard',
+  ADMIN_FLEET: '/admin/fleet',
+  ADMIN_MANIFEST_CREATE: '/admin/create',
+  ADMIN_LIVE_OPS: '/admin/live',
+  
+  // Client routes
+  CLIENT_DASHBOARD: '/client/dashboard',
+  CLIENT_ORDER: '/client/order',
+  CLIENT_TRACK: '/client/track',
+  CLIENT_INVOICES: '/client/invoices',
+  
+  // Driver routes
+  DRIVER_DASHBOARD: '/driver/dashboard',
+  
+  // Executive routes
+  EXECUTIVE_ANALYTICS: '/executive/analytics',
 };

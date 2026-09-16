@@ -1,3 +1,14 @@
-// Routes for: User notifications
-// Module: Backend Routes (Module 4) | Owner: Developer 1
-// Endpoints: GET /, PATCH /:id/read, PATCH /read-all, GET /unread-count
+import { Router } from 'express';
+import { list, markRead, markAllRead, unreadCount } from '../controllers/notification.controller';
+import { auth } from '../middleware/auth';
+
+const router = Router();
+
+router.use(auth);
+
+router.get('/', list);
+router.get('/unread-count', unreadCount);
+router.patch('/read-all', markAllRead);
+router.patch('/:id/read', markRead);
+
+export default router;

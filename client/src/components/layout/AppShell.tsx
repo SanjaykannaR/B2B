@@ -1,95 +1,37 @@
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
+import { Sidebar } from './Sidebar';
+import { Topbar } from './Topbar';
+import type { RootState } from '../../store/store';
 
-const MOBILE_BREAKPOINT = 900;
-const SIDEBAR_STORAGE_KEY = 'b2b_sidebar_collapsed';
-
-export default function AppShell() {
-  const [isMobile, setIsMobile] = useState<boolean>(() =>
-    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
-  );
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
-    const handleChange = (event: MediaQueryListEvent) => {
-      setIsMobile(event.matches);
-      if (!event.matches) {
-        setMobileMenuOpen(false);
-      }
-    };
-    setIsMobile(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  const handleToggleSidebar = () => {
-    if (isMobile) {
-      setMobileMenuOpen((prev) => !prev);
-      return;
-    }
-    setCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(SIDEBAR_STORAGE_KEY, next ? '1' : '0');
-      } catch {
-        // ignore storage errors
-      }
-      return next;
-    });
-  };
+/**
+ * AppShell — main authenticated layout (sidebar + topbar + content outlet).
+ * Role-aware sidebar; admin sees every section (full access to all pages).
+ */
+export const AppShell: React.FC = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = useSelector((s: RootState) => s.auth);
+  const role = user?.role || 'admin';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F8F9FC' }}>
-      {!isMobile && <Sidebar collapsed={collapsed} />}
+    <div
+      className="h-screen flex overflow-hidden"
+      style={{ background: 'var(--color-surface)', color: 'var(--color-text-primary)' }}
+    >
+      <Sidebar role={role} open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-      {isMobile && mobileMenuOpen && (
-        <div
-          onClick={() => setMobileMenuOpen(false)}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+        <Topbar onMenuClick={() => setMobileOpen(true)} />
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden relative z-0"
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 27, 51, 0.6)',
-            zIndex: 50,
-          }}
-        />
-      )}
-
-      {isMobile && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            zIndex: 60,
-            transform: mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)',
-            transition: 'transform 0.25s ease',
-            boxShadow: mobileMenuOpen ? '4px 0 20px rgba(0,0,0,0.3)' : 'none',
+            marginLeft: 0,
           }}
         >
-          <Sidebar onClose={() => setMobileMenuOpen(false)} />
-        </div>
-      )}
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Topbar onMenuClick={handleToggleSidebar} />
-        <main style={{ flex: 1, minWidth: 0, maxWidth: '100%', overflowX: 'hidden' }}>
           <Outlet />
         </main>
       </div>
     </div>
   );
-}
+};
