@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { formatElapsedTime } from '../utils/formatters';
 
+/**
+ * Driver timer hook — recovers and tracks elapsed trip time.
+ * @param manifestId - The manifest the timer belongs to
+ * @param initialIsRunning - Whether the timer should be running immediately
+ */
 export function useRecovery(manifestId: string | number, initialIsRunning: boolean = false) {
   const STORAGE_KEY = `b2b_trip_timer_${manifestId}`;
 
@@ -108,4 +113,43 @@ export function useRecovery(manifestId: string | number, initialIsRunning: boole
     stopTimer,
     clearTimer,
   };
+}
+
+/**
+ * Returns elapsed milliseconds since a recorded start timestamp (reads from
+ * localStorage or a provided timestamp). Resilience against reloads/tabs.
+ * @param storageKey - The localStorage key where the start timestamp is stored
+ * @param providedStartTimestamp - Optional explicit start timestamp (e.g. from API)
+ */
+export function useElapsedMillis(storageKey: string, providedStartTimestamp?: number | null): number {
+  const [elapsedMs, setElapsedMs] = useState<number>(0);
+
+  useEffect(() => {
+    let startTime = providedStartTimestamp;
+
+    if (!startTime) {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        startTime = parseInt(stored, 10);
+      }
+    }
+
+    if (!startTime || isNaN(startTime)) {
+      setElapsedMs(0);
+      return;
+    }
+
+    const updateElapsed = () => {
+      const now = Date.now();
+      const diff = now - startTime!;
+      setElapsedMs(diff > 0 ? diff : 0);
+    };
+
+    updateElapsed();
+    const interval = setInterval(updateElapsed, 1000);
+
+    return () => clearInterval(interval);
+  }, [storageKey, providedStartTimestamp]);
+
+  return elapsedMs;
 }

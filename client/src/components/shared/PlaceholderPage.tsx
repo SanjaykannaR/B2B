@@ -1,8 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { DEFAULT_ROUTES } from '../../utils/constants';
+import { ROLES } from '../../utils/constants';
 import { FiTool } from 'react-icons/fi';
 import type { ReactNode } from 'react';
+
+const ROLE_DASHBOARDS: Record<string, string> = {
+  [ROLES.ADMIN]: '/admin',
+  [ROLES.CLIENT]: '/client/dashboard',
+  [ROLES.DRIVER]: '/driver',
+  [ROLES.EXECUTIVE]: '/executive/analytics',
+};
 
 interface PlaceholderPageProps {
   title: string;
@@ -59,7 +66,7 @@ export default function PlaceholderPage({ title, description, icon = <FiTool siz
         </p>
         {role && (
           <button
-            onClick={() => navigate(DEFAULT_ROUTES[role])}
+            onClick={() => navigate(ROLE_DASHBOARDS[role] || '/')}
             style={{
               backgroundColor: '#1B2A4A',
               color: '#FFFFFF',

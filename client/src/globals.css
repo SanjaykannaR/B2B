@@ -769,3 +769,82 @@ header {
   .truck-delay-badge { animation: none !important; }
   .dest-marker::after { animation: none !important; opacity: 0.4; }
 }
+
+/* ============================================================
+   DRIVER MOBILE APP — PHONE FRAME & ANIMATIONS
+   ============================================================ */
+
+/* Forced light theme scope (Executive Analytics page) */
+.theme-light {
+  background-color: #F1F5F9;
+  --color-surface:        #F8F9FC;
+  --color-surface-card:   #FFFFFF;
+  --color-surface-hover:  #F0F2F8;
+  --color-surface-active: #E8EBF3;
+  --color-border:         #E2E8F0;
+  --color-border-light:   #EEF1F6;
+  --color-border-focus:   #2563EB;
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #64748B;
+  --color-text-link:      #2563EB;
+  --color-text-link-hover:#1D4ED8;
+  --shadow-card:          0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover:    0 8px 16px rgba(15, 23, 42, 0.10), 0 2px 4px rgba(15, 23, 42, 0.06);
+  --shadow-modal:         0 24px 48px rgba(15, 23, 42, 0.20);
+  min-height: 100vh;
+}
+
+@keyframes tabEnter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@layer components {
+  .animate-tab-enter   { animation: tabEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+  .animate-slide-up    { animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+}
+
+/* Desktop backdrop behind the phone */
+.b2b-phone-stage {
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: #0B1222;
+  background-image: radial-gradient(circle at 50% 0%, rgba(61, 104, 168, 0.28), transparent 60%);
+}
+
+/* Phone screen — fixed viewport height so content scrolls inside */
+.b2b-phone-frame {
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  background: #F1F5F9;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 520px) {
+  .b2b-phone-stage { padding: 32px 0; }
+  .b2b-phone-frame {
+    height: calc(100vh - 64px);
+    height: calc(100dvh - 64px);
+    max-height: 920px;
+    border: 10px solid #0F1B33;
+    border-radius: 44px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+}
+
+.b2b-tap { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.b2b-tap:active { transform: scale(0.985); }
