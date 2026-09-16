@@ -1,84 +1,57 @@
-// Controller for: Notifications - get, markRead, markAllRead, unreadCount
-// Module: Backend Controllers (Module 5) | Owner: Developer 1
+import { NextFunction, Request, Response } from 'express';
+import { Notification } from '../models/Notification';
+import { sendSuccess } from '../utils/ApiResponse';
+import { relativeTime } from '../utils/helpers';
 
-import { Request, Response, NextFunction } from 'express';
-import Notification from '../models/Notification';
-import ApiError from '../utils/ApiError';
-import { ok } from '../utils/ApiResponse';
-import { parsePage, toPaginationMeta } from '../utils/helpers';
+const serializeNotification = (n: any): any => {
+  const doc = n.toObject ? n.toObject() : n;
+  return {
+    ...doc,
+    read: doc.isRead,
+    time: relativeTime(doc.createdAt),
+  };
+};
 
-export async function getNotifications(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = parsePage(req.query as Record<string, unknown>);
-    const recipientId = (req as Request & { user: { _id: unknown } }).user._id;
-
-    const total = await Notification.countDocuments({ recipient: recipientId });
-    const notifications = await Notification.find({ recipient: recipientId })
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('relatedManifest', 'trackingId');
-
-    res.json(ok({ items: notifications, ...toPaginationMeta(total, page, limit) }));
+    const notifications = await Notification.find({ recipient: req.user!._id }).sort({
+      createdAt: -1,
+    });
+    return sendSuccess(res, { notifications: notifications.map(serializeNotification) });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function markNotificationRead(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const markRead = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipientId = (req as Request & { user: { _id: unknown } }).user._id;
-    const notification = await Notification.findOneAndUpdate(
-      { _id: req.params.id, recipient: recipientId },
+    await Notification.updateOne(
+      { _id: req.params.id, recipient: req.user!._id },
       { isRead: true },
-      { new: true }
     );
-    if (!notification) {
-      throw new ApiError(404, 'Notification not found.');
-    }
-    res.json(ok(notification, 'Notification marked as read.'));
+    return sendSuccess(res, {}, 'Notification marked as read');
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function markAllNotificationsRead(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const markAllRead = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipientId = (req as Request & { user: { _id: unknown } }).user._id;
-    const result = await Notification.updateMany(
-      { recipient: recipientId, isRead: false },
-      { isRead: true }
-    );
-    res.json(ok({ modifiedCount: result.modifiedCount }, 'All notifications marked as read.'));
+    await Notification.updateMany({ recipient: req.user!._id }, { isRead: true });
+    return sendSuccess(res, {}, 'All notifications marked as read');
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getUnreadCount(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const unreadCount = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipientId = (req as Request & { user: { _id: unknown } }).user._id;
-    const count = await Notification.countDocuments({ recipient: recipientId, isRead: false });
-    res.json(ok({ count }));
+    const count = await Notification.countDocuments({
+      recipient: req.user!._id,
+      isRead: false,
+    });
+    return sendSuccess(res, { count });
   } catch (err) {
     next(err);
   }
-}
-
-export default { getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount };
+};

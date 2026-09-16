@@ -1,7 +1,6 @@
-// This file is for: Active Delivery page (mobile-first) — the core driver execution screen
-// Module: Driver Pages (Module 16) — Mobile Resiliency Engineering
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// Uses: RunSheet, StopTerminal, TripTimer (with useRecovery), DeliveryConfirm
-// Actions: "Start Trip" → "Arrived" → "Unloading" → "Complete" (large touch targets min 44px)
-// Status buttons adapt to current manifest status
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+/** Placeholder — driver active delivery page, owned by another developer. */
+const ActiveDelivery: React.FC = () => <Navigate to="/admin" replace />;
+export default ActiveDelivery;

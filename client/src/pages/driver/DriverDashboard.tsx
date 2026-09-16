@@ -1,6 +1,6 @@
-// This file is for: Driver Dashboard (mobile-first) — today's assigned deliveries
-// Module: Driver Pages (Module 16)
-// Owner: Developer 3 (Mobile Frontend Engineer)
-//
-// Shows: active delivery cards (trackingId, origin → destination, cargo summary, pickup time)
-//        + recent history section. Tap card → navigate to ActiveDelivery page
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+/** Placeholder — this page is owned by another developer. Route will connect once they merge. */
+const DriverDashboard: React.FC = () => <Navigate to="/admin" replace />;
+export default DriverDashboard;

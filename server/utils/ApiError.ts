@@ -1,17 +1,12 @@
-// Utility: Custom error class with statusCode and message
-// Module: Backend Utils | Owner: Developer 1
-// Usage: throw new ApiError(404, 'Manifest not found')
-
 export class ApiError extends Error {
   statusCode: number;
-  isOperational: boolean;
+  errors?: Record<string, unknown>;
 
-  constructor(statusCode: number, message: string) {
+  constructor(statusCode: number, message: string, errors?: Record<string, unknown>) {
     super(message);
     this.statusCode = statusCode;
-    this.isOperational = true;
-    Error.captureStackTrace(this, this.constructor);
+    this.errors = errors;
+    this.name = 'ApiError';
+    if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
   }
 }
-
-export default ApiError;

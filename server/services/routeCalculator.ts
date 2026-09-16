@@ -1,53 +1,49 @@
-// Service for: Haversine distance calculation + travel duration estimation
-// Module: Backend Services (Module 6) | Owner: Developer 1
-// Calculates distance between GPS coordinates, estimates duration at 60 km/h
+const R = 6371; // Earth radius in km
 
-const EARTH_RADIUS_KM = 6371;
-const AVERAGE_SPEED_KMH = 60;
-
-function toRadians(degrees: number): number {
-  return (degrees * Math.PI) / 180;
+export interface Coord {
+  lat: number;
+  lng: number;
 }
 
-export function haversineDistanceKm(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-): number {
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
+export const haversineKm = (a: Coord, b: Coord): number => {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+};
 
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+export const estimateDurationMinutes = (distanceKm: number, avgSpeedKmph = 60): number =>
+  Math.round((distanceKm / avgSpeedKmph) * 60);
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return EARTH_RADIUS_KM * c;
-}
-
-export function estimateDurationMinutes(distanceKm: number, averageSpeedKmh = AVERAGE_SPEED_KMH): number {
-  if (distanceKm <= 0) return 0;
-  return Math.ceil((distanceKm / averageSpeedKmh) * 60);
-}
-
-export interface RouteResult {
-  distanceKm: number;
-  estimatedDurationMinutes: number;
-}
-
-export function calculateRoute(
-  origin: { latitude: number; longitude: number },
-  destination: { latitude: number; longitude: number }
-): RouteResult {
-  const distanceKm = Math.round(haversineDistanceKm(
-    origin.latitude,
-    origin.longitude,
-    destination.latitude,
-    destination.longitude
-  ) * 10) / 10;
-  const estimatedDurationMinutes = estimateDurationMinutes(distanceKm);
-  return { distanceKm, estimatedDurationMinutes };
-}
-
-export default { haversineDistanceKm, estimateDurationMinutes, calculateRoute };
+/**
+ * Compute route estimate from two [lng, lat] coordinate pairs.
+ * Returns null when either pair is missing/invalid.
+ */
+export const routeFromCoords = (
+  origin?: [number, number] | null,
+  destination?: [number, number] | null,
+): { estimatedDistanceKm: number; estimatedDurationMinutes: number } | null => {
+  if (
+    !origin ||
+    !destination ||
+    origin.length < 2 ||
+    destination.length < 2 ||
+    isNaN(origin[0]) ||
+    isNaN(origin[1]) ||
+    isNaN(destination[0]) ||
+    isNaN(destination[1])
+  ) {
+    return null;
+  }
+  const distanceKm = haversineKm(
+    { lat: origin[1], lng: origin[0] },
+    { lat: destination[1], lng: destination[0] },
+  );
+  return {
+    estimatedDistanceKm: Math.round(distanceKm * 10) / 10,
+    estimatedDurationMinutes: estimateDurationMinutes(distanceKm),
+  };
+};

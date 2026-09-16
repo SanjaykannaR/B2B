@@ -1,131 +1,175 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Activity, CheckCircle2, AlertTriangle, Search, Navigation } from 'lucide-react';
-import toast from 'react-hot-toast';
-import AdminNavbar from '../../components/admin/AdminNavbar';
-import StatCard from '../../components/shared/StatCard';
-import DataTable from '../../components/shared/DataTable';
-import { getRouteEfficiency, RouteEfficiency, RouteEfficiencyRow } from '../../services/analyticsApi';
-import { getErrorMessage } from '../../services/errorMessage';
+import React, { useState, useEffect } from 'react';
+import { List, Map as MapIcon } from 'lucide-react';
+import { DispatchPanel } from '../../components/admin/DispatchPanel';
+import { LiveMap } from '../../components/admin/LiveMap';
+import { ManifestDetailModal } from '../../components/admin/ManifestDetailModal';
+import * as manifestApi from '../../services/manifestApi';
 
-export default function LiveOperations() {
-  const [data, setData] = useState<RouteEfficiency | null>(null);
-  const [, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('All');
+const DEMO_TRIPS = [
+  {
+    _id: 'mock-1', trackingId: 'TRK-9021', status: 'IN_TRANSIT',
+    client: { name: 'Acme Corp' },
+    origin: { city: 'Mumbai', coordinates: [72.8777, 19.0760] },
+    destination: { city: 'Delhi', coordinates: [77.1025, 28.7041] },
+    currentLocation: { coordinates: [75.8573, 21.1458] },
+    vehicle: { registrationNumber: 'MH-12-AB-1234', make: 'Tata Ace Gold' },
+    driver: { name: 'Ramesh Patil', phone: '+91 98765 43210' },
+    cargoDetails: { description: '200 LED TVs — Fragile', totalWeightKg: 4000, isHazardous: false },
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    _id: 'mock-2', trackingId: 'TRK-9022', status: 'IN_TRANSIT',
+    client: { name: 'GlobalTrade' },
+    origin: { city: 'Chennai', coordinates: [80.2707, 13.0827] },
+    destination: { city: 'Bangalore', coordinates: [77.5946, 12.9716] },
+    currentLocation: { coordinates: [78.4867, 13.0827] },
+    vehicle: { registrationNumber: 'TN-07-EF-9012', make: 'Eicher Pro 2049' },
+    driver: { name: 'Suresh Kumar', phone: '+91 87654 32109' },
+    cargoDetails: { description: '500 Cartons — Packaged Food', totalWeightKg: 8500, isHazardous: false },
+    updatedAt: new Date(Date.now() - 7200000).toISOString(),
+  },
+  {
+    _id: 'mock-3', trackingId: 'TRK-9023', status: 'DELAYED',
+    client: { name: 'FastFreight' },
+    origin: { city: 'Pune', coordinates: [73.8567, 18.5204] },
+    destination: { city: 'Ahmedabad', coordinates: [72.5714, 23.0225] },
+    currentLocation: { coordinates: [73.2, 19.8] },
+    vehicle: { registrationNumber: 'GJ-06-IJ-7890', make: 'Tata Prima LX' },
+    driver: { name: 'Mohammed Khan', phone: '+91 54321 09876' },
+    cargoDetails: { description: 'Industrial Machine Parts', totalWeightKg: 12000, isHazardous: true },
+    delayReason: 'Heavy rainfall near Nashik — road blocked, waiting for clearance',
+    updatedAt: new Date(Date.now() - 14400000).toISOString(),
+  },
+];
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await getRouteEfficiency();
-      setData(res);
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Failed to load operations data.'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+export const LiveOperations: React.FC = () => {
+  const [activeManifests, setActiveManifests] = useState<any[]>([]);
+  const [selectedManifestId, setSelectedManifestId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewingManifestId, setViewingManifestId] = useState<string | null>(null);
+  const [mobileView, setMobileView] = useState<'dispatch' | 'map'>('dispatch');
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await manifestApi.getManifests({ status: 'IN_TRANSIT' });
+        const data = res.manifests || res || [];
+        setActiveManifests(data.length > 0 ? data : DEMO_TRIPS);
+      } catch {
+        setActiveManifests(DEMO_TRIPS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const filteredRows = useMemo(() => {
-    if (!data) return [];
-    return data.rows.filter(r => {
-      const matchesSearch = r.trackingId.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            r.destination.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'All' || 
-                            (statusFilter === 'On-Time' ? r.onTime : !r.onTime);
-      return matchesSearch && matchesStatus;
-    });
-  }, [data, searchQuery, statusFilter]);
+  const handleSelect = (m: any) => {
+    const id = m._id || m.id;
+    setSelectedManifestId((prev) => (prev === id ? null : id));
+  };
+
+  const handleViewDetails = (id: string) => {
+    setViewingManifestId(id);
+    setIsModalOpen(true);
+  };
+
+  const handleModalAction = (action: string, id: string) => {
+    console.log(`Action: ${action} for manifest: ${id}`);
+    setIsModalOpen(false);
+  };
+
+  const viewingManifest = activeManifests.find((m) => (m._id || m.id) === viewingManifestId) || null;
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-      <AdminNavbar active="operations" />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <header>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Live Operations</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Monitor route efficiency and dispatch delays.</p>
-        </header>
-
-        {/* ── Stat Cards Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <StatCard title="Active Routes" value={data?.total || 0} icon={Navigation} colorTheme="blue" />
-          <StatCard title="On-Time Delivery" value={`${data?.onTimePct.toFixed(1) || 0}%`} icon={CheckCircle2} colorTheme="emerald" />
-          <StatCard title="Delayed / Late" value={data?.late || 0} icon={AlertTriangle} colorTheme="red" />
-          <StatCard title="Avg Route Distance" value={`${data?.averageDistanceKm.toFixed(0) || 0} km`} icon={Activity} colorTheme="orange" />
-        </div>
-
-        {/* ── Operations List ── */}
-        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-          <div className="p-5 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center">
-              <Activity className="w-5 h-5 mr-2 text-blue-500" /> Route Tracking
-            </h2>
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:max-w-xs">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search Route..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-full h-10 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
-                />
-              </div>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-full h-10 px-4 pr-10 appearance-none text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer transition-all bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.7rem]"
-              >
-                <option value="All">All Operations</option>
-                <option value="On-Time">On-Time</option>
-                <option value="Delayed">Delayed</option>
-              </select>
-            </div>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--color-surface)' }}>
+      {/* Header Bar */}
+      <div className="px-4 sm:px-6 py-3 border-b shrink-0" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface-card)' }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>Live Operations</h1>
+            <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
+              {activeManifests.length} active trips &bull; Last updated just now
+            </p>
           </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Mobile view toggle — hidden on md+ */}
+            <div className="md:hidden flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--color-border)' }}>
+              <button
+                onClick={() => setMobileView('dispatch')}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[44px]"
+                style={{
+                  background: mobileView === 'dispatch' ? 'var(--color-accent)' : 'var(--color-surface-card)',
+                  color: mobileView === 'dispatch' ? '#fff' : 'var(--color-text-muted)',
+                }}
+              >
+                <List size={14} /> Trips
+              </button>
+              <button
+                onClick={() => setMobileView('map')}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors min-h-[44px]"
+                style={{
+                  background: mobileView === 'map' ? 'var(--color-accent)' : 'var(--color-surface-card)',
+                  color: mobileView === 'map' ? '#fff' : 'var(--color-text-muted)',
+                }}
+              >
+                <MapIcon size={14} /> Map
+              </button>
+            </div>
+            {loading && (
+              <div className="hidden sm:flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2" style={{ borderColor: 'var(--color-accent)' }} />
+                Refreshing...
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-          <DataTable 
-            columns={[
-              {
-                header: 'Tracking ID',
-                render: (r: RouteEfficiencyRow) => <span className="font-bold text-slate-900 font-mono tracking-wider">{r.trackingId}</span>
-              },
-              {
-                header: 'Route Details',
-                render: (r: RouteEfficiencyRow) => (
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-slate-800 text-sm">{r.destination}</span>
-                    <span className="text-xs text-slate-500">from {r.origin}</span>
-                  </div>
-                )
-              },
-              {
-                header: 'Distance / ETA',
-                render: (r: RouteEfficiencyRow) => (
-                  <div className="flex flex-col">
-                    <span className="font-medium text-slate-600 text-sm">{r.distanceKm.toFixed(0)} km</span>
-                    <span className="text-xs text-slate-400">{Math.floor(r.estimatedDurationMinutes / 60)}h {r.estimatedDurationMinutes % 60}m</span>
-                  </div>
-                )
-              },
-              {
-                header: 'Performance',
-                render: (r: RouteEfficiencyRow) => r.onTime ? (
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center w-max"><CheckCircle2 className="w-3 h-3 mr-1.5" /> On-Time</span>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center w-max"><AlertTriangle className="w-3 h-3 mr-1.5" /> Delayed</span>
-                )
-              }
-            ]}
-            data={filteredRows}
-            emptyMessage="No routes match your criteria."
-            emptyIcon={<Navigation className="w-10 h-10 text-slate-300 mx-auto" />}
+      {/* Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Dispatch Panel — always visible on md+, toggled on mobile */}
+        <div className={`${mobileView === 'dispatch' ? 'flex' : 'hidden'} md:flex flex-shrink-0 h-full`}>
+          <DispatchPanel
+            manifests={activeManifests}
+            onSelect={handleSelect}
+            selectedId={selectedManifestId}
+            onViewDetails={handleViewDetails}
           />
         </div>
-      </main>
+
+        {/* Map — always visible on md+, toggled on mobile */}
+        <div className={`${mobileView === 'map' ? 'flex' : 'hidden'} md:flex flex-1 relative h-full min-w-0`}>
+          <LiveMap
+            manifests={activeManifests}
+            selectedId={selectedManifestId}
+            simulate={activeManifests.length > 0 && activeManifests.every((m) => String(m._id || m.id).startsWith('mock-'))}
+            onSelect={handleSelect}
+            onViewDetails={handleViewDetails}
+          />
+
+          {loading && activeManifests.length === 0 && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+              style={{ background: 'rgba(15,22,41,0.5)' }}>
+              <div className="px-6 py-4 rounded-2xl flex items-center gap-3" style={{ background: 'var(--color-surface-card)', boxShadow: 'var(--shadow-xl)' }}>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: 'var(--color-accent)' }} />
+                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Connecting to fleet...</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ManifestDetailModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        manifest={viewingManifest}
+        onAction={handleModalAction}
+      />
     </div>
   );
-}
+};

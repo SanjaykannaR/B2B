@@ -1,22 +1,16 @@
-// This file is for: Invoice Mongoose model — financial billing records
-// Module: Database Models (Module 3)
-// Owner: Developer 1 (Backend Engineer)
-// Schema: invoiceNumber, manifest, client, amount, currency, status (Pending|Paid|Overdue|Cancelled),
-//         issuedDate, dueDate, paidDate, lineItems[{description, quantity, unitPrice, total}]
-// Indexes: client+status, invoiceNumber
+import { Schema, model, Model, Types } from 'mongoose';
 
-import { Schema, model, Document, Types } from 'mongoose';
+export const INVOICE_STATUSES = ['PENDING', 'PAID', 'OVERDUE', 'CANCELLED'] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
-export type InvoiceStatus = 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
-
-export interface InvoiceLineItem {
+export interface IInvoiceLineItem {
   description: string;
   quantity: number;
   unitPrice: number;
   total: number;
 }
 
-export interface InvoiceDocument extends Document {
+export interface IInvoice {
   invoiceNumber: string;
   manifest: Types.ObjectId;
   client: Types.ObjectId;
@@ -26,45 +20,38 @@ export interface InvoiceDocument extends Document {
   issuedDate: Date;
   dueDate: Date;
   paidDate?: Date;
-  lineItems: InvoiceLineItem[];
-  createdAt: Date;
-  updatedAt: Date;
+  lineItems: IInvoiceLineItem[];
 }
 
-const invoiceSchema = new Schema<InvoiceDocument>(
+export interface InvoiceModel extends Model<IInvoice> {}
+
+const lineItemSchema = new Schema<IInvoiceLineItem>(
   {
-    invoiceNumber: {
-      type: String,
-      required: [true, 'Invoice number is required'],
-      unique: true,
-      trim: true,
-    },
+    description: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 0 },
+    unitPrice: { type: Number, required: true, min: 0 },
+    total: { type: Number, required: true, min: 0 },
+  },
+  { _id: false },
+);
+
+const invoiceSchema = new Schema<IInvoice, InvoiceModel>(
+  {
+    invoiceNumber: { type: String, required: true, unique: true },
     manifest: { type: Schema.Types.ObjectId, ref: 'Manifest', required: true },
     client: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     amount: { type: Number, required: true, min: 0 },
-    currency: { type: String, default: 'USD', uppercase: true, trim: true },
-    status: {
-      type: String,
-      enum: ['Pending', 'Paid', 'Overdue', 'Cancelled'],
-      default: 'Pending',
-      required: true,
-    },
+    currency: { type: String, default: 'INR' },
+    status: { type: String, enum: INVOICE_STATUSES, default: 'PENDING' },
     issuedDate: { type: Date, default: Date.now },
-    dueDate: { type: Date, required: true },
+    dueDate: { type: Date },
     paidDate: { type: Date },
-    lineItems: [
-      {
-        description: { type: String, required: true, trim: true },
-        quantity: { type: Number, required: true, min: 0 },
-        unitPrice: { type: Number, required: true, min: 0 },
-        total: { type: Number, required: true, min: 0 },
-      },
-    ],
+    lineItems: { type: [lineItemSchema], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 invoiceSchema.index({ client: 1, status: 1 });
+invoiceSchema.index({ invoiceNumber: 1 });
 
-const Invoice = model<InvoiceDocument>('Invoice', invoiceSchema);
-export default Invoice;
+export const Invoice = model<IInvoice, InvoiceModel>('Invoice', invoiceSchema);

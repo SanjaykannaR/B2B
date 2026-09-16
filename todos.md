@@ -1,0 +1,356 @@
+# B2B Logistics — Frontend Implementation Checklist
+
+> **Important for all time**: We are only going to work on module [8, 9, 10, 14] only. Do not do other modules.
+> **Stack:** React 18 + TypeScript + Tailwind CSS v4 + Redux Toolkit + Axios + Leaflet + Recharts + framer-motion
+
+---
+
+## Phase 1 — Foundation (Modules 8 + 10)
+> These are dependencies for everything else. Build bottom-up.
+
+### P0 — Module 10: Utilities & Constants (no deps, used everywhere)
+- [x] `src/utils/constants.ts` — Role enums, status enums, status-to-color map, route paths
+- [x] `src/utils/formatters.ts` — formatDate, formatCurrency, formatWeight, formatVolume, formatDistance, formatDuration, formatElapsedTime, formatTrackingId
+- [x] `src/utils/validators.ts` — validateEmail, validatePhone, validateRequired, validatePositiveNumber, validatePassword
+- [x] `src/utils/sanitize.ts` — escapeHtml, escapeAttr (XSS prevention for HTML string interpolation)
+
+### P0 — Module 10: Axios API Instance
+- [x] `src/services/api.ts` — Axios instance, baseURL from `VITE_API_URL`, JWT request interceptor, 401 response interceptor (clear token + redirect `/login`)
+
+### P0 — Module 10: API Service Files (all depend on api.ts)
+- [x] `src/services/authApi.ts` — login, register, getProfile, refreshToken, updateProfile (PUT /users/:id, local fallback)
+- [x] `src/services/vehicleApi.ts` — getVehicles, getAvailableVehicles, getVehicleStats, createVehicle, updateVehicle, updateVehicleStatus, deleteVehicle
+- [x] `src/services/manifestApi.ts` — getManifests, getMyManifests, getDriverManifests, getManifest, createManifest, updateManifest, assignManifest, startTrip, updateStatus, completeDelivery, cancelManifest
+- [x] `src/services/invoiceApi.ts` — getInvoices, getMyInvoices, getInvoice, generateInvoice, markPaid, getInvoiceStats
+- [x] `src/services/analyticsApi.ts` — getFleetUtilization, getRouteEfficiency, getMonthlyCapacity, getDeliveryPerformance, getRevenueSummary
+- [x] `src/services/notificationApi.ts` — getNotifications, markRead, markAllRead, getUnreadCount
+- [x] `src/services/userApi.ts` — getUsers, createUser, updateUser, deactivateUser, resetPassword
+
+### P0 — Module 10: Custom Hooks
+- [x] `src/hooks/useAuth.ts` — reads authSlice from Redux, returns `{ user, role, isAuthenticated, loading }`
+- [x] `src/hooks/useLocalStorage.ts` — generic localStorage hook with JSON serialize/deserialize
+- [x] `src/hooks/useDebounce.ts` — delays value updates (default 300ms) for search inputs
+- [x] `src/hooks/useRecovery.ts` — reads UNIX timestamp from localStorage, computes elapsed time, resumes timer
+
+### P1 — Module 9: Redux Store (depends on Module 10 services)
+- [x] `src/store/authSlice.ts` — state: `{ user, token, isAuthenticated, loading, error }`, thunks: `loginUser`, `loadUser`, `logoutUser`, reducer: `updateUser` (profile save), localStorage JWT persistence
+- [x] `src/store/manifestSlice.ts` — state: `{ manifests[], selectedManifest, filters, pagination }`, reducers: setManifests, selectManifest, setFilters, clearFilters
+- [x] `src/store/vehicleSlice.ts` — state: `{ vehicles[], selectedVehicle, loading }`, reducers: setVehicles, selectVehicle, updateVehicleStatus
+- [x] `src/store/uiSlice.ts` — state: `{ sidebarOpen, sidebarExpanded, modalState, globalLoading }`, reducers: toggleSidebar, toggleSidebarExpanded, openModal, closeModal, setLoading
+- [x] `src/store/store.ts` — `configureStore` combining all 4 slices, export `RootState` & `AppDispatch` types
+
+### P1 — Module 8: App Entry Point (depends on Redux store)
+- [x] `src/main.tsx` — render `<App />` wrapped in `<Provider>`, `<BrowserRouter>`, `<Toaster>`, import `globals.css`
+
+---
+
+## Phase 2 — Layout & Shared Components (Modules 11 + 12)
+**[REMOVED by User: Do not implement Module 11 or 12]**
+
+---
+
+## Phase 3 — Module 14: Admin Pages
+> Depends on Phases 1 + 2. Core admin experience.
+
+### P1 — Admin Dashboard
+- [x] `src/pages/admin/AdminDashboard.tsx` — 4 StatCards (Total Manifests, Active Vehicles, Pending Orders, Overdue) + recent manifests DataTable with StatusBadge + quick action buttons
+
+### P2 — Fleet Monitor
+- [x] `src/components/admin/AddEditVehicleModal.tsx` — vehicle create/edit form (registration, model, make, year, weight, volume, fuel efficiency)
+- [x] `src/components/admin/FleetGrid.tsx` — vehicle DataTable with columns, StatusBadge, Edit/Delete actions
+- [x] `src/pages/admin/FleetMonitor.tsx` — filter tabs (All/Available/In-Transit/Maintenance) + stat summary cards + FleetGrid
+
+### P2 — Manifest Creation Wizard
+- [x] `src/components/admin/ManifestWizard/StepPartner.tsx` — client dropdown, origin/destination addresses, pickup/delivery dates
+- [x] `src/components/admin/ManifestWizard/StepCargo.tsx` — description, weight, volume, item count, hazmat toggle
+- [x] `src/components/admin/ManifestWizard/StepRoute.tsx` — auto-suggested vehicles by capacity, distance/duration display, vehicle selection
+- [x] `src/components/admin/ManifestWizard/WizardContainer.tsx` — 3-step manager, step indicator, localStorage persistence, validation per step, submit to API
+- [x] `src/pages/admin/ManifestCreate.tsx` — renders WizardContainer page wrapper
+
+### P3 — Live Operations
+- [x] `src/components/admin/LiveMap.tsx` — Leaflet map with vehicle markers (color-coded), route polylines, marker popups
+- [x] `src/components/admin/DispatchPanel.tsx` — manifest list for dispatch, driver/vehicle dropdowns, assign action
+- [x] `src/components/admin/ManifestDetailModal.tsx` — full manifest view with ProgressStepper, timeline, action buttons
+- [x] `src/pages/admin/LiveOperations.tsx` — LiveMap + DispatchPanel layout, manifest cards with live trip timers, status action buttons
+
+---
+
+## Build Order (Quick Reference)
+
+```
+1.  constants.ts
+2.  formatters.ts
+3.  validators.ts
+4.  sanitize.ts (XSS prevention)
+5.  api.ts (Axios instance)
+6.  All 6 API service files
+7.  All 4 hooks
+8.  All 4 Redux slices + store.ts
+9.  main.tsx
+10. All 8 shared components
+11. Layout: ProtectedRoute → Sidebar → Topbar → AppShell
+12. App.tsx (router)
+13. AdminDashboard
+14. FleetMonitor + FleetGrid + AddEditVehicleModal
+15. ManifestCreate + WizardContainer + 3 wizard steps
+16. LiveOperations + LiveMap + DispatchPanel + ManifestDetailModal
+```
+
+---
+
+### P2 — New Animation Hooks & Shared Components (added during UI rebuild)
+- [x] `src/hooks/useInView.ts` — IntersectionObserver hook for scroll-triggered reveals
+- [x] `src/hooks/useCountUp.ts` — Animated number counter with ease-out cubic
+- [x] `src/components/admin/shared/AnimatedCard.tsx` — Scroll-triggered fade-in-up wrapper
+- [x] `src/components/admin/shared/Skeleton.tsx` — Shimmer loading placeholder
+- [x] `src/components/admin/shared/PageHeader.tsx` — Reusable page header with gradient underline
+- [x] `src/components/admin/shared/StatCard.tsx` — Rewritten: count-up, glow hover, accent orb
+- [x] `src/components/admin/shared/StatusBadge.tsx` — Rewritten: colored pills, pulsing dot (PAID / OVERDUE / APPROVED / REJECTED / CONTACTED)
+
+### P2 — Admin UI Rebuild (modern animations + Industrial Twilight theme)
+- [x] `src/globals.css` — Moved from `src/styles/globals.css`. Added keyframes: shimmer, glowPulse, countReveal, barGrow, dotPulse. Added .skeleton, .reveal, .row-glow utilities. Tailwind `@import` must be first line.
+- [x] `src/index.html` — Google Fonts `<link>` tags moved here (not in CSS) to avoid @import warning
+- [x] `src/App.tsx` — Nav bar with design token colors
+- [x] `src/pages/admin/AdminDashboard.tsx` — KPI count-up cards, recent manifests table, status distribution bars
+- [x] `src/pages/admin/FleetMonitor.tsx` — Tab filters with animated underline, summary cards, grid
+- [x] `src/pages/admin/ManifestCreate.tsx` — Ambient gradient blobs, wizard wrapper
+- [x] `src/pages/admin/LiveOperations.tsx` — Split dispatch + map layout, demo trips, auto-refresh
+- [x] `src/components/admin/FleetGrid.tsx` — Row-glow hover, action buttons on hover
+- [x] `src/components/admin/DispatchPanel.tsx` — Trip cards with live timers
+- [x] `src/components/admin/LiveMap.tsx` — Dark CartoDB tiles, truck markers
+- [x] `src/components/admin/ManifestDetailModal.tsx` — Progress stepper, detail grid, action buttons
+- [x] `src/components/admin/AddEditVehicleModal.tsx` — Form with design tokens
+- [x] `src/components/admin/ManifestWizard/WizardContainer.tsx` — Animated progress stepper
+- [x] `src/components/admin/ManifestWizard/StepPartner.tsx` — Origin/dest cards
+- [x] `src/components/admin/ManifestWizard/StepCargo.tsx` — Hazmat toggle
+- [x] `src/components/admin/ManifestWizard/StepRoute.tsx` — Vehicle selection cards
+- [x] Deleted `src/styles/globals.css` (was emptied) and old `components/shared/StatCard.tsx` + `StatusBadge.tsx`
+- [x] Build verified: 0 TypeScript errors, CSS 49.87 KB (gzipped 13.83 KB), JS 474.27 KB
+
+---
+
+### P2 — Navbar Redesign & Theme (2026-07-27)
+- [x] `src/App.tsx` — Flex navbar: logo + nav links with icons + search bar (gradient glow) + settings gear
+- [x] `src/App.tsx` — Active nav state: orange accent bg + glow shadow on current page
+- [x] `src/App.tsx` — Sticky navbar: `sticky top-0 z-50`
+- [x] `src/App.tsx` — Search bar: gradient border on focus, glow box-shadow, expanded width on focus
+- [x] `src/App.tsx` — Settings icon links to `/admin/settings`
+- [x] `src/globals.css` — Forced light theme: removed `@media (prefers-color-scheme: dark)` and `[data-theme="dark"]` blocks
+- [x] `src/globals.css` — Added `@keyframes gradientSpin` for search bar border animation
+
+### P2 — Settings Page (2026-07-27)
+- [x] `src/pages/admin/Settings.tsx` — Profile info: first name, last name, email, phone, company, role badge
+- [x] `src/pages/admin/Settings.tsx` — Change password: current, new, confirm with show/hide toggle + validation
+- [x] `src/pages/admin/Settings.tsx` — Logout button: dispatches logoutUser, redirects to `/login`
+
+### P2 — All Manifests Page (2026-07-27)
+- [x] `src/pages/admin/AllManifests.tsx` — Full manifest table with 9 columns
+- [x] `src/pages/admin/AllManifests.tsx` — Search by tracking ID, client, city, cargo
+- [x] `src/pages/admin/AllManifests.tsx` — Status filter tabs with counts (ALL, Pending, Assigned, In-Transit, Delivered, Delayed, Cancelled)
+- [x] `src/pages/admin/AllManifests.tsx` — HAZ badge on hazardous shipments
+- [x] `src/pages/admin/AllManifests.tsx` — Back button + Export button
+- [x] `src/pages/admin/AdminDashboard.tsx` — "View All" button → `/admin/manifests`
+- [x] `src/pages/admin/AdminDashboard.tsx` — "New Manifest" button → `/admin/manifests/new`
+- [x] `src/App.tsx` — Added routes: `/admin/manifests`, `/admin/settings`
+
+---
+
+### P2 — Scoped Plan Items 8/9/14 + Settings API + Navbar UX (2026-07-31)
+> From `client/src/future-my-module.md` (Developer 2 scope). Committed as `2a01172` on `sanjay`.
+
+**Item 14 — Replace window.confirm() with Modal** ✅
+- [x] `src/components/shared/ConfirmModal.tsx` — Fully implemented (was a Module 12 stub): `isOpen, onConfirm, onCancel, title, message, confirmText?, variant?` (danger/default), Escape-to-close, Enter-to-confirm, focus on confirm
+- [x] `src/pages/admin/FleetMonitor.tsx` — `pendingDelete` state + `<ConfirmModal variant="danger" />`; no `window.confirm` remains in codebase
+
+**Item 9 — Row Click → Detail Modal on All Manifests** ✅
+- [x] `src/pages/admin/AllManifests.tsx` — `selected` state + row `onClick`
+- [x] `src/components/admin/ManifestDetailModal.tsx` — rendered read-only (no `onAction`); cargo fallback `cargoDetails.* → cargo.* → top-level` for description & weight
+
+**Item 8 — Pagination on All Tables** ✅
+- [x] `src/pages/admin/AllManifests.tsx` — page-size selector (10/25/50/100), Prev/Next, "Page X of Y", "Showing X–Y of Z", reset-to-page-1 on search/filter change
+- [x] `src/pages/admin/FleetMonitor.tsx` — same footer + local `useState` pagination, tab change resets page
+- [ ] ⚠️ API-readiness gap: AllManifests sends hardcoded `page: 1` + limit; vehicleApi gets no page/limit — revisit when backend lands
+
+**Item 10 — Make Settings Page API-Real** (partially done)
+- [x] `src/services/authApi.ts` — `updateProfile(data, userId?)` → `PUT /users/:id`, try/catch + local fallback
+- [x] `src/store/authSlice.ts` — `updateUser` reducer (merges + persists localStorage)
+- [x] `src/pages/admin/Settings.tsx` — `handleProfileSave` wired to API + dispatch; demo-mode fallback works
+- [x] `changePassword()` → `PATCH /auth/change-password` — backend endpoint implemented (auth.controller.ts) + wired in Settings.tsx (client-side validation + API call + error display)
+
+**Navbar UX (App.tsx)**
+- [x] Notification bell + unread badge + dropdown (demo data, API-ready via `notificationApi`), mark-read / mark-all-read, closes on route change
+- [x] Search bar widened: mobile 140px / sm 240px / md 300px / lg 380px (was collapsing to ~110px via `md:w-auto`)
+- [x] Logo: black badge + orange `PackageSearch` icon + orange pin dot (tracking style); **clickable → `/admin`**
+- [x] Dashboard KPI cards clickable: `StatCard` gained optional `to` prop → wraps in router `<Link>` (cursor-pointer, hover lift/glow kept; no "View details" footer per user preference)
+  - Total Manifests → `/admin/manifests` · Active Vehicles → `/admin/fleet` · Pending Orders → `/admin/manifests` · Alerts/Delayed → `/admin/live`
+- [x] `src/components/admin/shared/StatCard.tsx` — optional `to` prop + Link wrapper (design unchanged when not navigable)
+
+**Verified:** `npx tsc --noEmit` passes (0 errors) after all changes.
+
+---
+
+### P2 — Client Requests Page + Fleet Driver Details + Responsive Fixes + Live Map (2026-08-05)
+> Committed across multiple commits on `sanjay` branch.
+
+**Client Requests Page**
+- [x] `src/pages/admin/ClientRequests.tsx` — KPI cards, search, status tabs, data table, pagination, action buttons
+- [x] `src/components/admin/ClientRequestDetailModal.tsx` — two-column modal with client info + goods details + action buttons
+- [x] `src/App.tsx` — Added `Requests` nav item with `ClipboardList` icon, route at `/admin/requests`
+
+**Fleet Driver Details**
+- [x] `src/pages/admin/FleetMonitor.tsx` — Updated `DEMO_VEHICLES` with driver name/phone/license
+- [x] `src/components/admin/FleetGrid.tsx` — Driver column (avatar+name+phone) + Send Request + Contact by Phone buttons
+
+**Responsive Fixes (12+ files)**
+- [x] Nav overflow: logo hidden on `<sm`
+- [x] Tables: responsive column hiding on AdminDashboard, FleetGrid
+- [x] All touch targets bumped to 44px minimum
+- [x] Settings card padding, password toggle sizing
+- [x] Modal close buttons, AddEditVehicleModal grid stacking
+- [x] LiveMap follow button, TripInfoCard close button
+
+**Live Map Fixes**
+- [x] `src/components/admin/VehicleLayer.tsx` — 3D SVG truck with status-colored glow, ping-pong simulation (no teleport), per-frame smooth movement
+- [x] `src/components/admin/RouteLayer.tsx` — Canvas renderer (routes survive zoom), parallel OSRM fetch, bezier fallback
+- [x] `src/components/admin/LiveMap.tsx` — `markerZoomAnimation={false}`, removed flyTo and auto-follow on selection
+- [x] `src/globals.css` — Section 15: `.truck-marker-3d`, `.truck-glow`, `.truck-pulse-ring`, `.truck-icon-3d`, `.truck-delay-badge`, `.truck-popup`, `.route-flow`, `.route-glow`, keyframe animations
+- [x] Trucks follow exact OSRM road routes via shared `routeCache`
+- [x] Zoomend handler refreshes glyph rotation after zoom
+- [x] Route lines stay visible with flowing animation at any zoom
+
+**Verified:** `npx tsc --noEmit` clean, `npx vite build` clean.
+
+---
+
+### P0 — New Pages Build (2026-08-18) ✅
+> From `future.md` #1–4. All backend-ready; now have full UI. All wired to real MongoDB/API.
+- [x] `src/pages/admin/Invoices.tsx` + route `/admin/invoices` + sidebar item — KPI cards (billed/paid/pending/overdue), search, status tabs, table, pagination, **Mark Paid** (ConfirmModal), **Generate Invoice** modal (picks delivered manifest without invoice)
+- [x] `src/pages/admin/Notifications.tsx` + route `/admin/notifications` + sidebar item — All/Unread filter, type icons (info/warning/success/error), mark-one/mark-all read, link to related manifest; Topbar bell now has "View all notifications →"
+- [x] `src/pages/admin/Users.tsx` + route `/admin/users` + sidebar item — role filter tabs, search, table, **Create/Edit User** modal (role-based), Deactivate/Reactivate (ConfirmModal), Reset Password modal
+- [x] `src/pages/admin/Analytics.tsx` + route `/admin/analytics` + sidebar item — 5 charts: monthly revenue, fleet utilization, delivery performance, monthly load, route-efficiency strip
+  - ⚠️ **Handed off (2026-08-18):** another developer owns the Analytics page. `Analytics.tsx` is fully commented out (fallback), route + sidebar entry commented out. Re-enable by uncommenting if needed.
+- [x] Dark mode: REMOVED / not needed — forced light theme stays; removed stray `dark:bg-slate-900` class; future.md #11 marked ❌ REMOVED
+
+---
+
+### P2 — Collapsible Sidebar + Global Search + Modal Z-Index Fix (2026-09-01)
+> Committed as `14cd763` on `sanjay`.
+
+**Collapsible Desktop Sidebar**
+- [x] `src/components/layout/Sidebar.tsx` — Desktop expand/collapse toggle, brand section collapses to icon-only mode, `sidebarExpanded` state from Redux
+- [x] `src/store/uiSlice.ts` — Added `sidebarExpanded` boolean + `toggleSidebarExpanded` action
+- [x] `src/components/layout/AppShell.tsx` — Layout adjustment for sidebar width changes
+
+**Global Search in Topbar**
+- [x] `src/components/layout/Topbar.tsx` — Command-palette style search: queries manifests, vehicles, users, invoices in parallel, debounced input (300ms), keyboard navigation (↑↓), type-colored result icons
+- [x] `src/components/shared/SearchInput.tsx` — Fully implemented shared component (was placeholder): search icon, clear button, styled input
+
+**Z-Index / Modal Stacking Fix**
+- [x] All modals (`AddEditVehicleModal`, `ClientRequestDetailModal`, `ManifestDetailModal`, `ConfirmModal`, Users modal, Invoices modal) — Changed from `z-50` / `z-[var(--z-modal)]` to `style={{ zIndex: 10000 }}`
+- [x] `src/globals.css` — `.modal-overlay` z-index rules, `header { z-index: 40 }`, `.content-area` overflow rules
+
+**Map Tile Provider Change**
+- [x] `src/components/admin/LiveMap.tsx` — Switched from CARTO tiles to OpenStreetMap default tiles
+- [x] `src/components/admin/TripInfoCard.tsx` — Repositioned to avoid overlap with follow button
+
+**Minor UI Polish**
+- [x] `TripInfoCard.tsx` — Added `pb-2` to header, `flex-1` for text truncation, smaller close button
+- [x] `Users.tsx` — Tighter spacing (gap, label font sizes, input heights)
+- [x] `Invoices.tsx` — Modal z-index fix
+
+**Verified:** `npx tsc --noEmit` clean, `npx vite build` clean.
+
+---
+
+### P0 — Security Audit & Fixes (2026-09-02)
+> Full security audit of admin panel. 35 vulnerabilities found and fixed. Committed as `7e393b9` on `sanjay`.
+
+**CRITICAL Fixes**
+- [x] `server/config/env.ts` — JWT secret: removed hardcoded fallback, throws error in production if `JWT_SECRET` missing
+- [x] `src/components/layout/ProtectedRoute.tsx` — Real auth gate: checks `isAuthenticated` from Redux + enforces `allowedRoles` (was a no-op pass-through)
+- [x] `src/components/admin/VehicleLayer.tsx` — XSS fix: created `escapeHtml()`/`escapeAttr()` utilities, all 12+ popup fields now escaped
+- [x] 4 controllers (`user`, `vehicle`, `manifest`, `invoice`) — Regex injection: escape special chars before `new RegExp()` (ReDoS fix)
+
+**HIGH Fixes**
+- [x] `server/routes/auth.routes.ts` — Rate limiting: `express-rate-limit` on login (10 attempts per 15-minute window)
+- [x] `server/config/cors.ts` — CORS bypass fix: `null` origin blocked in production (only allowed in dev)
+- [x] `server/controllers/manifest.controller.ts` — IDOR fix: clients can only see their own manifests
+- [x] `server/controllers/invoice.controller.ts` — IDOR fix: clients can only see their own invoices
+- [x] `src/components/layout/AppShell.tsx` — Role fallback fix: reads role from Redux, not localStorage with `|| 'admin'` default
+- [x] `src/services/api.ts` — 401 handler: redirects to `/login` instead of silently falling back to demo data
+
+**MEDIUM Fixes**
+- [x] `server/server.ts` — Helmet security headers added
+- [x] `server/server.ts` — JSON body limit reduced from 10MB to 100KB in production
+- [x] `server/utils/helpers.ts` — Crypto-secure random IDs (`crypto.randomBytes` instead of `Math.random()`)
+- [x] `server/middleware/errorHandler.ts` — Sanitized logging, no field name leaks, no full URLs in production
+- [x] `server/middleware/errorHandler.ts` — CastError: generic "Invalid ID format" message
+- [x] `server/middleware/errorHandler.ts` — Duplicate key: no field name leak in production
+
+**New Dependencies**
+- [x] `server/package.json` — Added `express-rate-limit`, `helmet`
+- [x] `client/package.json` — Added `framer-motion` (for login animations)
+
+**Verified:** `npx tsc --noEmit` clean (client + server), `npx vite build` clean.
+
+---
+
+### P0 — Modern Role-Based Login Page (2026-09-02)
+> Committed as `7e393b9` on `sanjay`.
+
+**Login Page**
+- [x] `src/pages/Login.tsx` — Modern glassmorphism UI with animated background orbs (framer-motion)
+- [x] Role selector with 4 roles: Admin (orange), Executive (purple), Client (green), Driver (blue)
+- [x] Each role has unique color theme, icon, gradient, and description
+- [x] Animated transitions between roles with auto-fill demo credentials per role
+- [x] Loading spinner, error display, role-based redirect after login
+- [x] Role mismatch error: "This account is registered as X, not Y. Please select the correct role."
+
+**Auth Flow Fixes**
+- [x] `src/store/authSlice.ts` — `loadUser.rejected`: clears token from localStorage (was leaving stale token)
+- [x] `src/pages/Login.tsx` — Demo credentials match seed data exactly (client: `client@abc.com`, driver: `driver1@logistics.com`)
+
+**Verified:** `npx tsc --noEmit` clean, `npx vite build` clean.
+
+---
+
+### Placeholder Routes for Team Pages (2026-09-02)
+> Placeholder pages for client/driver sections. Team will replace when they merge.
+
+- [x] `src/pages/client/ClientDashboard.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/pages/client/ClientInvoices.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/pages/client/TrackShipment.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/pages/client/PlaceOrder.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/pages/driver/DriverDashboard.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/pages/driver/ActiveDelivery.tsx` — Redirects to `/admin` (placeholder)
+- [x] `src/App.tsx` — Routes with role guards: `/client/*` (client+admin), `/driver/*` (driver+admin)
+
+---
+
+### Favicon + Notification Fix (2026-09-02)
+> Committed as `639bfa3` + `0698ebd` on `sanjay`.
+
+- [x] `client/public/favicon.svg` — Custom SVG favicon matching sidebar logo (dark square + orange PackageSearch icon + orange dot)
+- [x] `client/index.html` — Changed from `/vite.svg` to `/favicon.svg`
+- [x] `src/components/layout/Topbar.tsx` — "View all notifications →" button now closes popup before navigating
+
+---
+
+## Cleanup — Client/Driver/Login Removed (2026-08-18) → Re-added (2026-09-02)
+- **Original removal (2026-08-18):** Sidebar removed CLIENT + DRIVER sections. Deleted `pages/client/*`, `pages/driver/*`, `pages/Login.tsx`, `components/client/*`, `components/driver/*`. `ProtectedRoute` was a pass-through.
+- **Re-added (2026-09-02):** Login page rebuilt with role-based UI. ProtectedRoute now enforces auth. Placeholder routes for client/driver created (team will replace). Sidebar shows Admin + Executive only (client/driver use their own login redirects).
+- **Backend:** `getMy`, `getDriverManifests`, client/driver routes still commented out — reconnect on teammate's merge.
+
+---
+
+## Notes
+
+- **Backend is fully implemented** — Express.js + MongoDB REST API with auth, RBAC, CRUD for all entities.
+- **Mapbox replaced by Leaflet** — the codebase uses `react-leaflet` (free, no API key). The docs mention Mapbox but the package.json has Leaflet.
+- **All files use TypeScript** (.ts / .tsx) — docs describe JavaScript but codebase is TS.
+- **globals.css is fully implemented** — CSS variables (Industrial Twilight palette), animations, Tailwind v4 integration. `@import "tailwindcss"` MUST be first line.
+- **Google Fonts loaded via `<link>` in index.html**, not CSS @import, to avoid Tailwind v4 ordering warnings.
+- **package.json dependencies are installed** — `node_modules` exists in both client and server.
+- **All work goes to `sanjay` branch only** — never commit to `main`/`master`.
+- **Start both servers** — `cd server && npm run dev` + `cd client && npm run dev`
+- **Seed database** — `cd server && npm run seed` (creates admin/executive/client/driver users)

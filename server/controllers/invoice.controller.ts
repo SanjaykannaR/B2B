@@ -1,208 +1,166 @@
-// Controller for: Invoice - generate, list, pay, stats
-// Module: Backend Controllers (Module 5) | Owner: Developer 1
-// Handles: amount calc (distance x contractRate), line items, payment marking
+import { NextFunction, Request, Response } from 'express';
+import { Invoice } from '../models/Invoice';
+import { sendError, sendSuccess } from '../utils/ApiResponse';
+import { paginate, toObjectId, userDisplay } from '../utils/helpers';
+import { generateInvoiceForManifest } from '../services/invoiceGenerator';
+import { notify } from '../services/notificationService';
 
-import { Request, Response, NextFunction } from 'express';
-import Invoice, { InvoiceStatus } from '../models/Invoice';
-import Manifest from '../models/Manifest';
-import ApiError from '../utils/ApiError';
-import { ok } from '../utils/ApiResponse';
-import { generateInvoice } from '../services/invoiceGenerator';
-import { parsePage, toPaginationMeta } from '../utils/helpers';
+const serializeInvoice = (i: any): any => {
+  const doc = i.toObject ? i.toObject() : i;
+  const { client, manifest, ...rest } = doc;
+  return {
+    ...rest,
+    client: client ? userDisplay(client) : client,
+    manifest: manifest
+      ? { _id: manifest._id, trackingId: manifest.trackingId, status: manifest.currentStatus }
+      : manifest,
+  };
+};
 
-const VALID_STATUSES: InvoiceStatus[] = ['Pending', 'Paid', 'Overdue', 'Cancelled'];
-
-export async function listInvoices(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const listInvoices = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = parsePage(req.query as Record<string, unknown>);
+    const { page, limit, skip } = paginate(req.query.page, req.query.limit);
     const filter: Record<string, unknown> = {};
 
-    const status = req.query.status as string | undefined;
-    if (status) {
-      if (!VALID_STATUSES.includes(status as InvoiceStatus)) {
-        throw new ApiError(400, `Invalid status filter. Allowed: ${VALID_STATUSES.join(', ')}`);
-      }
-      filter.status = status;
+    if (req.query.status) filter.status = String(req.query.status).toUpperCase();
+
+    // IDOR fix: clients can only see their own invoices
+    const role = (req as any).user?.role;
+    const userId = (req as any).user?._id;
+    if (role === 'client') {
+      filter.client = userId;
+    } else if (req.query.client) {
+      const cid = toObjectId(String(req.query.client));
+      if (cid) filter.client = cid;
+    }
+    const search = String(req.query.search || '').trim();
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.invoiceNumber = new RegExp(escaped, 'i');
     }
 
-    if (req.query.client) {
-      filter.client = req.query.client;
-    }
+    const [invoices, total] = await Promise.all([
+      Invoice.find(filter)
+        .populate('client', 'firstName lastName email phone company')
+        .populate('manifest', 'trackingId currentStatus')
+        .sort({ issuedDate: -1 })
+        .skip(skip)
+        .limit(limit),
+      Invoice.countDocuments(filter),
+    ]);
 
-    const total = await Invoice.countDocuments(filter);
-    const invoices = await Invoice.find(filter)
-      .sort({ issuedDate: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('client', 'firstName lastName email company')
-      .populate('manifest', 'trackingId');
-
-    res.json(ok({ items: invoices, ...toPaginationMeta(total, page, limit) }));
+    return sendSuccess(res, {
+      invoices: invoices.map(serializeInvoice),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getMyInvoices(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const getMyInvoices = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = parsePage(req.query as Record<string, unknown>);
-    const clientId = (req as Request & { user: { _id: unknown } }).user._id;
-    const filter: Record<string, unknown> = { client: clientId };
-
-    const status = req.query.status as string | undefined;
-    if (status) {
-      filter.status = status;
-    }
-
-    const total = await Invoice.countDocuments(filter);
-    const invoices = await Invoice.find(filter)
-      .sort({ issuedDate: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .populate('manifest', 'trackingId routing');
-
-    res.json(ok({ items: invoices, ...toPaginationMeta(total, page, limit) }));
+    const invoices = await Invoice.find({ client: req.user!._id })
+      .populate('client', 'firstName lastName email phone company')
+      .populate('manifest', 'trackingId currentStatus')
+      .sort({ issuedDate: -1 });
+    return sendSuccess(res, { invoices: invoices.map(serializeInvoice) });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getInvoice(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const getOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const invoice = await Invoice.findById(req.params.id)
-      .populate('client', 'firstName lastName email company phone')
-      .populate('manifest', 'trackingId routing cargoDetails');
-    if (!invoice) {
-      throw new ApiError(404, 'Invoice not found.');
+    const id = toObjectId(req.params.id);
+    const invoice = id
+      ? await Invoice.findById(id)
+          .populate('client', 'firstName lastName email phone company')
+          .populate('manifest', 'trackingId currentStatus')
+      : null;
+    if (!invoice) return sendError(res, 404, 'Invoice not found');
+
+    const user = req.user!;
+    if (user.role === 'client' && invoice.client.toString() !== user._id.toString()) {
+      return sendError(res, 403, 'Forbidden. This invoice does not belong to you.');
     }
-    res.json(ok(invoice));
+
+    return sendSuccess(res, { invoice: serializeInvoice(invoice) });
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function generateInvoiceForManifest(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const generateInvoice = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const manifest = await Manifest.findById(req.params.manifestId).populate('client', 'contractRate');
-    if (!manifest) {
-      throw new ApiError(404, 'Manifest not found.');
-    }
-    if (manifest.currentStatus !== 'Delivered') {
-      throw new ApiError(400, `Invoices can only be generated for Delivered manifests (current: ${manifest.currentStatus}).`);
-    }
+    const invoice = await generateInvoiceForManifest(req.params.manifestId);
+    if (!invoice) return sendError(res, 404, 'Manifest not found');
 
-    const existing = await Invoice.findOne({ manifest: manifest._id });
-    if (existing) {
-      throw new ApiError(409, 'An invoice already exists for this manifest.');
-    }
+    const full = await Invoice.findById(invoice._id)
+      .populate('client', 'firstName lastName email phone company')
+      .populate('manifest', 'trackingId currentStatus');
 
-    const client = manifest.client as unknown as { _id: string; contractRate?: number };
-    const invoice = await generateInvoice({
-      manifestId: manifest._id.toString(),
-      clientId: client._id.toString(),
-      distanceKm: manifest.routing.distanceKm,
-      weight: manifest.cargoDetails.weight,
-      contractRate: client.contractRate ?? 0,
-      description: manifest.cargoDetails.description,
+    await notify({
+      recipient: full!.client,
+      title: `Invoice generated: ${invoice.invoiceNumber}`,
+      message: `Invoice ${invoice.invoiceNumber} for ${invoice.amount} ${invoice.currency} is now pending.`,
+      type: 'info',
+      relatedManifest: invoice.manifest,
     });
 
-    res.status(201).json(ok(invoice, 'Invoice generated successfully.'));
+    return sendSuccess(res, { invoice: serializeInvoice(full) }, 'Invoice generated', 201);
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function markInvoicePaid(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const markPaid = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const invoice = await Invoice.findById(req.params.id);
-    if (!invoice) {
-      throw new ApiError(404, 'Invoice not found.');
-    }
-    if (invoice.status === 'Paid') {
-      throw new ApiError(400, 'Invoice is already paid.');
-    }
-    if (invoice.status === 'Cancelled') {
-      throw new ApiError(400, 'Cancelled invoices cannot be paid.');
-    }
+    const id = toObjectId(req.params.id);
+    const invoice = id ? await Invoice.findById(id) : null;
+    if (!invoice) return sendError(res, 404, 'Invoice not found');
 
-    invoice.status = 'Paid';
+    invoice.status = 'PAID';
     invoice.paidDate = new Date();
     await invoice.save();
 
-    res.json(ok(invoice, 'Invoice marked as paid.'));
+    const full = await Invoice.findById(invoice._id)
+      .populate('client', 'firstName lastName email phone company')
+      .populate('manifest', 'trackingId currentStatus');
+    return sendSuccess(res, { invoice: serializeInvoice(full) }, 'Invoice marked as paid');
   } catch (err) {
     next(err);
   }
-}
+};
 
-export async function getInvoiceStats(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
+export const getStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = (req as Request & { user: { _id: unknown; role: string } }).user;
-    const match: Record<string, unknown> = {};
-    if (user.role === 'client') {
-      match.client = user._id;
-    }
-
-    const [totals, byStatus] = await Promise.all([
+    const [billed, paid, pending, overdue, total] = await Promise.all([
+      Invoice.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]),
       Invoice.aggregate([
-        { $match: match },
-        { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } },
+        { $match: { status: 'PAID' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
       Invoice.aggregate([
-        { $match: match },
-        { $group: { _id: '$status', count: { $sum: 1 }, amount: { $sum: '$amount' } } },
+        { $match: { status: 'PENDING' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
       ]),
+      Invoice.aggregate([
+        { $match: { status: 'OVERDUE' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+      Invoice.countDocuments({}),
     ]);
 
-    const totalAmount = totals[0]?.total ?? 0;
-    const totalCount = totals[0]?.count ?? 0;
-    const statusBreakdown = byStatus.reduce<Record<string, { count: number; amount: number }>>((acc, s) => {
-      acc[s._id] = { count: s.count, amount: s.amount };
-      return acc;
-    }, {});
-
-    res.json(ok({
-      totalAmount,
-      totalCount,
-      pending: statusBreakdown.Pending ?? { count: 0, amount: 0 },
-      paid: statusBreakdown.Paid ?? { count: 0, amount: 0 },
-      overdue: statusBreakdown.Overdue ?? { count: 0, amount: 0 },
-      cancelled: statusBreakdown.Cancelled ?? { count: 0, amount: 0 },
-    }));
+    return sendSuccess(res, {
+      billed: billed[0]?.total ?? 0,
+      paid: paid[0]?.total ?? 0,
+      pending: pending[0]?.total ?? 0,
+      overdue: overdue[0]?.total ?? 0,
+      total,
+      currency: 'INR',
+    });
   } catch (err) {
     next(err);
   }
-}
-
-export default {
-  listInvoices,
-  getMyInvoices,
-  getInvoice,
-  generateInvoiceForManifest,
-  markInvoicePaid,
-  getInvoiceStats,
 };

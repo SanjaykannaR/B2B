@@ -1,29 +1,63 @@
-// Routes for: Manifest shipment lifecycle
-// Module: Backend Routes (Module 4) | Owner: Developer 1
-// Endpoints: GET /, GET /my, GET /driver/my, GET /:id, POST /, PUT /:id, PATCH assign/start-trip/status/complete, DELETE /:id
-
 import { Router } from 'express';
-import manifestController from '../controllers/manifest.controller';
-import authMiddleware from '../middleware/auth';
-import roleGuard from '../middleware/roleGuard';
+import {
+  listManifests,
+  getOne,
+  // getMy,                       // client/driver page endpoints — commented out (see controller)
+  // getDriverManifests,          // owned by another developer's team
+  createManifest,
+  updateManifest,
+  approveManifest,
+  rejectManifest,
+  contactManifest,
+  sendDriverRequest,
+  assignManifest,
+  // startTrip,                   // driver lifecycle — commented out (see controller)
+  // updateLocation,
+  // updateStatus,
+  // completeManifest,
+  deleteManifest,
+  // myDeliveryRequests,          // driver delivery requests — commented out
+  // acceptDriverRequest,
+  // declineDriverRequest,
+} from '../controllers/manifest.controller';
+import { auth } from '../middleware/auth';
+import { roleGuard } from '../middleware/roleGuard';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(auth);
 
-router.get('/', roleGuard(['admin', 'executive']), manifestController.listManifests);
-router.get('/my', roleGuard(['client']), manifestController.getMyManifests);
-router.get('/driver/my', roleGuard(['driver']), manifestController.getDriverManifests);
-router.get('/track/:trackingId', manifestController.getManifestByTrackingId);
-router.get('/suggestions/:id', roleGuard(['admin']), manifestController.getCapacitySuggestions);
-router.get('/:id', manifestController.getManifest);
+// ── Reads ────────────────────────────────────────────────────────
+router.get('/', roleGuard('admin', 'executive'), listManifests);
+// router.get('/my', getMy);
+// router.get('/driver/my', getDriverManifests);
+router.get('/:id', getOne);
 
-router.post('/', roleGuard(['admin', 'client']), manifestController.createManifest);
-router.put('/:id', roleGuard(['admin']), manifestController.updateManifest);
-router.patch('/:id/assign', roleGuard(['admin']), manifestController.assignManifest);
-router.patch('/:id/start-trip', roleGuard(['driver', 'admin']), manifestController.startTrip);
-router.patch('/:id/status', roleGuard(['admin']), manifestController.updateManifestStatus);
-router.patch('/:id/complete', roleGuard(['driver', 'admin']), manifestController.completeDelivery);
-router.delete('/:id', roleGuard(['admin']), manifestController.cancelManifest);
+// ── Create / edit ────────────────────────────────────────────────
+router.post('/', createManifest);
+router.put('/:id', roleGuard('admin'), updateManifest);
+router.delete('/:id', roleGuard('admin'), deleteManifest);
+
+// ── Approval workflow (Client Requests) ─────────────────────────
+router.patch('/:id/approve', roleGuard('admin'), approveManifest);
+router.patch('/:id/reject', roleGuard('admin'), rejectManifest);
+router.patch('/:id/contact', roleGuard('admin'), contactManifest);
+
+// ── Dispatch workflow ────────────────────────────────────────────
+router.post('/:id/driver-request', roleGuard('admin'), sendDriverRequest);
+router.patch('/:id/assign', roleGuard('admin'), assignManifest);
+
+// ── Trip lifecycle (driver) — commented out pending teammate merge ─
+// router.patch('/:id/start-trip', roleGuard('driver'), startTrip);
+// router.patch('/:id/location', roleGuard('driver'), updateLocation);
+// router.patch('/:id/status', roleGuard('admin', 'driver'), updateStatus);
+// router.patch('/:id/complete', roleGuard('driver'), completeManifest);
+
+// ── Driver delivery requests (separate namespace per plan) — commented out ─
+// export const deliveryRequestRouter = Router();
+// deliveryRequestRouter.use(auth);
+// deliveryRequestRouter.get('/my', myDeliveryRequests);
+// deliveryRequestRouter.patch('/:id/accept', roleGuard('driver'), acceptDriverRequest);
+// deliveryRequestRouter.patch('/:id/decline', roleGuard('driver'), declineDriverRequest);
 
 export default router;

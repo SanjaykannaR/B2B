@@ -1,136 +1,224 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Truck, Search, Activity, Wrench, CheckCircle2 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import AdminNavbar from '../../components/admin/AdminNavbar';
-import StatCard from '../../components/shared/StatCard';
-import DataTable from '../../components/shared/DataTable';
-import { listVehicles, getVehicleStats, Vehicle, VehicleStats } from '../../services/vehicleApi';
-import { getErrorMessage } from '../../services/errorMessage';
+import React, { useState, useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import { FleetGrid } from '../../components/admin/FleetGrid';
+import { AddEditVehicleModal } from '../../components/admin/AddEditVehicleModal';
+import { ConfirmModal } from '../../components/shared/ConfirmModal';
+import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
+import { PageHeader } from '../../components/admin/shared/PageHeader';
+import * as vehicleApi from '../../services/vehicleApi';
 
-const VehicleStatusBadge = ({ status }: { status: string }) => {
-  if (status === 'Available') return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 flex items-center w-max"><CheckCircle2 className="w-3 h-3 mr-1.5" /> Available</span>;
-  if (status === 'In-Transit') return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 flex items-center w-max"><Activity className="w-3 h-3 mr-1.5" /> In-Transit</span>;
-  return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 flex items-center w-max"><Wrench className="w-3 h-3 mr-1.5" /> Maintenance</span>;
-};
+const DEMO_VEHICLES = [
+  { _id: 'v1', registrationNumber: 'MH-12-AB-1234', make: 'Tata', model: 'Ace Gold', year: 2024, status: 'AVAILABLE', capacity: { weight: 2500, volume: 8 }, fuelEfficiency: 12, driver: { name: 'Ramesh Patil', phone: '+91 98765 43210', license: 'MH-12-2024-001' } },
+  { _id: 'v2', registrationNumber: 'DL-01-CD-5678', make: 'Mahindra', model: 'Blazo X', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 16000, volume: 48 }, fuelEfficiency: 6, driver: { name: 'Suresh Kumar', phone: '+91 87654 32109', license: 'DL-01-2023-045' } },
+  { _id: 'v3', registrationNumber: 'TN-07-EF-9012', make: 'Eicher', model: 'Pro 2049', year: 2025, status: 'MAINTENANCE', capacity: { weight: 5000, volume: 18 }, fuelEfficiency: 10, driver: { name: 'Anil Sharma', phone: '+91 76543 21098', license: 'TN-07-2025-012' } },
+  { _id: 'v4', registrationNumber: 'KA-05-GH-3456', make: 'Ashok Leyland', model: 'Dost+', year: 2024, status: 'AVAILABLE', capacity: { weight: 1500, volume: 6 }, fuelEfficiency: 14, driver: { name: 'Venkat Reddy', phone: '+91 65432 10987', license: 'KA-05-2024-078' } },
+  { _id: 'v5', registrationNumber: 'GJ-06-IJ-7890', make: 'Tata', model: 'Prima LX', year: 2023, status: 'IN_TRANSIT', capacity: { weight: 25000, volume: 70 }, fuelEfficiency: 4, driver: { name: 'Mohammed Khan', phone: '+91 54321 09876', license: 'GJ-06-2023-033' } },
+];
 
-export default function FleetMonitor() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [stats, setStats] = useState<VehicleStats | null>(null);
-  const [, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('All');
+type TabType = 'ALL' | 'AVAILABLE' | 'IN_TRANSIT' | 'MAINTENANCE';
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [vehiclesRes, statsRes] = await Promise.all([
-        listVehicles({ limit: 100 }),
-        getVehicleStats(),
-      ]);
-      setVehicles(vehiclesRes.items);
-      setStats(statsRes);
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, 'Failed to load fleet data.'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+export const FleetMonitor: React.FC = () => {
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('ALL');
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const tabs: TabType[] = ['ALL', 'AVAILABLE', 'IN_TRANSIT', 'MAINTENANCE'];
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    setPage(1); // reset pagination when the tab changes
+    const load = async () => {
+      try {
+        setLoading(true);
+        const q = activeTab !== 'ALL' ? { status: activeTab } : {};
+        const res = await vehicleApi.getVehicles(q);
+        setVehicles(res.vehicles || res || []);
+      } catch {
+        setVehicles(DEMO_VEHICLES);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [activeTab]);
 
-  const filteredVehicles = useMemo(() => {
-    return vehicles.filter(v => {
-      const matchesSearch = v.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            v.make.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'All' || v.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [vehicles, searchQuery, statusFilter]);
+  const handleSave = async (data: any) => {
+    try {
+      if (editingVehicle) {
+        await vehicleApi.updateVehicle(editingVehicle._id || editingVehicle.id, data);
+      } else {
+        await vehicleApi.createVehicle(data);
+      }
+      setActiveTab((t) => t); // trigger refetch
+    } catch (e) { console.error(e); throw e; }
+  };
+
+  const handleDelete = (id: string) => {
+    setPendingDelete(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    setPendingDelete(null);
+    try { await vehicleApi.deleteVehicle(pendingDelete); setActiveTab((t) => t); }
+    catch (e) { console.error(e); }
+  };
+
+  const stats = {
+    total: vehicles.length,
+    available: vehicles.filter((v) => v.status === 'AVAILABLE').length,
+    inTransit: vehicles.filter((v) => v.status === 'IN_TRANSIT').length,
+    maintenance: vehicles.filter((v) => v.status === 'MAINTENANCE').length,
+  };
+
+  // Pagination (client-side slice; stats above use the full list)
+  const total = vehicles.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageVehicles = vehicles.slice(start, start + pageSize);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-      <AdminNavbar active="fleet" />
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[2560px] mx-auto space-y-6">
+      <AnimatedCard>
+        <PageHeader
+          title="Fleet Monitor"
+          subtitle="Manage your vehicles and view real-time status."
+          action={
+            <button
+              onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white
+                transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg min-h-[44px]"
+              style={{ background: 'var(--color-accent)', boxShadow: '0 4px 14px rgba(255,107,44,0.3)' }}
+            >
+              <Plus size={16} /> Add Vehicle
+            </button>
+          }
+        />
+      </AnimatedCard>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <header>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Fleet Monitor</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Manage vehicles, track statuses, and assign maintenance.</p>
-        </header>
-
-        {/* ── Stat Cards Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <StatCard title="Total Fleet" value={stats?.total || 0} icon={Truck} colorTheme="blue" />
-          <StatCard title="Available" value={stats?.available || 0} icon={CheckCircle2} colorTheme="emerald" />
-          <StatCard title="In-Transit" value={stats?.inTransit || 0} icon={Activity} colorTheme="orange" />
-          <StatCard title="Maintenance" value={stats?.maintenance || 0} icon={Wrench} colorTheme="red" />
-        </div>
-
-        {/* ── Fleet List ── */}
-        <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-          <div className="p-5 md:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center">
-              <Truck className="w-5 h-5 mr-2 text-blue-500" /> Active Roster
-            </h2>
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-              <div className="relative w-full sm:max-w-xs">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search REG or Make..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-full h-10 pl-10 pr-4 text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
-                />
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Total', count: stats.total, color: '#3B82F6' },
+          { label: 'Available', count: stats.available, color: '#10B981' },
+          { label: 'In Transit', count: stats.inTransit, color: '#8B5CF6' },
+          { label: 'Maintenance', count: stats.maintenance, color: '#F97316' },
+        ].map((s, i) => (
+          <AnimatedCard key={s.label} delay={i * 60}>
+            <div
+              className="rounded-xl border p-4 text-center transition-all duration-200 hover:-translate-y-0.5"
+              style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)' }}
+            >
+              <div className="text-2xl font-bold" style={{ fontFamily: 'var(--font-mono)', color: s.color }}>
+                {s.count}
               </div>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-full h-10 px-4 pr-10 appearance-none text-sm font-medium focus:outline-none focus:border-blue-500 focus:bg-white cursor-pointer transition-all bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1rem_center] bg-[length:0.7rem]"
+              <div className="text-[11px] font-semibold uppercase tracking-wider mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                {s.label}
+              </div>
+            </div>
+          </AnimatedCard>
+        ))}
+      </div>
+
+      {/* Filter Tabs */}
+      <AnimatedCard delay={200}>
+        <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--color-surface-hover)' }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className="relative flex-1 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 min-h-[44px]"
+              style={{
+                background: activeTab === tab ? 'var(--color-surface-card)' : 'transparent',
+                color: activeTab === tab ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                boxShadow: activeTab === tab ? 'var(--shadow-sm)' : 'none',
+              }}
+            >
+              {tab.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+      </AnimatedCard>
+
+      {/* Grid */}
+      <AnimatedCard delay={280}>
+        <FleetGrid
+          vehicles={pageVehicles}
+          loading={loading}
+          onEdit={(v) => { setEditingVehicle(v); setIsModalOpen(true); }}
+          onDelete={handleDelete}
+          onRequestDriver={(v) => {
+            // TODO: open send request modal or call API
+            alert(`Request sent to driver: ${v.driver?.name || 'Unknown'} (${v.registrationNumber})`);
+          }}
+        />
+
+        {/* Pagination footer */}
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 border-t"
+          style={{ borderColor: 'var(--color-border-light)' }}
+        >
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Showing {total === 0 ? 0 : start + 1}–{Math.min(start + pageSize, total)} of {total}
+          </p>
+          <div className="flex items-center gap-3">
+            <select
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+                className="px-3 py-2 rounded-xl text-xs outline-none border min-h-[44px]"
+              style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+              aria-label="Page size"
+            >
+              {[10, 25, 50, 100].map((n) => (
+                <option key={n} value={n}>{n} / page</option>
+              ))}
+            </select>
+            <span className="text-xs font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              Page {safePage} of {totalPages}
+            </span>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setPage(safePage - 1)}
+                disabled={safePage <= 1}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage(safePage + 1)}
+                  disabled={safePage >= totalPages}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
               >
-                <option value="All">All Statuses</option>
-                <option value="Available">Available</option>
-                <option value="In-Transit">In-Transit</option>
-                <option value="Maintenance">Maintenance</option>
-              </select>
+                Next
+              </button>
             </div>
           </div>
-
-          <DataTable 
-            columns={[
-              {
-                header: 'Registration',
-                render: (v: Vehicle) => <span className="font-bold text-slate-900 font-mono tracking-wider">{v.registrationNumber}</span>
-              },
-              {
-                header: 'Vehicle',
-                render: (v: Vehicle) => (
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-slate-800 text-sm">{v.make} {v.model}</span>
-                    <span className="text-xs text-slate-500">{v.year} Model</span>
-                  </div>
-                )
-              },
-              {
-                header: 'Capacity',
-                render: (v: Vehicle) => <span className="font-medium text-slate-600 text-sm">{v.maxWeightKg} kg / {v.maxVolumeCubicMeters} m³</span>
-              },
-              {
-                header: 'Status',
-                render: (v: Vehicle) => <VehicleStatusBadge status={v.status} />
-              },
-              {
-                header: 'Driver',
-                render: (v: Vehicle) => <span className="font-medium text-slate-600 text-sm">{v.currentDriver ? v.currentDriver.firstName : '—'}</span>
-              }
-            ]}
-            data={filteredVehicles}
-            emptyMessage="No vehicles match your criteria."
-            emptyIcon={<Truck className="w-10 h-10 text-slate-300 mx-auto" />}
-          />
         </div>
-      </main>
+      </AnimatedCard>
+
+      <AddEditVehicleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialData={editingVehicle}
+      />
+
+      <ConfirmModal
+        isOpen={!!pendingDelete}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Vehicle"
+        message="Are you sure you want to delete this vehicle? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
-}
+};

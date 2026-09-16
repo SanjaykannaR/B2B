@@ -1,33 +1,33 @@
 import axios from 'axios';
 
+const baseURL = (import.meta as any).env.VITE_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  headers: { 'Content-Type': 'application/json' },
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('b2b_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
-  (response) => {
-    // Unwrap the backend's { success, data } envelope so callers receive the payload directly.
-    const body = response.data;
-    if (body && typeof body === 'object' && body.success === true && 'data' in body) {
-      response.data = body.data;
-    }
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      const url: string = error.config?.url ?? '';
-      const isLoginRequest = url.includes('/auth/login');
-      if (!isLoginRequest) {
-        localStorage.removeItem('b2b_token');
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Redirect to login if not already there
+      if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
     }

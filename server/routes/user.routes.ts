@@ -1,21 +1,45 @@
-// Routes for: User management (admin only)
-// Module: Backend Routes (Module 4) | Owner: Developer 1
-// Endpoints: GET /, GET /drivers, GET /clients, GET /:id, PUT /:id, PATCH /:id/deactivate
-
 import { Router } from 'express';
-import userController from '../controllers/user.controller';
-import authMiddleware from '../middleware/auth';
-import roleGuard from '../middleware/roleGuard';
+import { body } from 'express-validator';
+import {
+  listUsers,
+  getDrivers,
+  getClients,
+  getOne,
+  createUser,
+  updateUser,
+  deactivateUser,
+  resetPassword,
+} from '../controllers/user.controller';
+import { auth } from '../middleware/auth';
+import { roleGuard } from '../middleware/roleGuard';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 
-router.use(authMiddleware, roleGuard(['admin']));
+// All user management is ADMIN-ONLY. roleGuard lets admin pass for any list.
+router.use(auth);
+router.use(roleGuard('admin'));
 
-router.get('/', userController.listUsers);
-router.get('/drivers', userController.listDrivers);
-router.get('/clients', userController.listClients);
-router.get('/:id', userController.getUser);
-router.put('/:id', userController.updateUser);
-router.patch('/:id/deactivate', userController.deactivateUser);
+router.get('/', listUsers);
+router.get('/drivers', getDrivers);
+router.get('/clients', getClients);
+
+router.post(
+  '/',
+  [
+    body('firstName').notEmpty().withMessage('First name required'),
+    body('lastName').notEmpty().withMessage('Last name required'),
+    body('email').isEmail().withMessage('Valid email required'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('role').isIn(['admin', 'client', 'driver', 'executive']).withMessage('Invalid role'),
+  ],
+  validate,
+  createUser,
+);
+
+router.get('/:id', getOne);
+router.put('/:id', updateUser);
+router.patch('/:id/deactivate', deactivateUser);
+router.post('/:id/reset-password', resetPassword);
 
 export default router;

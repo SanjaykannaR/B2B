@@ -1,22 +1,24 @@
-import AdminNavbar from '../../components/admin/AdminNavbar';
-import OrderForm from '../../components/client/OrderForm'; // Reusing the robust manifest creator
+import React from 'react';
+import { WizardContainer } from '../../components/admin/ManifestWizard/WizardContainer';
+import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 
-export default function ManifestCreate() {
+export const ManifestCreate: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans flex flex-col">
-      <AdminNavbar active="create-manifest" />
+    <div className="min-h-[calc(100vh-64px)] relative overflow-hidden"
+      style={{ background: 'var(--color-surface)' }}>
+      {/* Ambient gradient blobs */}
+      <div className="absolute top-0 inset-x-0 h-72 pointer-events-none"
+        style={{ background: 'linear-gradient(to bottom, rgba(59,130,246,0.04), transparent)' }} />
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'rgba(139,92,246,0.06)' }} />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl pointer-events-none"
+        style={{ background: 'rgba(59,130,246,0.06)' }} />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <header className="mb-6 md:mb-8">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Create Manifest</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Admin override: manually route and schedule a new shipment.</p>
-        </header>
-
-        {/* We reuse the robust OrderForm, which scales perfectly on mobile and desktop */}
-        <div className="w-full">
-          <OrderForm />
-        </div>
-      </main>
+      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-[900px] mx-auto">
+        <AnimatedCard>
+          <WizardContainer />
+        </AnimatedCard>
+      </div>
     </div>
   );
-}
+};

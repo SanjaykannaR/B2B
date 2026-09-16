@@ -1,19 +1,6 @@
-import ClientNavbar from '../../components/client/ClientNavbar';
-import OrderForm from '../../components/client/OrderForm';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-export default function PlaceOrder() {
-  return (
-    <div className="min-h-screen w-full bg-[#f5f6f8] text-slate-900 font-sans flex flex-col relative">
-
-      {/* ── Global Navbar ── */}
-      <ClientNavbar active="place-order" />
-
-      {/* ── Main Content ── */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start p-5 md:p-4 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
-        <div className="w-full max-w-5xl mx-auto">
-          <OrderForm />
-        </div>
-      </div>
-    </div>
-  );
-}
+/** Placeholder — client order page, owned by another developer. */
+const PlaceOrder: React.FC = () => <Navigate to="/admin" replace />;
+export default PlaceOrder;

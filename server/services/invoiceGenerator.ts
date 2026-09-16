@@ -1,57 +1,59 @@
-// Service for: Auto-generate invoice from completed manifest
-// Module: Backend Services (Module 6) | Owner: Developer 1
-// Cost = distance x contractRate, creates invoice with 30-day payment window
+import { Manifest } from '../models/Manifest';
+import { Invoice } from '../models/Invoice';
+import { generateInvoiceNumber } from '../utils/helpers';
 
-import Invoice, { InvoiceDocument, InvoiceLineItem } from '../models/Invoice';
-import { generateInvoiceNumber, addDaysISO } from '../utils/helpers';
+export const DEFAULT_CONTRACT_RATE = 12; // ₹ per km
 
-const WEIGHT_SURCHARGE_PER_KG = 0.05;
+/**
+ * Build + persist an invoice from a delivered manifest.
+ * Cost = distance × client.contractRate. 30-day payment window.
+ * Idempotent: returns the existing invoice if one already exists for the manifest.
+ */
+export const generateInvoiceForManifest = async (
+  manifestId: string,
+): Promise<any | null> => {
+  const manifest = await Manifest.findById(manifestId).populate('client');
+  if (!manifest) return null;
 
-export interface InvoiceInput {
-  manifestId: string;
-  clientId: string;
-  distanceKm: number;
-  weight: number;
-  contractRate: number;
-  description: string;
-}
+  const existing = await Invoice.findOne({ manifest: manifestId });
+  if (existing) return existing;
 
-export async function generateInvoice(input: InvoiceInput): Promise<InvoiceDocument> {
-  const distanceCharge = Math.round(input.distanceKm * input.contractRate * 100) / 100;
-  const weightCharge = Math.round(input.weight * WEIGHT_SURCHARGE_PER_KG * 100) / 100;
-  const amount = Math.round((distanceCharge + weightCharge) * 100) / 100;
+  const client: any = manifest.client as any;
+  const contractRate =
+    typeof client?.contractRate === 'number' && client.contractRate > 0
+      ? client.contractRate
+      : DEFAULT_CONTRACT_RATE;
 
-  const lineItems: InvoiceLineItem[] = [
+  const distance = manifest.routing?.estimatedDistanceKm ?? 0;
+  const amount = Math.round(distance * contractRate * 100) / 100;
+
+  const now = new Date();
+  const dueDate = new Date(now);
+  dueDate.setDate(dueDate.getDate() + 30);
+
+  const originCity = manifest.routing?.origin?.city || 'Origin';
+  const destCity = manifest.routing?.destination?.city || 'Destination';
+
+  const lineItems = [
     {
-      description: `Freight transport — ${input.distanceKm.toFixed(1)} km (${input.description})`,
+      description: `Freight: ${manifest.trackingId} (${originCity} → ${destCity})`,
       quantity: 1,
-      unitPrice: distanceCharge,
-      total: distanceCharge,
-    },
-    {
-      description: 'Cargo weight surcharge',
-      quantity: input.weight,
-      unitPrice: WEIGHT_SURCHARGE_PER_KG,
-      total: weightCharge,
+      unitPrice: amount,
+      total: amount,
     },
   ];
 
-  const issuedDate = new Date();
-  const dueDate = addDaysISO(30, issuedDate);
-
   const invoice = await Invoice.create({
     invoiceNumber: generateInvoiceNumber(),
-    manifest: input.manifestId,
-    client: input.clientId,
+    manifest: manifest._id,
+    client: manifest.client,
     amount,
-    currency: 'USD',
-    status: 'Pending',
-    issuedDate,
+    currency: 'INR',
+    status: 'PENDING',
+    issuedDate: now,
     dueDate,
     lineItems,
   });
 
   return invoice;
-}
-
-export default { generateInvoice };
+};
