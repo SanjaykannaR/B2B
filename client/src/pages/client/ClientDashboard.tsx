@@ -124,10 +124,10 @@ function StatusBadge({ status }: { status: string }) {
 function ProgressStepper({ status }: { status: string }) {
   const steps = ['Pending', 'Assigned', 'In-Transit', 'Delivered'];
   const colorMap: Record<string, { bg: string; border: string }> = {
-    Pending: { bg: 'bg-orange-500', border: 'border-orange-500' },
+    Pending: { bg: 'bg-yellow-500', border: 'border-yellow-500' },
     Assigned: { bg: 'bg-purple-500', border: 'border-purple-500' },
     'In-Transit': { bg: 'bg-blue-500', border: 'border-blue-500' },
-    Delivered: { bg: 'bg-emerald-500', border: 'border-emerald-500' },
+    Delivered: { bg: 'bg-grey-500', border: 'border-emerald-500' },
   };
 
   const currentIndex = Math.max(steps.indexOf(status), 0);
