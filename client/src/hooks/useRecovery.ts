@@ -1,26 +1,130 @@
-// This file is for: Custom hook to recover and track elapsed trip time
-// Module: Frontend Custom Hooks (Module 10)
-// Owner: Developer 2 (Web Frontend Engineer)
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { formatElapsedTime } from '../utils/formatters';
 
 /**
- * useRecovery Hook
- * Computes elapsed time since a recorded start timestamp. It reads a UNIX timestamp
- * from localStorage (or takes a provided timestamp), and sets up an interval to
- * continuously update the elapsed time. This provides resilience against page 
- * reloads, background tabs, and mobile app suspensions.
- * 
+ * Driver timer hook — recovers and tracks elapsed trip time.
+ * @param manifestId - The manifest the timer belongs to
+ * @param initialIsRunning - Whether the timer should be running immediately
+ */
+export function useRecovery(manifestId: string | number, initialIsRunning: boolean = false) {
+  const STORAGE_KEY = `b2b_trip_timer_${manifestId}`;
+
+  const getSavedStartTime = useCallback((): number | null => {
+    if (!manifestId) return null;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.startTime || null;
+      }
+    } catch (e) {
+      console.error('Failed to read timer recovery from localStorage:', e);
+    }
+    return null;
+  }, [manifestId, STORAGE_KEY]);
+
+  const [startTime, setStartTime] = useState<number | null>(() => getSavedStartTime());
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(() => {
+    const savedTime = getSavedStartTime();
+    if (savedTime) {
+      return Math.max(0, Math.floor((Date.now() - savedTime) / 1000));
+    }
+    return 0;
+  });
+  const [isRunning, setIsRunning] = useState<boolean>(() => !!getSavedStartTime() || initialIsRunning);
+
+  useEffect(() => {
+    if (!manifestId || !isRunning) return;
+
+    let activeStartTime = startTime;
+
+    if (!activeStartTime) {
+      activeStartTime = Date.now();
+      setStartTime(activeStartTime);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ startTime: activeStartTime, manifestId }));
+      } catch (e) {
+        console.error('Failed to save timer recovery to localStorage:', e);
+      }
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const diff = Math.max(0, Math.floor((now - (activeStartTime as number)) / 1000));
+      setElapsedSeconds(diff);
+    };
+
+    updateTimer();
+    const intervalId = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [manifestId, isRunning, startTime, STORAGE_KEY]);
+
+  useEffect(() => {
+    const saved = getSavedStartTime();
+    if (saved) {
+      setStartTime(saved);
+      setIsRunning(true);
+      setElapsedSeconds(Math.max(0, Math.floor((Date.now() - saved) / 1000)));
+    } else {
+      setStartTime(null);
+      setElapsedSeconds(0);
+      setIsRunning(initialIsRunning);
+    }
+  }, [manifestId, getSavedStartTime, initialIsRunning]);
+
+  const startTimer = useCallback(() => {
+    if (!manifestId) return;
+    const now = Date.now();
+    setStartTime(now);
+    setIsRunning(true);
+    setElapsedSeconds(0);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ startTime: now, manifestId }));
+    } catch (e) {
+      console.error('Failed to start timer in localStorage:', e);
+    }
+  }, [manifestId, STORAGE_KEY]);
+
+  const stopTimer = useCallback(() => {
+    setIsRunning(false);
+  }, []);
+
+  const clearTimer = useCallback(() => {
+    setIsRunning(false);
+    setStartTime(null);
+    setElapsedSeconds(0);
+    if (manifestId) {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        console.error('Failed to clear timer from localStorage:', e);
+      }
+    }
+  }, [manifestId, STORAGE_KEY]);
+
+  return {
+    elapsedSeconds,
+    formattedTime: formatElapsedTime(elapsedSeconds),
+    isRunning,
+    startTime,
+    isRecovered: !!startTime,
+    startTimer,
+    stopTimer,
+    clearTimer,
+  };
+}
+
+/**
+ * Returns elapsed milliseconds since a recorded start timestamp (reads from
+ * localStorage or a provided timestamp). Resilience against reloads/tabs.
  * @param storageKey - The localStorage key where the start timestamp is stored
  * @param providedStartTimestamp - Optional explicit start timestamp (e.g. from API)
- * @returns The elapsed time in milliseconds
  */
-export function useRecovery(storageKey: string, providedStartTimestamp?: number | null): number {
+export function useElapsedMillis(storageKey: string, providedStartTimestamp?: number | null): number {
   const [elapsedMs, setElapsedMs] = useState<number>(0);
 
   useEffect(() => {
-    // Determine the start time: favor provided timestamp (from backend API), 
-    // fallback to local storage recovery (for offline/immediate resilience)
     let startTime = providedStartTimestamp;
 
     if (!startTime) {
@@ -35,17 +139,13 @@ export function useRecovery(storageKey: string, providedStartTimestamp?: number 
       return;
     }
 
-    // Function to calculate and update current elapsed time
     const updateElapsed = () => {
       const now = Date.now();
       const diff = now - startTime!;
       setElapsedMs(diff > 0 ? diff : 0);
     };
 
-    // Immediate update
     updateElapsed();
-
-    // Set up 1-second interval for live ticking
     const interval = setInterval(updateElapsed, 1000);
 
     return () => clearInterval(interval);

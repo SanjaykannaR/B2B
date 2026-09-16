@@ -2,7 +2,7 @@ import React from 'react';
 import { formatDateTime } from '../../utils/formatters';
 import { StatusBadge } from './shared/StatusBadge';
 import { Navigation, Clock, Eye } from 'lucide-react';
-import { useRecovery } from '../../hooks/useRecovery';
+import { useElapsedMillis } from '../../hooks/useRecovery';
 
 interface DispatchPanelProps {
   manifests: any[];
@@ -12,7 +12,7 @@ interface DispatchPanelProps {
 }
 
 const TripTimer: React.FC<{ manifestId: string; startTime: string | Date }> = ({ manifestId, startTime }) => {
-  const elapsedMs = useRecovery(`trip_timer_${manifestId}`, new Date(startTime).getTime());
+  const elapsedMs = useElapsedMillis(`trip_timer_${manifestId}`, new Date(startTime).getTime());
   const pad = (n: number) => n.toString().padStart(2, '0');
   const h = Math.floor(elapsedMs / 3600000);
   const m = Math.floor((elapsedMs % 3600000) / 60000);

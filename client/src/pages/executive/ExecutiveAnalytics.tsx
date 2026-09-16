@@ -1,155 +1,157 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { FiPackage, FiTruck, FiClock, FiAlertTriangle } from 'react-icons/fi';
+import MetricCard from '../../components/shared/MetricCard';
+import RevenueSummary from '../../components/executive/RevenueSummary';
+import FleetUtilizationChart from '../../components/executive/FleetUtilizationChart';
+import RouteEfficiencyChart from '../../components/executive/RouteEfficiencyChart';
+import DeliveryPerformance from '../../components/executive/DeliveryPerformance';
+import MonthlyCapacityWidget from '../../components/executive/MonthlyCapacityWidget';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid,
-} from 'recharts';
-import { TrendingUp, Wallet, Clock, Truck, Gauge } from 'lucide-react';
-import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
-import {
-  getFleetUtilization, getRouteEfficiency, getMonthlyCapacity,
-  getDeliveryPerformance, getRevenueSummary,
+  getFleetUtilization,
+  getRouteEfficiency,
+  getMonthlyCapacity,
+  getDeliveryPerformance,
+  getRevenueSummary,
+  FleetUtilizationData,
+  RouteEfficiencyData,
+  MonthlyCapacityData,
+  DeliveryPerformanceData,
+  RevenueSummaryData,
 } from '../../services/analyticsApi';
 
-const COLORS = ['#10B981', '#EF4444', '#F59E0B', '#3B82F6', '#8B5CF6', '#FF6B2C'];
+interface AnalyticsState {
+  fleet: FleetUtilizationData | null;
+  route: RouteEfficiencyData | null;
+  capacity: MonthlyCapacityData | null;
+  performance: DeliveryPerformanceData | null;
+  revenue: RevenueSummaryData | null;
+}
 
-const fmtMoney = (v: number) =>
-  Number(v || 0).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
+const EMPTY_STATE: AnalyticsState = {
+  fleet: null,
+  route: null,
+  capacity: null,
+  performance: null,
+  revenue: null,
+};
 
-export const ExecutiveAnalytics: React.FC = () => {
-  const [rev, setRev] = useState<any>(null);
-  const [fleet, setFleet] = useState<any>(null);
-  const [route, setRoute] = useState<any>(null);
-  const [perf, setPerf] = useState<any>(null);
-  const [cap, setCap] = useState<any[]>([]);
+export default function ExecutiveAnalytics() {
+  const [data, setData] = useState<AnalyticsState>(EMPTY_STATE);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.allSettled([
-      getRevenueSummary(), getFleetUtilization(), getRouteEfficiency(),
-      getDeliveryPerformance(), getMonthlyCapacity(),
-    ]).then(([r, f, rt, p, c]) => {
-      const val = (x: any) => (x as any).status === 'fulfilled' ? (x as any).value : null;
-      setRev(val(r));
-      setFleet(val(f));
-      setRoute(val(rt));
-      setPerf(val(p));
-      const capData = val(c);
-      setCap(capData?.data && Array.isArray(capData.data) ? capData.data : []);
-    });
+    let cancelled = false;
+
+    (async () => {
+      const results = await Promise.allSettled([
+        getFleetUtilization(),
+        getRouteEfficiency(),
+        getMonthlyCapacity(),
+        getDeliveryPerformance(),
+        getRevenueSummary(),
+      ]);
+
+      if (cancelled) return;
+
+      setData({
+        fleet: results[0].status === 'fulfilled' ? results[0].value : null,
+        route: results[1].status === 'fulfilled' ? results[1].value : null,
+        capacity: results[2].status === 'fulfilled' ? results[2].value : null,
+        performance: results[3].status === 'fulfilled' ? results[3].value : null,
+        revenue: results[4].status === 'fulfilled' ? results[4].value : null,
+      });
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const revenueMonthly = rev?.monthly || [];
-  const utilizationData = fleet?.byStatus || [];
-  const perfData = perf?.data || [];
+  const totalShipments = data.capacity?.monthly.reduce((sum, row) => sum + row.shipments, 0) ?? 0;
 
   return (
-    <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+    <div className="theme-light" style={{ width: '100%', maxWidth: '1400px', margin: '0 auto', padding: '1.5rem 1rem 3rem 1rem', minWidth: 0, overflowX: 'hidden', minHeight: '100vh' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+          <span style={{ backgroundColor: '#FF6B2C', color: '#FFF', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em' }}>
+            EXECUTIVE ANALYTICS
+          </span>
+          <span style={{ fontSize: '0.8125rem', color: '#94A3B8' }}>Leadership overview · Current period</span>
+        </div>
+
+        <h1 style={{ fontSize: '1.875rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: '#1B2A4A' }}>
           Executive Analytics
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-          Business-wide performance across revenue, fleet and delivery
+        <p style={{ color: '#64748B', margin: 0, fontSize: '0.9375rem', maxWidth: '640px' }}>
+          Fleet utilization, route efficiency, monthly capacity, and delivery performance — fetched live with
+          automatic fallback to reference data when the analytics service is unavailable.
         </p>
       </div>
 
-      {/* KPI row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {([
-          { label: 'Total revenue', value: fmtMoney(rev?.totalRevenue || 0), icon: TrendingUp, color: '#FF6B2C' },
-          { label: 'Collected', value: fmtMoney(rev?.totalPaid || 0), icon: Wallet, color: '#10B981' },
-          { label: 'Outstanding', value: fmtMoney(rev?.totalPending || 0), icon: Clock, color: '#F59E0B' },
-          { label: 'On-time rate', value: `${route?.onTimeRate ?? 0}%`, icon: Gauge, color: '#3B82F6' },
-        ]).map((kpi, i) => (
-          <AnimatedCard key={kpi.label} delay={60 * (i + 1)}>
-            <div className="rounded-2xl border p-5 h-full" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-              <div className="h-1 w-full rounded-full mb-3" style={{ background: `linear-gradient(90deg, ${kpi.color}, transparent)` }} />
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
-                {kpi.label}
-              </p>
-              <p className="text-2xl font-bold tracking-tight mt-1 truncate" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
-                {kpi.value}
-              </p>
-            </div>
-          </AnimatedCard>
-        ))}
-      </div>
-
-      {/* Charts grid */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Monthly revenue */}
-        <AnimatedCard>
-          <div className="rounded-2xl border p-5" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Monthly Revenue</h2>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={revenueMonthly}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EDF0F7" />
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="#8B92A8" />
-                <YAxis tick={{ fontSize: 10 }} stroke="#8B92A8" tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-                <Tooltip formatter={(v: any) => fmtMoney(Number(v))} />
-                <Bar dataKey="revenue" fill="#FF6B2C" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      {loading ? (
+        <div
+          className="card"
+          style={{
+            padding: '4rem',
+            textAlign: 'center',
+            color: '#64748B',
+            backgroundColor: '#FFFFFF',
+            fontSize: '0.9375rem',
+          }}
+        >
+          Loading executive analytics data…
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <MetricCard
+              label="TOTAL MANIFESTS"
+              value={totalShipments.toLocaleString()}
+              icon={<FiPackage size={22} color="#2563EB" />}
+              accentColor="#2563EB"
+              themeColor="#2563EB"
+            />
+            <MetricCard
+              label="ACTIVE VEHICLES"
+              value={data.fleet?.statusDistribution.find(s => s.name === 'In-Transit')?.value?.toString() ?? '0'}
+              icon={<FiTruck size={22} color="#10B981" />}
+              accentColor="#10B981"
+              themeColor="#10B981"
+            />
+            <MetricCard
+              label="PENDING ORDERS"
+              value={data.performance?.breakdown.find(s => s.name === 'On-Time')?.value?.toString() ?? '0'}
+              icon={<FiClock size={22} color="#F59E0B" />}
+              accentColor="#F59E0B"
+              themeColor="#F59E0B"
+            />
+            <MetricCard
+              label="ALERTS / DELAYS"
+              value={data.performance?.breakdown.find(s => s.name === 'Delayed')?.value?.toString() ?? '0'}
+              icon={<FiAlertTriangle size={22} color="#EF4444" />}
+              accentColor="#EF4444"
+              themeColor="#EF4444"
+            />
           </div>
-        </AnimatedCard>
 
-        {/* Fleet utilization */}
-        <AnimatedCard>
-          <div className="rounded-2xl border p-5" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="flex items-center gap-2 text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-              <Truck size={15} style={{ color: 'var(--color-accent)' }} /> Fleet Utilization
-            </h2>
-            <div className="flex items-center gap-2 text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
-              <span>{fleet?.total ?? 0} vehicles · {fleet?.avgEfficiencyKmPerLiter ?? 0} km/L avg</span>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={utilizationData} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label={(p: any) => `${p.name} (${p.count})`}>
-                  {utilizationData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(480px, 100%), 1fr))',
+              gap: '1.5rem',
+              marginBottom: '1.5rem',
+            }}
+          >
+            {data.revenue && <RevenueSummary data={data.revenue} />}
+            {data.fleet && <FleetUtilizationChart data={data.fleet} />}
+            {data.route && <RouteEfficiencyChart data={data.route} />}
+            {data.performance && <DeliveryPerformance data={data.performance} />}
           </div>
-        </AnimatedCard>
 
-        {/* Delivery performance */}
-        <AnimatedCard>
-          <div className="rounded-2xl border p-5" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Delivery Performance</h2>
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie data={perfData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85}>
-                  {perfData.map((_: any, i: number) => <Cell key={i} fill={i === 0 ? '#10B981' : '#EF4444'} />)}
-                </Pie>
-                <Tooltip />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex items-center justify-around mt-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              <span className="font-bold" style={{ color: '#10B981' }}>{perf?.delivered ?? 0} delivered</span>
-              <span className="font-bold" style={{ color: '#EF4444' }}>{perf?.delayed ?? 0} delayed</span>
-              <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{perf?.deliveredRate ?? 0}% success</span>
-            </div>
-          </div>
-        </AnimatedCard>
-
-        {/* Monthly capacity */}
-        <AnimatedCard>
-          <div className="rounded-2xl border p-5" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-            <h2 className="text-sm font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Monthly Load (kg)</h2>
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={cap}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EDF0F7" />
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} stroke="#8B92A8" />
-                <YAxis tick={{ fontSize: 10 }} stroke="#8B92A8" />
-                <Tooltip formatter={(v: any) => `${Number(v).toLocaleString('en-IN')} kg`} />
-                <Line type="monotone" dataKey="totalWeightKg" stroke="#8B5CF6" strokeWidth={2.5} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </AnimatedCard>
-      </div>
+          {data.capacity && <MonthlyCapacityWidget data={data.capacity} />}
+        </>
+      )}
     </div>
   );
-};
+}
