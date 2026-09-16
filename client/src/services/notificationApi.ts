@@ -4,6 +4,14 @@
 
 import api from './api';
 
+export interface NotificationItem {
+  _id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 /**
  * Retrieves a list of in-app notifications for the logged-in user.
  * @returns Promise with list of notifications
