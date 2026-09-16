@@ -5,7 +5,7 @@ import {
   PackageSearch, Activity, MapPin, FileText, RefreshCw, Package,
   Bell, Settings, Menu, X, LogOut, type LucideIcon,
 } from 'lucide-react';
-import { logout } from '../../store/authSlice';
+import { logoutUser } from '../../store/authSlice';
 import { getNotifications, markRead, markAllRead, type NotificationItem } from '../../services/notificationApi';
 import toast from 'react-hot-toast';
 
@@ -77,7 +77,7 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
 
   const handleLogout = () => {
     setMenuOpen(false);
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate('/login');
   };
 

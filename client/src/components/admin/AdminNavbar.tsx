@@ -5,7 +5,7 @@ import {
   ShieldAlert, LayoutDashboard, Truck, Activity, FilePlus, RefreshCw,
   Bell, Menu, X, LogOut, type LucideIcon,
 } from 'lucide-react';
-import { logout } from '../../store/authSlice';
+import { logoutUser } from '../../store/authSlice';
 
 type NavKey = 'dashboard' | 'fleet' | 'operations' | 'create-manifest' | 'settings';
 
@@ -32,7 +32,7 @@ export default function AdminNavbar({ active }: AdminNavbarProps) {
 
   const handleLogout = () => {
     setMenuOpen(false);
-    dispatch(logout());
+    dispatch(logoutUser());
     navigate('/login');
   };
 
