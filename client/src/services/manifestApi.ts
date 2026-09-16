@@ -1,4 +1,4 @@
-// This file is for: Manifest API service — CRUD + assign + status lifecycle
+// Manifest API service — CRUD + assign + status lifecycle
 // Module: Frontend API Services (Module 10)
 // Owner: Developer 2 (Web Frontend Engineer)
 

@@ -1,4 +1,4 @@
-// This file is for: Invoice API service — generate, list, pay, stats
+// Invoice API service — generate, list, pay, stats
 // Module: Frontend API Services (Module 10)
 // Owner: Developer 2 (Web Frontend Engineer)
 
