@@ -14,8 +14,7 @@ import { Settings as SettingsPage } from './pages/admin/Settings';
 import { Invoices as InvoicesPage } from './pages/admin/Invoices';
 import { Notifications as NotificationsPage } from './pages/admin/Notifications';
 import { Users as UsersPage } from './pages/admin/Users';
-// Analytics page is owned by another developer — currently disabled (see pages/admin/Analytics.tsx).
-// import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
+import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
 // Executive
 import { ExecutiveAnalytics } from './pages/executive/ExecutiveAnalytics';
 // Team placeholders — will be replaced when teammates merge their pages
@@ -45,7 +44,7 @@ export default function App() {
           <Route path="/admin/invoices" element={<InvoicesPage />} />
           <Route path="/admin/notifications" element={<NotificationsPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
-          {/* <Route path="/admin/analytics" element={<AnalyticsPage />} /> */}
+          <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/manifests/new" element={<ManifestCreate />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
 

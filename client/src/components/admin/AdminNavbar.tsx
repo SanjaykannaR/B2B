@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
   ShieldAlert, LayoutDashboard, Truck, Activity, FilePlus, RefreshCw,
-  Bell, Menu, X, LogOut, type LucideIcon,
+  Bell, Menu, X, LogOut, BarChart3, type LucideIcon,
 } from 'lucide-react';
 import { logoutUser } from '../../store/authSlice';
 
-type NavKey = 'dashboard' | 'fleet' | 'operations' | 'create-manifest' | 'settings';
+type NavKey = 'dashboard' | 'fleet' | 'operations' | 'create-manifest' | 'analytics' | 'settings';
 
 interface AdminNavbarProps {
   active: NavKey;
@@ -18,6 +18,7 @@ const NAV_LINKS: { key: NavKey; label: string; icon: LucideIcon; path: string }[
   { key: 'fleet', label: 'Fleet Monitor', icon: Truck, path: '/admin/fleet' },
   { key: 'operations', label: 'Live Operations', icon: Activity, path: '/admin/operations' },
   { key: 'create-manifest', label: 'New Manifest', icon: FilePlus, path: '/admin/manifest/create' },
+  { key: 'analytics', label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
 ];
 
 export default function AdminNavbar({ active }: AdminNavbarProps) {

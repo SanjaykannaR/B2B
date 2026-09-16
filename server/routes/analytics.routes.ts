@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  dashboardStats,
   fleetUtilization,
   routeEfficiency,
   monthlyCapacity,
@@ -14,6 +15,7 @@ const router = Router();
 router.use(auth);
 router.use(roleGuard('admin', 'executive'));
 
+router.get('/dashboard-stats', dashboardStats);
 router.get('/fleet-utilization', fleetUtilization);
 router.get('/route-efficiency', routeEfficiency);
 router.get('/monthly-capacity', monthlyCapacity);

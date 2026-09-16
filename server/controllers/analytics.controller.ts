@@ -144,6 +144,45 @@ export const deliveryPerformance = async (req: Request, res: Response, next: Nex
   }
 };
 
+export const dashboardStats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [
+      totalManifests,
+      pendingManifests,
+      assignedManifests,
+      inTransitManifests,
+      deliveredManifests,
+      delayedManifests,
+      totalVehicles,
+      activeVehicles,
+    ] = await Promise.all([
+      Manifest.countDocuments(),
+      Manifest.countDocuments({ currentStatus: 'PENDING' }),
+      Manifest.countDocuments({ currentStatus: 'ASSIGNED' }),
+      Manifest.countDocuments({ currentStatus: 'IN_TRANSIT' }),
+      Manifest.countDocuments({ currentStatus: 'DELIVERED' }),
+      Manifest.countDocuments({ currentStatus: 'DELAYED' }),
+      Vehicle.countDocuments(),
+      Vehicle.countDocuments({ status: 'IN_TRANSIT' }),
+    ]);
+
+    return sendSuccess(res, {
+      totalManifests,
+      activeVehicles: activeVehicles || totalVehicles,
+      pendingOrders: pendingManifests + assignedManifests,
+      delayedAlerts: delayedManifests,
+      statusDistribution: {
+        pending: pendingManifests,
+        inTransit: inTransitManifests,
+        delivered: deliveredManifests,
+        delayed: delayedManifests,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const revenueSummary = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const rows = await Invoice.aggregate([

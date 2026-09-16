@@ -44,6 +44,7 @@ const ADMIN: NavSection = {
     { to: '/admin/requests', label: 'Client Requests', icon: Search },
     { to: '/admin/invoices', label: 'Invoices', icon: Receipt },
     { to: '/admin/users', label: 'Users', icon: Users },
+    { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/admin/manifests/new', label: 'Create Manifest', icon: FilePlus },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ],

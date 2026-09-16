@@ -5,6 +5,15 @@
 import api from './api';
 
 /**
+ * Retrieves dashboard summary stats (total manifests, active vehicles, pending orders, alerts).
+ * @returns Promise with dashboard KPI data
+ */
+export const getDashboardStats = async () => {
+  const response = await api.get('/analytics/dashboard-stats');
+  return response.data;
+};
+
+/**
  * Retrieves fleet utilization statistics (e.g. active vs idle ratio).
  * @returns Promise with fleet utilization data points
  */
