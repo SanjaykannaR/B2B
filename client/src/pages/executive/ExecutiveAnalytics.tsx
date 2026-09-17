@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Wallet, Clock, Truck, Gauge } from 'lucide-react';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
+import { StatCard } from '../../components/admin/shared/StatCard';
 import {
   getFleetUtilization, getRouteEfficiency, getMonthlyCapacity,
   getDeliveryPerformance, getRevenueSummary,
@@ -21,8 +22,10 @@ export const ExecutiveAnalytics: React.FC = () => {
   const [route, setRoute] = useState<any>(null);
   const [perf, setPerf] = useState<any>(null);
   const [cap, setCap] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     Promise.allSettled([
       getRevenueSummary(), getFleetUtilization(), getRouteEfficiency(),
       getDeliveryPerformance(), getMonthlyCapacity(),
@@ -34,12 +37,13 @@ export const ExecutiveAnalytics: React.FC = () => {
       setPerf(val(p));
       const capData = val(c);
       setCap(capData?.data && Array.isArray(capData.data) ? capData.data : []);
+      setLoading(false);
     });
   }, []);
 
   const revenueMonthly = rev?.monthly || [];
   const utilizationData = fleet?.byStatus || [];
-  const perfData = perf?.data || [];
+  const perfData = Array.isArray(perf?.data) ? perf.data : (perf?.data?.data && Array.isArray(perf.data.data) ? perf.data.data : []);
 
   return (
     <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-6">
@@ -48,30 +52,16 @@ export const ExecutiveAnalytics: React.FC = () => {
           Executive Analytics
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-          Business-wide performance across revenue, fleet and delivery
+          {loading ? 'Loading analytics data…' : 'Business-wide performance across revenue, fleet and delivery'}
         </p>
       </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {([
-          { label: 'Total revenue', value: fmtMoney(rev?.totalRevenue || 0), icon: TrendingUp, color: '#FF6B2C' },
-          { label: 'Collected', value: fmtMoney(rev?.totalPaid || 0), icon: Wallet, color: '#10B981' },
-          { label: 'Outstanding', value: fmtMoney(rev?.totalPending || 0), icon: Clock, color: '#F59E0B' },
-          { label: 'On-time rate', value: `${route?.onTimeRate ?? 0}%`, icon: Gauge, color: '#3B82F6' },
-        ]).map((kpi, i) => (
-          <AnimatedCard key={kpi.label} delay={60 * (i + 1)}>
-            <div className="rounded-2xl border p-5 h-full" style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-card)' }}>
-              <div className="h-1 w-full rounded-full mb-3" style={{ background: `linear-gradient(90deg, ${kpi.color}, transparent)` }} />
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
-                {kpi.label}
-              </p>
-              <p className="text-2xl font-bold tracking-tight mt-1 truncate" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
-                {kpi.value}
-              </p>
-            </div>
-          </AnimatedCard>
-        ))}
+        <StatCard title="Total Revenue" value={loading ? 0 : rev?.totalRevenue || 0} icon={TrendingUp} color="#FF6B2C" delay={60} />
+        <StatCard title="Collected" value={loading ? 0 : rev?.totalPaid || 0} icon={Wallet} color="#10B981" delay={120} />
+        <StatCard title="Outstanding" value={loading ? 0 : rev?.totalPending || 0} icon={Clock} color="#F59E0B" delay={180} />
+        <StatCard title="On-time Rate" value={loading ? 0 : route?.onTimeRate ?? 0} icon={Gauge} color="#3B82F6" delay={240} />
       </div>
 
       {/* Charts grid */}

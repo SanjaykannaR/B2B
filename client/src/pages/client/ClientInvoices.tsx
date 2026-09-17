@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FileText, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
 import { getMyInvoices, markPaid } from '../../services/invoiceApi';
 import { getErrorMessage } from '../../services/errorMessage';
 
@@ -94,7 +94,7 @@ export default function ClientInvoices() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] font-sans text-slate-900 flex flex-col">
-      <ClientNavbar active="invoices" />
+
 
       <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 p-5 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         {/* Header */}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Package, MapPin, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
 import { createManifest } from '../../services/manifestApi';
 import { getErrorMessage } from '../../services/errorMessage';
 
@@ -59,7 +59,6 @@ export default function PlaceOrder() {
   if (success) {
     return (
       <div className="min-h-screen bg-[#f5f6f8] font-sans text-slate-900 flex flex-col">
-        <ClientNavbar active="place-order" />
         <div className="flex-1 flex items-center justify-center p-5">
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm max-w-md animate-in fade-in zoom-in duration-500">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -89,8 +88,6 @@ export default function PlaceOrder() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] font-sans text-slate-900 flex flex-col">
-      <ClientNavbar active="place-order" />
-
       <div className="flex-1 max-w-3xl mx-auto w-full space-y-6 p-5 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         {/* Header */}
         <div>

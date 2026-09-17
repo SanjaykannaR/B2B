@@ -51,7 +51,7 @@ export const Analytics: React.FC = () => {
 
   const revenueMonthly = rev?.monthly || [];
   const utilizationData = fleet?.byStatus || [];
-  const perfData = perf?.data || [];
+  const perfData = Array.isArray(perf?.data) ? perf.data : (perf?.data?.data && Array.isArray(perf.data.data) ? perf.data.data : []);
 
   const kpis = [
     { label: 'Total revenue', value: fmtMoney(rev?.totalRevenue || 0), icon: TrendingUp, color: '#FF6B2C' },

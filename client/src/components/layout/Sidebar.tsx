@@ -55,9 +55,21 @@ const EXEC: NavSection = {
   items: [{ to: '/executive/analytics', label: 'Analytics', icon: BarChart3, end: true }],
 };
 
+const CLIENT: NavSection = {
+  title: 'Client',
+  items: [
+    { to: '/client/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/client/track', label: 'Track Shipment', icon: Search },
+    { to: '/client/order', label: 'Place Order', icon: FilePlus },
+    { to: '/client/invoices', label: 'Invoices', icon: Receipt },
+    { to: '/client/settings', label: 'Settings', icon: Settings },
+  ],
+};
+
 const ROLE_SECTIONS: Record<string, NavSection[]> = {
   admin: [ADMIN, EXEC],
   executive: [EXEC],
+  client: [CLIENT],
 };
 
 interface SidebarProps {

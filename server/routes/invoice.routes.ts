@@ -20,6 +20,6 @@ router.get('/stats', roleGuard('admin', 'executive'), getStats);
 router.get('/:id', getOne);
 
 router.post('/generate/:manifestId', roleGuard('admin'), generateInvoice);
-router.patch('/:id/pay', roleGuard('admin'), markPaid);
+router.patch('/:id/pay', roleGuard('admin', 'client'), markPaid);
 
 export default router;

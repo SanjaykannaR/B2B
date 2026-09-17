@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Search, Package, MapPin, Clock, Truck, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
 import { getManifest } from '../../services/manifestApi';
 import { getErrorMessage } from '../../services/errorMessage';
 
@@ -67,8 +67,6 @@ export default function TrackShipment() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] font-sans text-slate-900 flex flex-col">
-      <ClientNavbar active="track" />
-
       <div className="flex-1 max-w-4xl mx-auto w-full space-y-6 p-5 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         {/* Header */}
         <div>

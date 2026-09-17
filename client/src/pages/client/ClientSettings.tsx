@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { User, Globe, Shield, Key, Bell, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
 import { updateProfile, changePassword } from '../../services/authApi';
 import { getErrorMessage } from '../../services/errorMessage';
 import type { RootState } from '../../store/store';
@@ -79,8 +79,6 @@ export default function ClientSettings() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] text-slate-900 font-sans flex flex-col relative">
-      <ClientNavbar active="settings" />
-
       <div className="flex-1 w-full flex flex-col items-center justify-start pt-6 md:pt-8 pb-10 md:pb-12 px-4 md:px-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         <div className="w-full max-w-6xl mx-auto">
           
