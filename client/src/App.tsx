@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { NotFound } from './pages/NotFound';
@@ -14,16 +14,24 @@ import { Settings as SettingsPage } from './pages/admin/Settings';
 import { Invoices as InvoicesPage } from './pages/admin/Invoices';
 import { Notifications as NotificationsPage } from './pages/admin/Notifications';
 import { Users as UsersPage } from './pages/admin/Users';
-import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
-
-// Team placeholders — will be replaced when teammates merge their pages
+// Executive
+import ExecutiveAnalytics from './pages/executive/ExecutiveAnalytics';
+// Client
 import ClientDashboard from './pages/client/ClientDashboard';
 import ClientInvoices from './pages/client/ClientInvoices';
 import TrackShipment from './pages/client/TrackShipment';
 import PlaceOrder from './pages/client/PlaceOrder';
-import ClientSettings from './pages/client/ClientSettings';
+// Driver
+import DriverMobileLayout from './components/driver/DriverMobileLayout';
 import DriverDashboard from './pages/driver/DriverDashboard';
+import DriverAnalytics from './pages/driver/DriverAnalytics';
+import DriverNotifications from './pages/driver/DriverNotifications';
 import ActiveDelivery from './pages/driver/ActiveDelivery';
+
+function ActiveDeliveryRoute() {
+  const { id } = useParams();
+  return <ActiveDelivery manifestId={id!} />;
+}
 
 export default function App() {
   return (
@@ -32,7 +40,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Authenticated — admin can access every role's routes */}
+      {/* Authenticated — admin has full access */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
           {/* Admin */}
@@ -44,24 +52,31 @@ export default function App() {
           <Route path="/admin/invoices" element={<InvoicesPage />} />
           <Route path="/admin/notifications" element={<NotificationsPage />} />
           <Route path="/admin/users" element={<UsersPage />} />
-          <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/manifests/new" element={<ManifestCreate />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
 
-          {/* Client pages (placeholder — teammates will replace these) */}
+          {/* Executive (standalone page, no sidebar) */}
+          <Route element={<ProtectedRoute allowedRoles={['executive', 'admin']} />}>
+            <Route path="/executive/analytics" element={<ExecutiveAnalytics />} />
+          </Route>
+
+          {/* Client */}
           <Route element={<ProtectedRoute allowedRoles={['client', 'admin']} />}>
             <Route path="/client/dashboard" element={<ClientDashboard />} />
             <Route path="/client/invoices" element={<ClientInvoices />} />
             <Route path="/client/track" element={<TrackShipment />} />
             <Route path="/client/order" element={<PlaceOrder />} />
-            <Route path="/client/settings" element={<ClientSettings />} />
           </Route>
+        </Route>
+      </Route>
 
-          {/* Driver pages (placeholder — teammates will replace these) */}
-          <Route element={<ProtectedRoute allowedRoles={['driver', 'admin']} />}>
-            <Route path="/driver/dashboard" element={<DriverDashboard />} />
-            <Route path="/driver/delivery" element={<ActiveDelivery />} />
-          </Route>
+      {/* Driver — mobile layout (no sidebar/topbar) */}
+      <Route element={<ProtectedRoute allowedRoles={['driver', 'admin']} />}>
+        <Route element={<DriverMobileLayout />}>
+          <Route path="/driver" element={<DriverDashboard />} />
+          <Route path="/driver/analytics" element={<DriverAnalytics />} />
+          <Route path="/driver/notifications" element={<DriverNotifications />} />
+          <Route path="/driver/delivery/:id" element={<ActiveDeliveryRoute />} />
         </Route>
       </Route>
 

@@ -10,6 +10,8 @@ export interface NotificationItem {
   message: string;
   isRead: boolean;
   createdAt: string;
+  type?: string;
+  relatedManifest?: string;
 }
 
 /**

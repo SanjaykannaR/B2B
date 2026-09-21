@@ -1,7 +1,3 @@
-// This file is for: Formatting utility functions
-// Module: Frontend Utilities (Module 10)
-// Owner: Developer 2 (Web Frontend Engineer)
-
 /**
  * Formats a date string or object to "MMM DD, YYYY" (e.g. "Jul 23, 2026")
  */
@@ -81,15 +77,15 @@ export const formatDuration = (minutes: number | null | undefined): string => {
 };
 
 /**
- * Formats elapsed milliseconds to "HH:MM:SS" (trip timer)
+ * Formats elapsed time in seconds to "HH:MM:SS" (trip timer)
  */
-export const formatElapsedTime = (ms: number | null | undefined): string => {
-  if (ms === null || ms === undefined || isNaN(ms) || ms < 0) return '00:00:00';
-  const totalSecs = Math.floor(ms / 1000);
+export const formatElapsedTime = (totalSeconds: number | null | undefined): string => {
+  if (totalSeconds === null || totalSeconds === undefined || isNaN(totalSeconds) || totalSeconds < 0) return '00:00:00';
+  const totalSecs = Math.floor(totalSeconds);
   const hrs = Math.floor(totalSecs / 3600);
   const mins = Math.floor((totalSecs % 3600) / 60);
   const secs = totalSecs % 60;
-  
+
   const pad = (num: number) => String(num).padStart(2, '0');
   return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
 };
