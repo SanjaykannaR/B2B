@@ -5,6 +5,7 @@ import { StatusBadge } from '../../components/admin/shared/StatusBadge';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
 import { ManifestDetailModal } from '../../components/admin/ManifestDetailModal';
+import { AssignModal } from '../../components/admin/AssignModal';
 import * as manifestApi from '../../services/manifestApi';
 import { formatDateTime } from '../../utils/formatters';
 
@@ -29,6 +30,7 @@ export const AllManifests: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [selected, setSelected] = useState<any | null>(null);
+  const [assignManifest, setAssignManifest] = useState<any | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -39,21 +41,27 @@ export const AllManifests: React.FC = () => {
     setPage(1);
   }, [search, statusFilter]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const res = await manifestApi.getManifests({ page: 1, limit: pageSize });
-        const data = res.manifests || res || [];
-        setManifests(data.length > 0 ? data : DEMO_MANIFESTS);
-      } catch {
-        setManifests(DEMO_MANIFESTS);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [pageSize]);
+  const loadManifests = async () => {
+    try {
+      setLoading(true);
+      const res = await manifestApi.getManifests({ page: 1, limit: pageSize });
+      const data = res.manifests || res || [];
+      setManifests(data.length > 0 ? data : DEMO_MANIFESTS);
+    } catch {
+      setManifests(DEMO_MANIFESTS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadManifests(); }, [pageSize]);
+
+  const handleAction = (action: string, manifestId: string) => {
+    if (action === 'assign') {
+      const m = manifests.find((x: any) => x._id === manifestId);
+      setAssignManifest(m || { _id: manifestId });
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = manifests;
@@ -311,11 +319,21 @@ export const AllManifests: React.FC = () => {
         </div>
       </AnimatedCard>
 
-      {/* Row click → detail modal (read-only) */}
+      {/* Row click → detail modal */}
       <ManifestDetailModal
         isOpen={!!selected}
         onClose={() => setSelected(null)}
         manifest={selected}
+        onAction={handleAction}
+      />
+
+      {/* Assign Driver Modal */}
+      <AssignModal
+        isOpen={!!assignManifest}
+        onClose={() => setAssignManifest(null)}
+        manifestId={assignManifest?._id || ''}
+        manifestLabel={assignManifest?.trackingId ? `#${assignManifest.trackingId}` : ''}
+        onAssigned={loadManifests}
       />
     </div>
   );

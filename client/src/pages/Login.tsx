@@ -104,7 +104,7 @@ const Login: React.FC = () => {
         admin: '/admin',
         executive: '/admin/analytics',
         client: '/client/dashboard',
-        driver: '/driver/dashboard',
+        driver: '/driver',
       };
       navigate(redirectMap[actualRole] || '/admin', { replace: true });
     }

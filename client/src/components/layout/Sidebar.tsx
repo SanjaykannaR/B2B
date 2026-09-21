@@ -61,9 +61,26 @@ const CLIENT: NavSection = {
   ],
 };
 
+const EXEC: NavSection = {
+  title: 'Executive',
+  items: [
+    { to: '/admin/analytics', label: 'Analytics', icon: BarChart3, end: true },
+  ],
+};
+
+const DRIVER: NavSection = {
+  title: 'Driver',
+  items: [
+    { to: '/driver', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/driver/analytics', label: 'Analytics', icon: BarChart3 },
+  ],
+};
+
 const ROLE_SECTIONS: Record<string, NavSection[]> = {
   admin: [ADMIN],
+  executive: [EXEC],
   client: [CLIENT],
+  driver: [DRIVER],
 };
 
 interface SidebarProps {

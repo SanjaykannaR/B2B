@@ -72,3 +72,52 @@ export const cancelManifest = async (id: string) => {
   const response = await api.delete(`/manifests/${id}`);
   return response.data;
 };
+
+/**
+ * Approves a client request manifest.
+ * @param id - The manifest ID
+ * @returns Promise with updated manifest
+ */
+export const approveManifest = async (id: string) => {
+  const response = await api.patch(`/manifests/${id}/approve`);
+  return response.data;
+};
+
+/**
+ * Rejects a client request manifest.
+ * @param id - The manifest ID
+ * @returns Promise with updated manifest
+ */
+export const rejectManifest = async (id: string) => {
+  const response = await api.patch(`/manifests/${id}/reject`);
+  return response.data;
+};
+
+/**
+ * Marks a client request as contacted.
+ * @param id - The manifest ID
+ * @returns Promise with updated manifest
+ */
+export const contactManifest = async (id: string) => {
+  const response = await api.patch(`/manifests/${id}/contact`);
+  return response.data;
+};
+
+/**
+ * Sends a driver request for a manifest.
+ * @param id - The manifest ID
+ * @returns Promise with request status
+ */
+export const sendDriverRequest = async (id: string) => {
+  const response = await api.post(`/manifests/${id}/driver-request`);
+  return response.data;
+};
+
+/**
+ * Gets manifests assigned to the current driver.
+ * @returns Promise with list of driver manifests
+ */
+export const getDriverManifests = async () => {
+  const response = await api.get('/manifests', { params: { assigned: true } });
+  return response.data;
+};

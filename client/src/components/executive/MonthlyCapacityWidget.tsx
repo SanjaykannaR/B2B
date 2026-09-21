@@ -16,7 +16,7 @@ interface MonthlyCapacityWidgetProps {
 }
 
 export default function MonthlyCapacityWidget({ data }: MonthlyCapacityWidgetProps) {
-  const rows = data.monthly.map((row) => ({
+  const rows = (data?.monthly || []).map((row) => ({
     month: row.month,
     shipments: row.shipments,
     capacityUtilized: row.capacityUtilized,

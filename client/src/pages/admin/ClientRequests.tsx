@@ -4,8 +4,7 @@ import { ArrowLeft, Search, ClipboardList, Download, MessageCircle, CheckCircle,
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
 import { ClientRequestDetailModal } from '../../components/admin/ClientRequestDetailModal';
-import { getManifests } from '../../services/manifestApi';
-import api from '../../services/api';
+import { getManifests, approveManifest, rejectManifest, contactManifest } from '../../services/manifestApi';
 
 // Maps backend serialized Manifest → the client-request row shape used by this page
 const mapRequest = (m: any) => {
@@ -246,8 +245,8 @@ export const ClientRequests: React.FC = () => {
 
   const handleApprove = async (id: string) => {
     try {
-      const res = await api.patch(`/manifests/${id}/approve`);
-      const m = res.data?.manifest || res.data?.data?.manifest;
+      const res = await approveManifest(id);
+      const m = res?.manifest || res?.data?.manifest || res;
       if (m) {
         const mapped = mapRequest(m);
         setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));
@@ -262,8 +261,8 @@ export const ClientRequests: React.FC = () => {
 
   const handleReject = async (id: string) => {
     try {
-      const res = await api.patch(`/manifests/${id}/reject`);
-      const m = res.data?.manifest || res.data?.data?.manifest;
+      const res = await rejectManifest(id);
+      const m = res?.manifest || res?.data?.manifest || res;
       if (m) {
         const mapped = mapRequest(m);
         setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));
@@ -278,8 +277,8 @@ export const ClientRequests: React.FC = () => {
 
   const handleContact = async (id: string) => {
     try {
-      const res = await api.patch(`/manifests/${id}/contact`);
-      const m = res.data?.manifest || res.data?.data?.manifest;
+      const res = await contactManifest(id);
+      const m = res?.manifest || res?.data?.manifest || res;
       if (m) {
         const mapped = mapRequest(m);
         setRequests((prev) => prev.map((r) => (r._id === id ? mapped : r)));

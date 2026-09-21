@@ -55,3 +55,21 @@ export const resetPassword = async (id: string, password: string) => {
   const response = await api.post(`/users/${id}/reset-password`, { password });
   return response.data;
 };
+
+/**
+ * Gets all driver users.
+ * @returns Promise with list of drivers
+ */
+export const getDrivers = async () => {
+  const response = await api.get('/users/drivers');
+  return response.data;
+};
+
+/**
+ * Gets all client users.
+ * @returns Promise with list of clients
+ */
+export const getClients = async () => {
+  const response = await api.get('/users/clients');
+  return response.data;
+};
