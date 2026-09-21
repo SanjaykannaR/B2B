@@ -69,6 +69,5 @@ export const ROUTE_PATHS = {
   // Driver routes
   DRIVER_DASHBOARD: '/driver/dashboard',
   
-  // Executive routes
-  EXECUTIVE_ANALYTICS: '/executive/analytics',
+
 };

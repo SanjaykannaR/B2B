@@ -15,8 +15,7 @@ import { Invoices as InvoicesPage } from './pages/admin/Invoices';
 import { Notifications as NotificationsPage } from './pages/admin/Notifications';
 import { Users as UsersPage } from './pages/admin/Users';
 import { Analytics as AnalyticsPage } from './pages/admin/Analytics';
-// Executive
-import { ExecutiveAnalytics } from './pages/executive/ExecutiveAnalytics';
+
 // Team placeholders — will be replaced when teammates merge their pages
 import ClientDashboard from './pages/client/ClientDashboard';
 import ClientInvoices from './pages/client/ClientInvoices';
@@ -48,11 +47,6 @@ export default function App() {
           <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/manifests/new" element={<ManifestCreate />} />
           <Route path="/admin/settings" element={<SettingsPage />} />
-
-          {/* Executive */}
-          <Route element={<ProtectedRoute allowedRoles={['executive', 'admin']} />}>
-            <Route path="/executive/analytics" element={<ExecutiveAnalytics />} />
-          </Route>
 
           {/* Client pages (placeholder — teammates will replace these) */}
           <Route element={<ProtectedRoute allowedRoles={['client', 'admin']} />}>

@@ -50,11 +50,6 @@ const ADMIN: NavSection = {
   ],
 };
 
-const EXEC: NavSection = {
-  title: 'Executive',
-  items: [{ to: '/executive/analytics', label: 'Analytics', icon: BarChart3, end: true }],
-};
-
 const CLIENT: NavSection = {
   title: 'Client',
   items: [
@@ -67,8 +62,7 @@ const CLIENT: NavSection = {
 };
 
 const ROLE_SECTIONS: Record<string, NavSection[]> = {
-  admin: [ADMIN, EXEC],
-  executive: [EXEC],
+  admin: [ADMIN],
   client: [CLIENT],
 };
 
