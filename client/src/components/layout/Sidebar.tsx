@@ -40,7 +40,7 @@ const ADMIN: NavSection = {
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/admin/fleet', label: 'Fleet Monitor', icon: Truck },
     { to: '/admin/live', label: 'Live Operations', icon: Radio },
-    { to: '/admin/manifests', label: 'Manifests', icon: ClipboardList },
+    { to: '/admin/manifests', label: 'Manifests', icon: ClipboardList, end: true },
     { to: '/admin/requests', label: 'Client Requests', icon: Search },
     { to: '/admin/invoices', label: 'Invoices', icon: Receipt },
     { to: '/admin/users', label: 'Users', icon: Users },
