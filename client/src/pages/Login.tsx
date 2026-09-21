@@ -102,7 +102,7 @@ const Login: React.FC = () => {
       }
       const redirectMap: Record<string, string> = {
         admin: '/admin',
-        executive: '/executive/analytics',
+        executive: '/admin/analytics',
         client: '/client/dashboard',
         driver: '/driver/dashboard',
       };

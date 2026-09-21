@@ -29,13 +29,13 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = Array.isArray(notifications) ? notifications.filter(n => !n.isRead).length : 0;
 
   useEffect(() => {
     const fetchNotifs = async () => {
       try {
         const data = await getNotifications();
-        setNotifications(data);
+        setNotifications(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load notifications', err);
       }
@@ -102,7 +102,7 @@ export default function ClientNavbar({ active }: ClientNavbarProps) {
         )}
       </div>
       <div className="max-h-[300px] overflow-y-auto">
-        {notifications.length === 0 ? (
+        {!Array.isArray(notifications) || notifications.length === 0 ? (
           <div className="p-6 text-center text-sm text-slate-500 font-medium">No notifications yet.</div>
         ) : (
           <div className="divide-y divide-slate-100">

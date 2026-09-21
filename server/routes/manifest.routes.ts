@@ -28,7 +28,7 @@ const router = Router();
 router.use(auth);
 
 // ── Reads ────────────────────────────────────────────────────────
-router.get('/', roleGuard('admin', 'executive'), listManifests);
+router.get('/', roleGuard('admin', 'executive', 'client'), listManifests);
 // router.get('/my', getMy);
 // router.get('/driver/my', getDriverManifests);
 router.get('/:id', getOne);

@@ -7,28 +7,25 @@ import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { PageHeader } from '../../components/admin/shared/PageHeader';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
 import * as manifestApi from '../../services/manifestApi';
+import * as vehicleApi from '../../services/vehicleApi';
 import { formatDateTime } from '../../utils/formatters';
-
-/** Demo data shown when backend is offline */
-const DEMO_MANIFESTS = [
-  { _id: '1', trackingId: 'TRK-8841', status: 'IN_TRANSIT', client: { name: 'Acme Corp' }, origin: { city: 'Mumbai' }, destination: { city: 'Delhi' }, updatedAt: new Date(Date.now() - 3600000).toISOString() },
-  { _id: '2', trackingId: 'TRK-8842', status: 'DELIVERED', client: { name: 'GlobalTrade' }, origin: { city: 'Chennai' }, destination: { city: 'Bangalore' }, updatedAt: new Date(Date.now() - 7200000).toISOString() },
-  { _id: '3', trackingId: 'TRK-8843', status: 'PENDING', client: { name: 'QuickShip' }, origin: { city: 'Kolkata' }, destination: { city: 'Hyderabad' }, updatedAt: new Date(Date.now() - 10800000).toISOString() },
-  { _id: '4', trackingId: 'TRK-8844', status: 'DELAYED', client: { name: 'FastFreight' }, origin: { city: 'Pune' }, destination: { city: 'Ahmedabad' }, updatedAt: new Date(Date.now() - 14400000).toISOString() },
-  { _id: '5', trackingId: 'TRK-8845', status: 'ASSIGNED', client: { name: 'LogiPrime' }, origin: { city: 'Jaipur' }, destination: { city: 'Lucknow' }, updatedAt: new Date(Date.now() - 18000000).toISOString() },
-];
-
-const STATUS_SEGMENTS = [
-  { label: 'Pending', count: 28, color: '#F59E0B' },
-  { label: 'In Transit', count: 45, color: '#8B5CF6' },
-  { label: 'Delivered', count: 112, color: '#10B981' },
-  { label: 'Delayed', count: 8, color: '#EF4444' },
-];
 
 export const AdminDashboard: React.FC = () => {
   const [manifests, setManifests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [stats, setStats] = useState({
+    totalManifests: 0,
+    activeVehicles: 0,
+    pendingOrders: 0,
+    delayedAlerts: 0,
+    statusDistribution: [
+      { label: 'Pending', count: 0, color: '#F59E0B' },
+      { label: 'In Transit', count: 0, color: '#8B5CF6' },
+      { label: 'Delivered', count: 0, color: '#10B981' },
+      { label: 'Delayed', count: 0, color: '#EF4444' },
+    ],
+  });
 
   const handleExport = useCallback(async () => {
     try {
@@ -66,10 +63,37 @@ export const AdminDashboard: React.FC = () => {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await manifestApi.getManifests({ limit: 5 });
-        setManifests(res.manifests || res || []);
+        const [manifestsRes, vehiclesRes] = await Promise.all([
+          manifestApi.getManifests({ limit: 1000 }),
+          vehicleApi.getVehicles(),
+        ]);
+
+        const allManifests = manifestsRes.manifests || manifestsRes.data?.manifests || manifestsRes || [];
+        const allVehicles = vehiclesRes.vehicles || vehiclesRes.data?.vehicles || vehiclesRes || [];
+
+        const pending = allManifests.filter((m: any) => m.status === 'PENDING').length;
+        const inTransit = allManifests.filter((m: any) => m.status === 'IN_TRANSIT').length;
+        const delivered = allManifests.filter((m: any) => m.status === 'DELIVERED').length;
+        const delayed = allManifests.filter((m: any) => m.status === 'DELAYED').length;
+        const assigned = allManifests.filter((m: any) => m.status === 'ASSIGNED').length;
+        const activeVehicles = allVehicles.filter((v: any) => v.status === 'IN_TRANSIT').length;
+
+        setStats({
+          totalManifests: allManifests.length,
+          activeVehicles: activeVehicles || allVehicles.length,
+          pendingOrders: pending + assigned,
+          delayedAlerts: delayed,
+          statusDistribution: [
+            { label: 'Pending', count: pending, color: '#F59E0B' },
+            { label: 'In Transit', count: inTransit, color: '#8B5CF6' },
+            { label: 'Delivered', count: delivered, color: '#10B981' },
+            { label: 'Delayed', count: delayed, color: '#EF4444' },
+          ],
+        });
+
+        setManifests(allManifests.slice(0, 5));
       } catch {
-        setManifests(DEMO_MANIFESTS);
+        setManifests([]);
       } finally {
         setLoading(false);
       }
@@ -77,7 +101,7 @@ export const AdminDashboard: React.FC = () => {
     load();
   }, []);
 
-  const total = STATUS_SEGMENTS.reduce((s, x) => s + x.count, 0);
+  const total = stats.statusDistribution.reduce((s, x) => s + x.count, 0);
 
   return (
     <div className="p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto space-y-7">
@@ -118,16 +142,16 @@ export const AdminDashboard: React.FC = () => {
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <AnimatedCard delay={80}>
-          <StatCard title="Total Manifests" value={1248} icon={Package} color="#3B82F6" trend={{ value: '12%', isPositive: true }} to="/admin/manifests" />
+          <StatCard title="Total Manifests" value={stats.totalManifests} icon={Package} color="#3B82F6" to="/admin/manifests" />
         </AnimatedCard>
         <AnimatedCard delay={160}>
-          <StatCard title="Active Vehicles" value={34} icon={Truck} color="#10B981" trend={{ value: '4%', isPositive: true }} to="/admin/fleet" />
+          <StatCard title="Active Vehicles" value={stats.activeVehicles} icon={Truck} color="#10B981" to="/admin/fleet" />
         </AnimatedCard>
         <AnimatedCard delay={240}>
-          <StatCard title="Pending Orders" value={12} icon={Clock} color="#F59E0B" trend={{ value: '8%', isPositive: false }} to="/admin/manifests" />
+          <StatCard title="Pending Orders" value={stats.pendingOrders} icon={Clock} color="#F59E0B" to="/admin/manifests" />
         </AnimatedCard>
         <AnimatedCard delay={320}>
-          <StatCard title="Alerts / Delayed" value={3} icon={AlertTriangle} color="#EF4444" to="/admin/live" />
+          <StatCard title="Alerts / Delayed" value={stats.delayedAlerts} icon={AlertTriangle} color="#EF4444" to="/admin/live" />
         </AnimatedCard>
       </div>
 
@@ -231,7 +255,7 @@ export const AdminDashboard: React.FC = () => {
               Status Distribution
             </h3>
             <div className="space-y-4">
-              {STATUS_SEGMENTS.map((seg) => (
+              {stats.statusDistribution.map((seg) => (
                 <div key={seg.label}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
@@ -245,7 +269,7 @@ export const AdminDashboard: React.FC = () => {
                     <div
                       className="h-full rounded-full animate-bar-grow"
                       style={{
-                        width: `${(seg.count / total) * 100}%`,
+                        width: total > 0 ? `${(seg.count / total) * 100}%` : '0%',
                         background: seg.color,
                       }}
                     />

@@ -40,23 +40,30 @@ const ADMIN: NavSection = {
     { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/admin/fleet', label: 'Fleet Monitor', icon: Truck },
     { to: '/admin/live', label: 'Live Operations', icon: Radio },
-    { to: '/admin/manifests', label: 'Manifests', icon: ClipboardList },
+    { to: '/admin/manifests', label: 'Manifests', icon: ClipboardList, end: true },
     { to: '/admin/requests', label: 'Client Requests', icon: Search },
     { to: '/admin/invoices', label: 'Invoices', icon: Receipt },
     { to: '/admin/users', label: 'Users', icon: Users },
+    { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
     { to: '/admin/manifests/new', label: 'Create Manifest', icon: FilePlus },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ],
 };
 
-const EXEC: NavSection = {
-  title: 'Executive',
-  items: [{ to: '/executive/analytics', label: 'Analytics', icon: BarChart3, end: true }],
+const CLIENT: NavSection = {
+  title: 'Client',
+  items: [
+    { to: '/client/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/client/track', label: 'Track Shipment', icon: Search },
+    { to: '/client/order', label: 'Place Order', icon: FilePlus },
+    { to: '/client/invoices', label: 'Invoices', icon: Receipt },
+    { to: '/client/settings', label: 'Settings', icon: Settings },
+  ],
 };
 
 const ROLE_SECTIONS: Record<string, NavSection[]> = {
-  admin: [ADMIN, EXEC],
-  executive: [EXEC],
+  admin: [ADMIN],
+  client: [CLIENT],
 };
 
 interface SidebarProps {

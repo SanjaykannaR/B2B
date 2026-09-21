@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import type { RootState } from '../../store/store';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
 import { getManifests } from '../../services/manifestApi';
 import { getMyInvoices, markPaid } from '../../services/invoiceApi';
 import { getErrorMessage } from '../../services/errorMessage';
@@ -296,16 +296,13 @@ export default function ClientDashboard() {
     <div className="dash-container min-h-screen bg-[#f5f6f8] font-sans text-slate-900 flex flex-col">
       <style>{dashboardStyles}</style>
 
-      {/* ── Global Navbar ── */}
-      <ClientNavbar active="dashboard" />
-
-      <div className="flex-1 max-w-7xl mx-auto w-full space-y-6 md:space-y-8 p-5 md:p-10 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
+      <div className="flex-1 p-5 sm:p-7 lg:p-8 max-w-[2560px] mx-auto w-full space-y-6 md:space-y-7 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
 
         {/* ═══ Header ═══ */}
         <div className="dash-header flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-700 ease-out">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-slate-900">
-              Welcome back, <span className="text-orange-500">{user?.name?.split(' ')[0] || 'B2B Client'}</span>
+              Welcome back, <span className="text-orange-500">{user?.firstName || 'Client'}</span>
             </h1>
             <p className="text-slate-600 font-medium text-base">{loading ? 'Loading your freight data…' : "Here's what's happening with your freight today."}</p>
           </div>

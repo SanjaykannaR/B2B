@@ -1,33 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { User, Globe, Shield, Key, Bell, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import ClientNavbar from '../../components/client/ClientNavbar';
+
+import { updateProfile, changePassword } from '../../services/authApi';
+import { getErrorMessage } from '../../services/errorMessage';
+import type { RootState } from '../../store/store';
 
 export default function ClientSettings() {
+  const user = useSelector((state: RootState) => state.auth.user);
   const [activeTab, setActiveTab] = useState('account');
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [passwords, setPasswords] = useState({ current: '', new: '' });
+  const [accountData, setAccountData] = useState({
+    companyName: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+  });
 
-  const handleSaveAccount = () => {
-    toast.success('Account details updated successfully.');
+  useEffect(() => {
+    if (user) {
+      setAccountData({
+        companyName: user.company || '',
+        contactPerson: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
+
+  const handleSaveAccount = async () => {
+    try {
+      await updateProfile({
+        name: accountData.contactPerson,
+        company: accountData.companyName,
+        email: accountData.email,
+        phone: accountData.phone,
+      });
+      toast.success('Account details updated successfully.');
+    } catch (err: any) {
+      toast.error(getErrorMessage(err, 'Failed to update account.'));
+    }
   };
 
-  const handleUpdatePassword = () => {
+  const handleUpdatePassword = async () => {
     if (!passwords.current || !passwords.new) {
       toast.error('Please fill in both password fields.');
       return;
     }
-    toast.success('Password updated securely.');
-    setPasswords({ current: '', new: '' });
+    try {
+      await changePassword(passwords.current, passwords.new);
+      toast.success('Password updated securely.');
+      setPasswords({ current: '', new: '' });
+    } catch (err: any) {
+      toast.error(getErrorMessage(err, 'Failed to update password.'));
+    }
   };
 
   const handleToggle2FA = () => {
     setIs2FAEnabled(!is2FAEnabled);
-    if (!is2FAEnabled) {
-      toast.success('Two-Factor Authentication enabled.');
-    } else {
-      toast.success('Two-Factor Authentication disabled.');
-    }
+    toast.success(is2FAEnabled ? 'Two-Factor Authentication disabled.' : 'Two-Factor Authentication enabled.');
   };
 
   const handleDeactivate = () => {
@@ -46,10 +79,6 @@ export default function ClientSettings() {
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] text-slate-900 font-sans flex flex-col relative">
-      {/* ── Global Navbar ── */}
-      <ClientNavbar active="settings" />
-
-      {/* Main Content */}
       <div className="flex-1 w-full flex flex-col items-center justify-start pt-6 md:pt-8 pb-10 md:pb-12 px-4 md:px-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out fill-mode-both">
         <div className="w-full max-w-6xl mx-auto">
           
@@ -106,19 +135,39 @@ export default function ClientSettings() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div className="space-y-2">
                           <label className="text-sm font-semibold text-slate-700">Company Name</label>
-                          <input type="text" defaultValue="Acme Logistics Corp" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
+                          <input
+                            type="text"
+                            value={accountData.companyName}
+                            onChange={(e) => setAccountData({ ...accountData, companyName: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-semibold text-slate-700">Contact Person</label>
-                          <input type="text" defaultValue="Jane Doe" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
+                          <input
+                            type="text"
+                            value={accountData.contactPerson}
+                            onChange={(e) => setAccountData({ ...accountData, contactPerson: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-semibold text-slate-700">Email Address</label>
-                          <input type="email" defaultValue="jane.doe@acmecorp.com" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
+                          <input
+                            type="email"
+                            value={accountData.email}
+                            onChange={(e) => setAccountData({ ...accountData, email: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-semibold text-slate-700">Phone Number</label>
-                          <input type="tel" defaultValue="+1 (555) 019-2831" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all" />
+                          <input
+                            type="tel"
+                            value={accountData.phone}
+                            onChange={(e) => setAccountData({ ...accountData, phone: e.target.value })}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+                          />
                         </div>
                       </div>
                     </div>
@@ -257,7 +306,6 @@ export default function ClientSettings() {
                       </div>
                     </div>
 
-                    {/* Animated Security Image from Outside */}
                     <div className="flex flex-col lg:w-1/3 items-center justify-center opacity-90 lg:border-l border-slate-100 lg:pl-8 mt-8 lg:mt-0">
                       <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f512/512.gif" alt="Animated Security Lock" width="220" height="220" className="drop-shadow-2xl opacity-80" />
                       <p className="mt-8 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">AES-256 Encrypted</p>
