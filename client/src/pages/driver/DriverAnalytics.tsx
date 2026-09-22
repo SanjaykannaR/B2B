@@ -22,7 +22,7 @@ export default function DriverAnalytics() {
   const [manifests, setManifests] = useState<ManifestItem[]>([]);
 
   useEffect(() => {
-    setManifests(getStoredManifests());
+    getStoredManifests().then(setManifests);
   }, []);
 
   const completed = manifests.filter((m) => m.status === 'Delivered').length;

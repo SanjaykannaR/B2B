@@ -11,6 +11,7 @@ interface Invoice {
   amount: number;
   dueDate: string;
   status: string;
+  manifest?: { trackingId?: string };
   manifestId?: { trackingId?: string };
   issuedDate?: string;
 }
@@ -67,9 +68,10 @@ export default function ClientInvoices() {
   }, [loadInvoices]);
 
   const filteredInvoices = invoices.filter((inv) => {
+    const trackingId = inv.manifest?.trackingId || inv.manifestId?.trackingId;
     const matchesSearch = searchQuery === '' ||
       inv.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      inv.manifestId?.trackingId?.toLowerCase().includes(searchQuery.toLowerCase());
+      trackingId?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || inv.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -181,7 +183,7 @@ export default function ClientInvoices() {
                   {filteredInvoices.map((inv) => (
                     <tr key={inv._id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 font-mono font-bold text-sm text-slate-900">{inv.invoiceNumber}</td>
-                      <td className="px-6 py-4 font-mono text-sm text-orange-500">{inv.manifestId?.trackingId || '—'}</td>
+                      <td className="px-6 py-4 font-mono text-sm text-orange-500">{inv.manifest?.trackingId || inv.manifestId?.trackingId || '—'}</td>
                       <td className="px-6 py-4 font-bold text-slate-900">{formatINR(inv.amount)}</td>
                       <td className="px-6 py-4 text-sm text-slate-600">{formatDate(inv.issuedDate)}</td>
                       <td className="px-6 py-4 text-sm text-slate-600">{formatDate(inv.dueDate)}</td>

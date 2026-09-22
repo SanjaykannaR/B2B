@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Package, Download } from 'lucide-react';
+import { ArrowLeft, Search, Package, Download, Pencil } from 'lucide-react';
 import { StatusBadge } from '../../components/admin/shared/StatusBadge';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
 import { ManifestDetailModal } from '../../components/admin/ManifestDetailModal';
+import { AssignModal } from '../../components/admin/AssignModal';
 import * as manifestApi from '../../services/manifestApi';
 import { formatDateTime } from '../../utils/formatters';
 
@@ -29,6 +30,7 @@ export const AllManifests: React.FC = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [selected, setSelected] = useState<any | null>(null);
+  const [assignManifest, setAssignManifest] = useState<any | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -39,21 +41,27 @@ export const AllManifests: React.FC = () => {
     setPage(1);
   }, [search, statusFilter]);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        const res = await manifestApi.getManifests({ page: 1, limit: pageSize });
-        const data = res.manifests || res || [];
-        setManifests(data.length > 0 ? data : DEMO_MANIFESTS);
-      } catch {
-        setManifests(DEMO_MANIFESTS);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [pageSize]);
+  const loadManifests = async () => {
+    try {
+      setLoading(true);
+      const res = await manifestApi.getManifests({ page: 1, limit: pageSize });
+      const data = res.manifests || res || [];
+      setManifests(data.length > 0 ? data : DEMO_MANIFESTS);
+    } catch {
+      setManifests(DEMO_MANIFESTS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadManifests(); }, [pageSize]);
+
+  const handleAction = (action: string, manifestId: string) => {
+    if (action === 'assign') {
+      const m = manifests.find((x: any) => x._id === manifestId);
+      setAssignManifest(m || { _id: manifestId });
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = manifests;
@@ -242,7 +250,19 @@ export const AllManifests: React.FC = () => {
                         {m.cargoDetails?.totalWeightKg ? `${m.cargoDetails.totalWeightKg.toLocaleString()} kg` : '—'}
                       </td>
                       <td className="hidden lg:table-cell px-5 py-3.5 whitespace-nowrap text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
-                        {m.vehicle?.registrationNumber || '—'}
+                        <span className="flex items-center gap-1.5">
+                          {m.vehicle?.registrationNumber || '—'}
+                          {m.status === 'ASSIGNED' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleAction('assign', m._id); }}
+                              className="p-1 rounded-md transition-colors hover:bg-[var(--color-surface-hover)]"
+                              style={{ color: 'var(--color-accent)' }}
+                              title="Change driver"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                          )}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={m.status} />
@@ -311,11 +331,21 @@ export const AllManifests: React.FC = () => {
         </div>
       </AnimatedCard>
 
-      {/* Row click → detail modal (read-only) */}
+      {/* Row click → detail modal */}
       <ManifestDetailModal
         isOpen={!!selected}
         onClose={() => setSelected(null)}
         manifest={selected}
+        onAction={handleAction}
+      />
+
+      {/* Assign Driver Modal */}
+      <AssignModal
+        isOpen={!!assignManifest}
+        onClose={() => setAssignManifest(null)}
+        manifestId={assignManifest?._id || ''}
+        manifestLabel={assignManifest?.trackingId ? `#${assignManifest.trackingId}` : ''}
+        onAssigned={loadManifests}
       />
     </div>
   );

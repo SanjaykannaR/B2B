@@ -189,7 +189,7 @@ export default function DriverDashboard({ onNavigateToDelivery }: DriverDashboar
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    setManifests(getStoredManifests());
+    getStoredManifests().then(setManifests);
   }, []);
 
   useEffect(() => {

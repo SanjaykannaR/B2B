@@ -11,8 +11,6 @@ export default function PlaceOrder() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
-    originCity: '',
-    originAddress: '',
     destinationCity: '',
     destinationAddress: '',
     cargoDescription: '',
@@ -21,6 +19,7 @@ export default function PlaceOrder() {
     pickupDate: '',
     notes: '',
   });
+  const [createdTrackingId, setCreatedTrackingId] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,15 +27,14 @@ export default function PlaceOrder() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.originCity || !form.destinationCity || !form.weight || !form.pickupDate) {
+    if (!form.destinationCity || !form.weight || !form.pickupDate) {
       toast.error('Please fill in all required fields.');
       return;
     }
     setLoading(true);
     try {
-      await createManifest({
+      const res = await createManifest({
         routing: {
-          origin: { city: form.originCity, address: form.originAddress },
           destination: { city: form.destinationCity, address: form.destinationAddress },
         },
         cargoDetails: {
@@ -47,6 +45,8 @@ export default function PlaceOrder() {
         scheduledPickup: form.pickupDate,
         notes: form.notes,
       });
+      const tid = res?.manifest?.trackingId || res?.trackingId || '';
+      setCreatedTrackingId(tid);
       setSuccess(true);
       toast.success('Order placed successfully!');
     } catch (err: any) {
@@ -65,10 +65,17 @@ export default function PlaceOrder() {
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
             <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Order Placed!</h2>
-            <p className="text-slate-600 mb-8">Your freight request has been submitted. Our team will review and assign a vehicle shortly.</p>
+            <p className="text-slate-600 mb-2">Your freight request has been submitted.</p>
+            {createdTrackingId && (
+              <p className="text-sm mb-6">
+                <span className="text-slate-500">Tracking ID: </span>
+                <span className="font-bold text-orange-500 font-mono">{createdTrackingId}</span>
+              </p>
+            )}
+            <p className="text-slate-500 text-xs mb-6">Our team will review and assign a vehicle shortly.</p>
             <div className="flex gap-3">
               <button
-                onClick={() => { setSuccess(false); setForm({ originCity: '', originAddress: '', destinationCity: '', destinationAddress: '', cargoDescription: '', weight: '', volume: '', pickupDate: '', notes: '' }); }}
+                onClick={() => { setSuccess(false); setCreatedTrackingId(''); setForm({ destinationCity: '', destinationAddress: '', cargoDescription: '', weight: '', volume: '', pickupDate: '', notes: '' }); }}
                 className="flex-1 px-6 py-3 border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-50 transition-all"
               >
                 New Order
@@ -106,29 +113,6 @@ export default function PlaceOrder() {
               <MapPin size={18} className="text-orange-500" /> Route Details
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase">Origin City *</label>
-                <input
-                  type="text"
-                  name="originCity"
-                  value={form.originCity}
-                  onChange={handleChange}
-                  placeholder="e.g., Mumbai"
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase">Origin Address</label>
-                <input
-                  type="text"
-                  name="originAddress"
-                  value={form.originAddress}
-                  onChange={handleChange}
-                  placeholder="Full pickup address"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all"
-                />
-              </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase">Destination City *</label>
                 <input

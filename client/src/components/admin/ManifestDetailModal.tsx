@@ -147,8 +147,8 @@ export const ManifestDetailModal: React.FC<ManifestDetailModalProps> = ({ isOpen
             className="p-4 border-t flex justify-end gap-2 shrink-0"
             style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface)' }}
           >
-            {manifest.status === 'PENDING' && (
-              <ActionBtn onClick={() => handle('assign')} color="#3B82F6" icon={Truck} label="Assign Vehicle" />
+            {['PENDING', 'APPROVED'].includes(manifest.status) && manifest.requestStatus !== 'REJECTED' && (
+              <ActionBtn onClick={() => handle('assign')} color="#3B82F6" icon={Truck} label="Assign Driver" />
             )}
             {manifest.status === 'ASSIGNED' && (
               <ActionBtn onClick={() => handle('start')} color="#10B981" icon={Play} label="Start Trip" />

@@ -15,6 +15,8 @@ interface RouteEfficiencyChartProps {
 }
 
 export default function RouteEfficiencyChart({ data }: RouteEfficiencyChartProps) {
+  const corridors = data?.corridors || [];
+
   return (
     <div className="card" style={{ padding: '1.5rem', backgroundColor: '#FFFFFF', height: '100%', minWidth: 0, maxWidth: '100%' }}>
       <div style={{ marginBottom: '1rem' }}>
@@ -28,7 +30,7 @@ export default function RouteEfficiencyChart({ data }: RouteEfficiencyChartProps
 
       <div style={{ width: '100%', height: 280 }}>
         <ResponsiveContainer>
-          <BarChart data={data.corridors} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={4}>
+          <BarChart data={corridors} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={4}>
             <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
             <XAxis
               dataKey="corridor"

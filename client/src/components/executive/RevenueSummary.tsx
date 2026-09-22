@@ -21,7 +21,7 @@ function formatCurrency(value: number): string {
 }
 
 export default function RevenueSummary({ data }: RevenueSummaryProps) {
-  const rows = data.monthly.map((row) => ({
+  const rows = (data?.monthly || []).map((row) => ({
     month: row.month,
     shipments: row.shipments,
     revenue: row.revenue,
@@ -49,7 +49,7 @@ export default function RevenueSummary({ data }: RevenueSummaryProps) {
             fontFamily: "'IBM Plex Mono', monospace",
           }}
         >
-          ${(data.totalRevenue / 1000000).toFixed(1)}M total
+          ${(data?.totalRevenue ? data.totalRevenue / 1000000 : 0).toFixed(1)}M total
         </span>
       </div>
 

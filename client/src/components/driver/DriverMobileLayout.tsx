@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { useAuth } from '../../hooks/useAuth';
+import { logoutUser } from '../../store/authSlice';
 import { getUnreadCount } from '../../services/notificationService';
-import { FiBell, FiBarChart2 } from 'react-icons/fi';
-import { BiSignal4 } from 'react-icons/bi';
-import { BsWifi, BsBatteryFull } from 'react-icons/bs';
+import { FiBell, FiLogOut } from 'react-icons/fi';
 
 const TRUCK_BG = encodeURIComponent(`
 <svg xmlns="http://www.w3.org/2000/svg" width="840" height="240" viewBox="0 0 840 240" fill="none" stroke="#FFFFFF" stroke-width="3">
@@ -20,46 +20,10 @@ const TRUCK_BG = encodeURIComponent(`
   <path d="M-10 212 H850" stroke-dasharray="18 14" stroke-opacity="0.4"/>
 </svg>`);
 
-function StatusBar() {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    const intervalId = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const time = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-
-  return (
-    <div
-      style={{
-        flexShrink: 0,
-        height: 22,
-        backgroundColor: '#0B1222',
-        color: '#CBD5E1',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 1.25rem',
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: '0.6875rem',
-        fontWeight: 600,
-        letterSpacing: '0.03em',
-      }}
-    >
-      <span>{time}</span>
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-        <BiSignal4 size={14} />
-        <BsWifi size={15} />
-        <BsBatteryFull size={16} />
-      </span>
-    </div>
-  );
-}
-
 export default function DriverMobileLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const { user } = useAuth();
   const [unread, setUnread] = useState(0);
 
@@ -76,11 +40,14 @@ export default function DriverMobileLayout() {
   const firstName = user?.name?.split(' ')[0] ?? 'Driver';
   const initial = (user?.name?.charAt(0) ?? 'D').toUpperCase();
 
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate('/login');
+  };
+
   return (
     <div className="b2b-phone-stage">
       <div className="b2b-phone-frame">
-        <StatusBar />
-
         <header
           style={{
             flexShrink: 0,
@@ -198,9 +165,9 @@ export default function DriverMobileLayout() {
             </button>
 
             <button
-              onClick={() => navigate('/driver/analytics')}
-              aria-label="Analytics"
-              title="Analytics"
+              onClick={handleLogout}
+              aria-label="Logout"
+              title="Logout"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -208,14 +175,14 @@ export default function DriverMobileLayout() {
                 width: 38,
                 height: 38,
                 borderRadius: '0.75rem',
-                border: '1px solid rgba(255, 107, 44, 0.4)',
-                backgroundColor: 'rgba(255, 107, 44, 0.16)',
-                color: '#FFB48A',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                backgroundColor: 'rgba(239, 68, 68, 0.16)',
+                color: '#FCA5A5',
                 cursor: 'pointer',
                 flexShrink: 0,
               }}
             >
-              <FiBarChart2 size={17} strokeWidth={2.5} />
+              <FiLogOut size={17} strokeWidth={2.5} />
             </button>
           </div>
         </header>

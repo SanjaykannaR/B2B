@@ -17,17 +17,6 @@ export const login = async (email: string, password: string) => {
 };
 
 /**
- * Sends a POST request to register a new user account.
- * @param userData - The form data containing name, email, password, and role
- * @returns Promise with response containing the newly registered user details
- */
-export const register = async (userData: Record<string, any>) => {
-  // Call POST /auth/register with user input details
-  const response = await api.post('/auth/register', userData);
-  return response.data;
-};
-
-/**
  * Sends a GET request to fetch the profile details of the currently authenticated user.
  * @returns Promise with response containing current user profile information
  */

@@ -47,13 +47,13 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
   );
 
   useEffect(() => {
-    const loaded = getManifestById(currentManifestId);
-    if (loaded) {
-      setManifest(loaded);
-    } else {
-      const fallback = getManifestById('TRK-8902-NY');
-      setManifest(fallback);
-    }
+    getManifestById(currentManifestId).then((loaded) => {
+      if (loaded) {
+        setManifest(loaded);
+      } else {
+        getManifestById('TRK-8902-NY').then(setManifest);
+      }
+    });
   }, [currentManifestId]);
 
   if (!manifest) {
@@ -64,32 +64,32 @@ export default function ActiveDelivery({ manifestId = 'TRK-8902-NY', onBack }: A
     );
   }
 
-  const handleStartTrip = () => {
+  const handleStartTrip = async () => {
     startTimer();
-    const updated = updateManifestStatus(manifest.id, 'In-Transit', 'Trip started by driver. Live timer initiated.');
+    const updated = await updateManifestStatus(manifest.id, 'In-Transit', 'Trip started by driver. Live timer initiated.');
     if (updated) setManifest(updated);
   };
 
-  const handleReportDelaySubmit = (e: React.FormEvent) => {
+  const handleReportDelaySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const noteText = customDelayNote
       ? `${delayReason}: ${customDelayNote}`
       : `Delay reported: ${delayReason}`;
 
-    const updated = updateManifestStatus(manifest.id, 'Delayed', noteText);
+    const updated = await updateManifestStatus(manifest.id, 'Delayed', noteText);
     if (updated) setManifest(updated);
     setShowDelayModal(false);
     setCustomDelayNote('');
   };
 
-  const handleCompleteDeliverySubmit = (e: React.FormEvent) => {
+  const handleCompleteDeliverySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearTimer();
     const noteText = deliveryNotes
       ? `Delivery completed. Notes: ${deliveryNotes}`
       : 'Delivery completed successfully and verified.';
 
-    const updated = updateManifestStatus(manifest.id, 'Delivered', noteText);
+    const updated = await updateManifestStatus(manifest.id, 'Delivered', noteText);
     if (updated) setManifest(updated);
     setShowCompleteModal(false);
   };

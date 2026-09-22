@@ -6,7 +6,8 @@ interface DeliveryPerformanceProps {
 }
 
 export default function DeliveryPerformance({ data }: DeliveryPerformanceProps) {
-  const total = data.breakdown.reduce((sum, slice) => sum + slice.value, 0);
+  const breakdown = data?.breakdown || [];
+  const total = breakdown.reduce((sum, slice) => sum + slice.value, 0);
 
   return (
     <div className="card" style={{ padding: '1.5rem', backgroundColor: '#FFFFFF', height: '100%', minWidth: 0, maxWidth: '100%' }}>
@@ -30,7 +31,7 @@ export default function DeliveryPerformance({ data }: DeliveryPerformanceProps) 
             fontFamily: "'IBM Plex Mono', monospace",
           }}
         >
-          {data.onTimeRate.toFixed(1)}% on-time
+          {data?.onTimeRate?.toFixed(1) ?? '0'}% on-time
         </span>
       </div>
 
@@ -38,7 +39,7 @@ export default function DeliveryPerformance({ data }: DeliveryPerformanceProps) 
         <ResponsiveContainer>
           <PieChart>
             <Pie
-              data={data.breakdown}
+              data={breakdown}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -51,14 +52,14 @@ export default function DeliveryPerformance({ data }: DeliveryPerformanceProps) 
               label={({ name, percent }) => `${name} ${(Number(percent) * 100).toFixed(0)}%`}
               labelLine={{ stroke: '#CBD5E1' }}
             >
-              {data.breakdown.map((slice) => (
+              {breakdown.map((slice) => (
                 <Cell key={slice.name} fill={slice.color} />
               ))}
             </Pie>
             <Tooltip
               contentStyle={{ borderRadius: '0.5rem', border: '1px solid #E2E8F0', fontSize: '0.8125rem' }}
               formatter={(value: number | string, name: string) => [
-                `${value} orders (${((Number(value) / total) * 100).toFixed(1)}%)`,
+                `${value} orders (${total > 0 ? ((Number(value) / total) * 100).toFixed(1) : '0'}%)`,
                 name,
               ]}
             />

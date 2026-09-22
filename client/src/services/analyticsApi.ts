@@ -99,51 +99,48 @@ const MOCK_REVENUE_SUMMARY: RevenueSummaryData = {
   monthly: MOCK_MONTHLY_CAPACITY.monthly,
 };
 
-const MOCK_DELAY_MS = 400;
-
-function mockResolve<T>(data: T): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(data), MOCK_DELAY_MS));
-}
-
-function makeFallbackCall<T>(endpoint: string, mock: T, timeoutMs = 2500): Promise<T> {
-  return new Promise<T>((resolve) => {
+async function fetchWithFallback<T>(endpoint: string, mock: T): Promise<T> {
+  try {
+    const token = localStorage.getItem('token');
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const timer = setTimeout(() => controller.abort(), 5000);
 
-    fetch(endpoint, { signal: controller.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => {
-        clearTimeout(timer);
-        resolve((json?.data ?? json) as T);
-      })
-      .catch(() => {
-        clearTimeout(timer);
-        resolve(mock);
-      });
-  });
+    const response = await fetch(`/api${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const json = await response.json();
+    return (json?.data ?? json) as T;
+  } catch {
+    return mock;
+  }
 }
 
 export function getFleetUtilization(): Promise<FleetUtilizationData> {
-  return makeFallbackCall<FleetUtilizationData>('/api/analytics/fleet-utilization', MOCK_FLEET_UTILIZATION).catch(() => mockResolve(MOCK_FLEET_UTILIZATION));
+  return fetchWithFallback('/analytics/fleet-utilization', MOCK_FLEET_UTILIZATION);
 }
 
 export function getRouteEfficiency(): Promise<RouteEfficiencyData> {
-  return makeFallbackCall<RouteEfficiencyData>('/api/analytics/route-efficiency', MOCK_ROUTE_EFFICIENCY).catch(() => mockResolve(MOCK_ROUTE_EFFICIENCY));
+  return fetchWithFallback('/analytics/route-efficiency', MOCK_ROUTE_EFFICIENCY);
 }
 
 export function getMonthlyCapacity(): Promise<MonthlyCapacityData> {
-  return makeFallbackCall<MonthlyCapacityData>('/api/analytics/monthly-capacity', MOCK_MONTHLY_CAPACITY).catch(() => mockResolve(MOCK_MONTHLY_CAPACITY));
+  return fetchWithFallback('/analytics/monthly-capacity', MOCK_MONTHLY_CAPACITY);
 }
 
 export function getDeliveryPerformance(): Promise<DeliveryPerformanceData> {
-  return makeFallbackCall<DeliveryPerformanceData>('/api/analytics/delivery-performance', MOCK_DELIVERY_PERFORMANCE).catch(() => mockResolve(MOCK_DELIVERY_PERFORMANCE));
+  return fetchWithFallback('/analytics/delivery-performance', MOCK_DELIVERY_PERFORMANCE);
 }
 
 export function getRevenueSummary(): Promise<RevenueSummaryData> {
-  return makeFallbackCall<RevenueSummaryData>('/api/analytics/revenue-summary', MOCK_REVENUE_SUMMARY).catch(() => mockResolve(MOCK_REVENUE_SUMMARY));
+  return fetchWithFallback('/analytics/revenue-summary', MOCK_REVENUE_SUMMARY);
 }
 
 export { MOCK_MONTHLY_CAPACITY };

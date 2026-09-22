@@ -36,6 +36,8 @@ export const Invoices: React.FC = () => {
   const [generateOpen, setGenerateOpen] = useState(false);
   const [deliveredManifests, setDeliveredManifests] = useState<any[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [generateAmount, setGenerateAmount] = useState('');
+  const [selectedManifest, setSelectedManifest] = useState<any | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -104,6 +106,8 @@ export const Invoices: React.FC = () => {
 
   const openGenerate = async () => {
     setGenerateOpen(true);
+    setGenerateAmount('');
+    setSelectedManifest(null);
     try {
       const res = await manifestApi.getManifests({ status: 'DELIVERED', limit: 100 });
       const list = res?.manifests || res || [];
@@ -115,11 +119,18 @@ export const Invoices: React.FC = () => {
   };
 
   const handleGenerate = async (manifestId: string) => {
+    const amt = generateAmount ? parseFloat(generateAmount) : undefined;
+    if (generateAmount && (isNaN(amt!) || amt! <= 0)) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
     try {
       setGenerating(true);
-      await invoiceApi.generateInvoice(manifestId);
+      await invoiceApi.generateInvoice(manifestId, amt);
       toast.success('Invoice generated');
       setGenerateOpen(false);
+      setGenerateAmount('');
+      setSelectedManifest(null);
       load();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to generate invoice');
@@ -400,30 +411,58 @@ export const Invoices: React.FC = () => {
                   No delivered manifests awaiting invoices.
                 </p>
               ) : (
-                deliveredManifests.map((m) => (
-                  <button
-                    key={m._id}
-                    onClick={() => handleGenerate(m._id)}
-                    disabled={generating}
-                    className="w-full flex items-center justify-between gap-4 px-4 py-3 rounded-xl border text-left transition-all duration-200 min-h-[44px] hover:border-[var(--color-accent)] disabled:opacity-50"
-                    style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-                  >
-                    <div>
-                      <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
-                        {m.trackingId}
-                      </p>
-                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
-                        {m.client?.name || '—'} · {m.routing?.origin?.city || 'Origin'} → {m.routing?.destination?.city || 'Destination'}
-                      </p>
-                    </div>
-                    <span
-                      className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-                      style={{ background: 'var(--color-accent)' }}
+                <>
+                  {deliveredManifests.map((m) => (
+                    <button
+                      key={m._id}
+                      onClick={() => setSelectedManifest(m)}
+                      disabled={generating}
+                      className={`w-full flex items-center justify-between gap-4 px-4 py-3 rounded-xl border text-left transition-all duration-200 min-h-[44px] ${selectedManifest?._id === m._id ? 'border-[var(--color-accent)] bg-[var(--color-accent-50)]' : 'hover:border-[var(--color-accent)]'}`}
+                      style={{ background: selectedManifest?._id === m._id ? undefined : 'var(--color-surface)', borderColor: selectedManifest?._id === m._id ? undefined : 'var(--color-border)' }}
                     >
-                      Generate
-                    </span>
-                  </button>
-                ))
+                      <div>
+                        <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-primary)' }}>
+                          {m.trackingId}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                          {m.client?.name || '—'} · {m.routing?.origin?.city || 'Origin'} → {m.routing?.destination?.city || 'Destination'}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+
+                  {selectedManifest && (
+                    <div className="mt-4 space-y-3 p-4 rounded-xl border" style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface)' }}>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+                          Invoice Amount (₹) *
+                        </label>
+                        <input
+                          type="number"
+                          value={generateAmount}
+                          onChange={(e) => setGenerateAmount(e.target.value)}
+                          placeholder="e.g., 15000"
+                          min="0"
+                          step="0.01"
+                          className="w-full px-4 py-3 rounded-xl border text-sm outline-none min-h-[44px]"
+                          style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                          autoFocus
+                        />
+                        <p className="text-[10px]" style={{ color: 'var(--color-text-muted)' }}>
+                          Enter the total freight charge for this shipment
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleGenerate(selectedManifest._id)}
+                        disabled={generating}
+                        className="w-full px-4 py-3 rounded-xl text-sm font-bold text-white transition-all min-h-[44px] disabled:opacity-50"
+                        style={{ background: 'var(--color-accent)', boxShadow: '0 4px 12px rgba(255,107,44,0.3)' }}
+                      >
+                        {generating ? 'Generating...' : 'Generate Invoice'}
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

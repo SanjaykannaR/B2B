@@ -93,7 +93,8 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 
 export const generateInvoice = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const invoice = await generateInvoiceForManifest(req.params.manifestId);
+    const customAmount = req.body.amount ? Number(req.body.amount) : undefined;
+    const invoice = await generateInvoiceForManifest(req.params.manifestId, customAmount);
     if (!invoice) return sendError(res, 404, 'Manifest not found');
 
     const full = await Invoice.findById(invoice._id)

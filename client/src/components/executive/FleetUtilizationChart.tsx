@@ -6,7 +6,8 @@ interface FleetUtilizationChartProps {
 }
 
 export default function FleetUtilizationChart({ data }: FleetUtilizationChartProps) {
-  const total = data.statusDistribution.reduce((sum, slice) => sum + slice.value, 0);
+  const statusDistribution = data?.statusDistribution || [];
+  const total = statusDistribution.reduce((sum, slice) => sum + slice.value, 0);
 
   return (
     <div className="card" style={{ padding: '1.5rem', backgroundColor: '#FFFFFF', height: '100%', minWidth: 0, maxWidth: '100%' }}>
@@ -30,7 +31,7 @@ export default function FleetUtilizationChart({ data }: FleetUtilizationChartPro
             fontFamily: "'IBM Plex Mono', monospace",
           }}
         >
-          {data.utilizationRate.toFixed(1)}% utilized
+          {data?.utilizationRate?.toFixed(1) ?? '0'}% utilized
         </span>
       </div>
 
@@ -38,7 +39,7 @@ export default function FleetUtilizationChart({ data }: FleetUtilizationChartPro
         <ResponsiveContainer>
           <PieChart>
             <Pie
-              data={data.statusDistribution}
+              data={statusDistribution}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -49,7 +50,7 @@ export default function FleetUtilizationChart({ data }: FleetUtilizationChartPro
               stroke="#FFFFFF"
               strokeWidth={3}
             >
-              {data.statusDistribution.map((slice) => (
+              {statusDistribution.map((slice) => (
                 <Cell key={slice.name} fill={slice.color} />
               ))}
             </Pie>
@@ -60,7 +61,7 @@ export default function FleetUtilizationChart({ data }: FleetUtilizationChartPro
             <Legend
               wrapperStyle={{ fontSize: '0.8125rem' }}
               formatter={(value: string) => {
-                const slice = data.statusDistribution.find((s) => s.name === value);
+                const slice = statusDistribution.find((s) => s.name === value);
                 return `${value} (${slice ? Math.round((slice.value / total) * 100) : 0}%)`;
               }}
             />
