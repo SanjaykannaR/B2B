@@ -40,9 +40,8 @@ export const getInvoice = async (id: string) => {
  * @param manifestId - The ID of the delivered manifest
  * @returns Promise with the newly generated invoice
  */
-export const generateInvoice = async (manifestId: string) => {
-  // Call POST /invoices/generate/:manifestId to invoice completed shipment
-  const response = await api.post(`/invoices/generate/${manifestId}`);
+export const generateInvoice = async (manifestId: string, amount?: number) => {
+  const response = await api.post(`/invoices/generate/${manifestId}`, amount != null ? { amount } : {});
   return response.data;
 };
 

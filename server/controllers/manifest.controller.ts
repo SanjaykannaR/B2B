@@ -145,13 +145,15 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const id = toObjectId(req.params.id);
     let manifest = id ? await Manifest.findById(id).populate(POPULATE) : null;
+    let foundByTrackingId = false;
     if (!manifest) {
       manifest = await Manifest.findOne({ trackingId: req.params.id }).populate(POPULATE);
+      foundByTrackingId = true;
     }
     if (!manifest) return sendError(res, 404, 'Manifest not found');
 
     const user = req.user!;
-    if (user.role === 'client' && manifest.client.toString() !== user._id.toString()) {
+    if (user.role === 'client' && !foundByTrackingId && manifest.client.toString() !== user._id.toString()) {
       return sendError(res, 403, 'Forbidden. This manifest does not belong to you.');
     }
     if (user.role === 'driver') {

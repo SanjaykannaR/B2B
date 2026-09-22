@@ -11,6 +11,7 @@ export const DEFAULT_CONTRACT_RATE = 12; // ₹ per km
  */
 export const generateInvoiceForManifest = async (
   manifestId: string,
+  customAmount?: number,
 ): Promise<any | null> => {
   const manifest = await Manifest.findById(manifestId).populate('client');
   if (!manifest) return null;
@@ -25,7 +26,8 @@ export const generateInvoiceForManifest = async (
       : DEFAULT_CONTRACT_RATE;
 
   const distance = manifest.routing?.estimatedDistanceKm ?? 0;
-  const amount = Math.round(distance * contractRate * 100) / 100;
+  const calculatedAmount = Math.round(distance * contractRate * 100) / 100;
+  const amount = (typeof customAmount === 'number' && customAmount > 0) ? customAmount : calculatedAmount;
 
   const now = new Date();
   const dueDate = new Date(now);

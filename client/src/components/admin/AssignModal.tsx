@@ -23,13 +23,22 @@ export const AssignModal: React.FC<AssignModalProps> = ({ isOpen, onClose, manif
     if (!isOpen) return;
     setFetching(true);
     Promise.all([
-      api.get('/users/drivers').catch(() => ({ data: { users: [] } })),
-      api.get('/vehicles/available').catch(() => ({ data: { vehicles: [] } })),
+      api.get('/users/drivers'),
+      api.get('/vehicles/available'),
     ]).then(([driversRes, vehiclesRes]) => {
-      const d = driversRes.data?.users || driversRes.data || [];
-      const v = vehiclesRes.data?.vehicles || vehiclesRes.data || [];
+      const d = driversRes.data?.users || driversRes.data?.data?.users || [];
+      let v = vehiclesRes.data?.vehicles || vehiclesRes.data?.data?.vehicles || [];
       setDrivers(Array.isArray(d) ? d : []);
+      if (Array.isArray(v) && v.length === 0) {
+        return api.get('/vehicles').then((allRes) => {
+          const all = allRes.data?.vehicles || allRes.data?.data?.vehicles || [];
+          setVehicles(Array.isArray(all) ? all : []);
+        });
+      }
       setVehicles(Array.isArray(v) ? v : []);
+    }).catch(() => {
+      setDrivers([]);
+      setVehicles([]);
     }).finally(() => setFetching(false));
   }, [isOpen]);
 
@@ -114,12 +123,12 @@ export const AssignModal: React.FC<AssignModalProps> = ({ isOpen, onClose, manif
                 >
                   <option value="">-- Choose Vehicle --</option>
                   {vehicles.map((v: any) => (
-                    <option key={v._id} value={v._id}>
-                      {v.registrationNumber} {v.make ? `- ${v.make} ${v.model || ''}` : ''} ({v.maxWeightKg || '?'} kg)
+                    <option key={v._id} value={v._id} disabled={v.status !== 'AVAILABLE'}>
+                      {v.registrationNumber} {v.make ? `- ${v.make} ${v.model || ''}` : ''} ({v.capacity?.weight || v.maxWeightKg || '?'} kg) {v.status !== 'AVAILABLE' ? `[${v.status}]` : ''}
                     </option>
                   ))}
                 </select>
-                {vehicles.length === 0 && <p className="text-xs" style={{ color: '#EF4444' }}>No available vehicles found. Add a vehicle first.</p>}
+                {vehicles.length === 0 && <p className="text-xs" style={{ color: '#EF4444' }}>No vehicles found. Add a vehicle from Fleet page first.</p>}
               </div>
             </>
           )}

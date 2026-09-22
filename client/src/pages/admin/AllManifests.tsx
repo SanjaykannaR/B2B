@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Package, Download } from 'lucide-react';
+import { ArrowLeft, Search, Package, Download, Pencil } from 'lucide-react';
 import { StatusBadge } from '../../components/admin/shared/StatusBadge';
 import { AnimatedCard } from '../../components/admin/shared/AnimatedCard';
 import { Skeleton } from '../../components/admin/shared/Skeleton';
@@ -250,7 +250,19 @@ export const AllManifests: React.FC = () => {
                         {m.cargoDetails?.totalWeightKg ? `${m.cargoDetails.totalWeightKg.toLocaleString()} kg` : '—'}
                       </td>
                       <td className="hidden lg:table-cell px-5 py-3.5 whitespace-nowrap text-xs" style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-text-secondary)' }}>
-                        {m.vehicle?.registrationNumber || '—'}
+                        <span className="flex items-center gap-1.5">
+                          {m.vehicle?.registrationNumber || '—'}
+                          {m.status === 'ASSIGNED' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleAction('assign', m._id); }}
+                              className="p-1 rounded-md transition-colors hover:bg-[var(--color-surface-hover)]"
+                              style={{ color: 'var(--color-accent)' }}
+                              title="Change driver"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                          )}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5">
                         <StatusBadge status={m.status} />

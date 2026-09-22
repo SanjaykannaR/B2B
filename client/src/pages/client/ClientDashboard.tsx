@@ -311,7 +311,7 @@ export default function ClientDashboard() {
         {/* ═══ Overview Stats ═══ */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Total Shipments */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div onClick={() => navigate('/client/track')} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-500/10 hover:border-slate-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-pointer">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Package className="w-10 h-10 text-slate-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>
@@ -322,7 +322,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Active Shipments */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div onClick={() => navigate('/client/track')} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-pointer">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Activity className="w-10 h-10 text-orange-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>
@@ -333,7 +333,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Delivered Shipments */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div onClick={() => navigate('/client/track')} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-green-500/10 hover:border-green-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-pointer">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <Check className="w-10 h-10 text-green-600 group-hover:rotate-12 transition-transform duration-300" />
             </div>
@@ -344,7 +344,7 @@ export default function ClientDashboard() {
           </div>
 
           {/* Pending Invoices */}
-          <div className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-default">
+          <div onClick={() => navigate('/client/invoices')} className="bg-white rounded-2xl p-5 md:p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group cursor-pointer">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-300">
               <FileText className="w-10 h-10 text-red-600 group-hover:-rotate-12 transition-transform duration-300" />
             </div>

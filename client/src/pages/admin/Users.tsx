@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -517,14 +518,14 @@ export const Users: React.FC = () => {
       </AnimatedCard>
 
       {/* Create / Edit user modal */}
-      {formOpen && (
-        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 10000 }}>
+      {formOpen && createPortal(
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 99999 }}>
           <div className="absolute inset-0 bg-black/50" onClick={() => setFormOpen(false)} />
           <div
-            className="relative w-full max-w-lg rounded-2xl border max-h-[calc(100vh-32px)] overflow-y-auto overscroll-contain"
+            className="relative w-full max-w-lg rounded-2xl border max-h-[90vh] overflow-y-auto overscroll-contain scrollbar-hidden"
             style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-modal)' }}
           >
-            <div className="flex items-center justify-between px-5 sm:px-6 pt-4 pb-3 border-b sticky top-0 z-10" style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface-card)' }}>
+            <div className="flex items-center justify-between px-5 sm:px-6 pt-4 pb-3 border-b sticky top-0 z-20" style={{ borderColor: 'var(--color-border-light)', background: 'var(--color-surface-card)' }}>
               <div>
                 <h2 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {editing ? 'Edit User' : 'Create User'}
@@ -625,7 +626,7 @@ export const Users: React.FC = () => {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 px-5 sm:px-6 pb-5 sm:pb-6 pt-4 border-t" style={{ borderColor: 'var(--color-border-light)' }}>
               <button
                 onClick={() => setFormOpen(false)}
                 className="px-5 py-2.5 rounded-xl text-xs font-semibold border transition-all duration-200 min-h-[44px]"
@@ -643,7 +644,8 @@ export const Users: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Reset password modal */}
