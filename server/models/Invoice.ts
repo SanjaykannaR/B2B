@@ -52,6 +52,6 @@ const invoiceSchema = new Schema<IInvoice, InvoiceModel>(
 );
 
 invoiceSchema.index({ client: 1, status: 1 });
-invoiceSchema.index({ invoiceNumber: 1 });
+// invoiceNumber index is created automatically by unique:true above
 
 export const Invoice = model<IInvoice, InvoiceModel>('Invoice', invoiceSchema);

@@ -48,10 +48,22 @@ app.use(errorHandler);
 const start = async () => {
   try {
     await connectDB();
-    app.listen(env.port, () => {
-      console.log(`[server] API listening on http://localhost:${env.port} (${env.nodeEnv})`);
-    });
-    startOverdueSweep();
+    const listen = (port: number) => {
+      const server = app.listen(port, () => {
+        console.log(`[server] API listening on http://localhost:${port} (${env.nodeEnv})`);
+        startOverdueSweep();
+      });
+      server.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE') {
+          console.warn(`[server] Port ${port} is in use, trying ${port + 1}...`);
+          listen(port + 1);
+        } else {
+          console.error(`[server] Failed to listen on port ${port}:`, err.message);
+          process.exit(1);
+        }
+      });
+    };
+    listen(env.port);
   } catch (err) {
     console.error('[server] Failed to start:', err);
     process.exit(1);

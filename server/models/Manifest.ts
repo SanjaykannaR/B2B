@@ -141,7 +141,7 @@ const lastLocationSchema = new Schema<ILastLocation>(
 
 const manifestSchema = new Schema<IManifest, ManifestModel>(
   {
-    trackingId: { type: String, unique: true, index: true },
+    trackingId: { type: String, unique: true }, // index created automatically by unique:true
     client: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     gstNumber: { type: String, trim: true },
     driver: { type: Schema.Types.ObjectId, ref: 'User' },

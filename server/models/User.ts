@@ -38,7 +38,7 @@ const userSchema = new Schema<IUser, UserModel>(
   { timestamps: true },
 );
 
-userSchema.index({ email: 1 });
+// email index is created automatically by unique:true above
 userSchema.index({ role: 1 });
 userSchema.index({ role: 1, isActive: 1 });
 

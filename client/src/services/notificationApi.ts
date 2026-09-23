@@ -18,10 +18,10 @@ export interface NotificationItem {
  * Retrieves a list of in-app notifications for the logged-in user.
  * @returns Promise with list of notifications
  */
-export const getNotifications = async () => {
+export const getNotifications = async (): Promise<NotificationItem[]> => {
   // Call GET /notifications to fetch all alerts and status changes
   const response = await api.get('/notifications');
-  return response.data;
+  return response.data.notifications || response.data.data?.notifications || [];
 };
 
 /**

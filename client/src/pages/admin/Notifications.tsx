@@ -34,9 +34,8 @@ export const Notifications: React.FC = () => {
   const load = async () => {
     try {
       setLoading(true);
-      const res = await notificationApi.getNotifications();
-      const data = res.notifications || res.data?.notifications || res;
-      setNotifications(Array.isArray(data) ? data : []);
+      const data = await notificationApi.getNotifications();
+      setNotifications(data);
     } catch {
       setNotifications([]);
     } finally {

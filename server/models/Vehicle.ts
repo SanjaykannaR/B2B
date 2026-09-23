@@ -39,6 +39,6 @@ const vehicleSchema = new Schema<IVehicle, VehicleModel>(
 );
 
 vehicleSchema.index({ status: 1 });
-vehicleSchema.index({ registrationNumber: 1 });
+// registrationNumber index is created automatically by unique:true above
 
 export const Vehicle = model<IVehicle, VehicleModel>('Vehicle', vehicleSchema);

@@ -102,7 +102,7 @@ export const generateInvoice = async (req: Request, res: Response, next: NextFun
       .populate('manifest', 'trackingId currentStatus');
 
     await notify({
-      recipient: full!.client,
+      recipient: invoice.client,
       title: `Invoice generated: ${invoice.invoiceNumber}`,
       message: `Invoice ${invoice.invoiceNumber} for ${invoice.amount} ${invoice.currency} is now pending.`,
       type: 'info',
@@ -120,6 +120,11 @@ export const markPaid = async (req: Request, res: Response, next: NextFunction) 
     const id = toObjectId(req.params.id);
     const invoice = id ? await Invoice.findById(id) : null;
     if (!invoice) return sendError(res, 404, 'Invoice not found');
+
+    const user = req.user!;
+    if (user.role === 'client' && invoice.client.toString() !== user._id.toString()) {
+      return sendError(res, 403, 'Forbidden. This invoice does not belong to you.');
+    }
 
     invoice.status = 'PAID';
     invoice.paidDate = new Date();

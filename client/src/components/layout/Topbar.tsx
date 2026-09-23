@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Menu, Bell, CheckCheck, PackageSearch, Search, Truck, Receipt, Users, FileText } from 'lucide-react';
+import { Menu, Bell, CheckCheck, PackageSearch, Search, Truck, Receipt, Users, FileText, LogOut, Settings, ChevronDown } from 'lucide-react';
 import * as notificationApi from '../../services/notificationApi';
 import * as manifestApi from '../../services/manifestApi';
 import * as vehicleApi from '../../services/vehicleApi';
@@ -9,6 +9,8 @@ import * as userApi from '../../services/userApi';
 import * as invoiceApi from '../../services/invoiceApi';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { RootState } from '../../store/store';
+import type { AppDispatch } from '../../store/store';
+import { logoutUser } from '../../store/authSlice';
 
 interface SearchResult {
   id: string;
@@ -45,6 +47,7 @@ interface TopbarProps {
 
 export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((s: RootState) => s.auth);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -53,10 +56,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const [showName, setShowName] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const debouncedQuery = useDebounce(searchQuery, 300);
 
   const role = user?.role || (JSON.parse(localStorage.getItem('user') || 'null') || {}).role;
@@ -68,16 +72,33 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
   useEffect(() => {
     let mounted = true;
     notificationApi.getNotifications()
-      .then((res) => {
+      .then((data) => {
         if (!mounted) return;
-        const data = res.notifications || res.data?.notifications || res;
-        setNotifications(Array.isArray(data) && data.length > 0 ? data : DEMO_NOTIFICATIONS);
+        setNotifications(data.length > 0 ? data : DEMO_NOTIFICATIONS);
       })
       .catch(() => { if (mounted) setNotifications(DEMO_NOTIFICATIONS); });
     return () => { mounted = false; };
   }, []);
 
   useEffect(() => { setNotifOpen(false); }, []);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [userMenuOpen]);
+
+  const handleLogout = () => {
+    setUserMenuOpen(false);
+    dispatch(logoutUser());
+    navigate('/login', { replace: true });
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -487,23 +508,87 @@ export const Topbar: React.FC<TopbarProps> = ({ onMenuClick }) => {
         )}
       </div>
 
-      {/* User chip */}
-      <div className="flex items-center gap-2.5 pl-1">
+      {/* User chip + dropdown */}
+      <div className="relative" ref={userMenuRef}>
         <button
-          onClick={() => setShowName((v) => !v)}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 cursor-pointer transition-transform duration-200 hover:scale-105"
-          style={{ background: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1px rgba(255,107,44,0.4)' }}
+          onClick={() => setUserMenuOpen((v) => !v)}
+          className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all duration-200 hover:bg-black/5 min-h-[44px]"
+          style={{ color: 'var(--color-text-primary)' }}
+          aria-label="User menu"
         >
-          {initials || <PackageSearch size={16} />}
-        </button>
-        {showName && (
-          <div className="hidden sm:block min-w-0 animate-scale-in">
-            <p className="text-[13px] font-bold leading-tight truncate max-w-[140px]" style={{ color: 'var(--color-text-primary)' }}>
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+            style={{ background: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1px rgba(255,107,44,0.4)' }}
+          >
+            {initials || <PackageSearch size={14} />}
+          </div>
+          <div className="hidden sm:block min-w-0 text-left">
+            <p className="text-[13px] font-bold leading-tight truncate max-w-[120px]" style={{ color: 'var(--color-text-primary)' }}>
               {displayName}
             </p>
             <p className="text-[10px] font-semibold uppercase tracking-wider leading-tight" style={{ color: 'var(--color-accent)' }}>
               {role || 'user'}
             </p>
+          </div>
+          <ChevronDown
+            size={14}
+            className={`hidden sm:block shrink-0 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`}
+            style={{ color: 'var(--color-text-muted)' }}
+          />
+        </button>
+
+        {/* Dropdown */}
+        {userMenuOpen && (
+          <div
+            className="absolute right-0 top-full mt-2 w-[220px] rounded-2xl border overflow-hidden animate-scale-in z-50"
+            style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-modal)' }}
+          >
+            {/* Profile header */}
+            <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                  style={{ background: 'var(--color-primary)', boxShadow: 'inset 0 0 0 1px rgba(255,107,44,0.4)' }}
+                >
+                  {initials || <PackageSearch size={16} />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold truncate" style={{ color: 'var(--color-text-primary)' }}>{displayName}</p>
+                  <p className="text-[11px] truncate" style={{ color: 'var(--color-text-muted)' }}>{user?.email || ''}</p>
+                  <span
+                    className="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(255,107,44,0.12)', color: 'var(--color-accent)' }}
+                  >
+                    {role || 'user'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-2">
+              <button
+                onClick={() => { setUserMenuOpen(false); navigate('/admin/settings'); }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left"
+                style={{ color: 'var(--color-text-secondary)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <Settings size={15} className="shrink-0" />
+                Settings
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors text-left mt-0.5"
+                style={{ color: '#EF4444' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <LogOut size={15} className="shrink-0" />
+                Log out
+              </button>
+            </div>
           </div>
         )}
       </div>

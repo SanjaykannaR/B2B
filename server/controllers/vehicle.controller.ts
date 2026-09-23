@@ -88,7 +88,7 @@ const mapVehicleInput = (body: Record<string, any>) => {
     maxVolumeCubicMeters: Number(
       body.volumeCapacity ?? capacity.volume ?? body.maxVolumeCubicMeters ?? 0,
     ),
-    status: body.status ?? 'AVAILABLE',
+    status: body.status,
     currentDriver: body.currentDriver ?? body.driverId,
     fuelEfficiencyKmPerLiter: Number(body.fuelEfficiency ?? body.fuelEfficiencyKmPerLiter ?? 0),
     lastMaintenanceDate: body.lastMaintenanceDate,
@@ -101,14 +101,15 @@ export const createVehicle = async (req: Request, res: Response, next: NextFunct
     if (!data.registrationNumber || !data.make || !data.model) {
       return sendError(res, 400, 'registrationNumber, make and model are required');
     }
-    if (!VEHICLE_STATUSES.includes(data.status)) {
+    const status = data.status || 'AVAILABLE';
+    if (!VEHICLE_STATUSES.includes(status)) {
       return sendError(res, 400, 'Invalid vehicle status');
     }
 
     const dup = await Vehicle.findOne({ registrationNumber: data.registrationNumber });
     if (dup) return sendError(res, 409, 'A vehicle with this registration number already exists');
 
-    const vehicle = await Vehicle.create(data);
+    const vehicle = await Vehicle.create({ ...data, status });
     return sendSuccess(
       res,
       { vehicle: serializeVehicle(vehicle) },
