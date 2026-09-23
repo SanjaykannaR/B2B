@@ -74,6 +74,7 @@ export default function App() {
       <Route element={<ProtectedRoute allowedRoles={['driver', 'admin']} />}>
         <Route element={<DriverMobileLayout />}>
           <Route path="/driver" element={<DriverDashboard />} />
+          <Route path="/driver/dashboard" element={<DriverDashboard />} />
           <Route path="/driver/analytics" element={<DriverAnalytics />} />
           <Route path="/driver/notifications" element={<DriverNotifications />} />
           <Route path="/driver/delivery/:id" element={<ActiveDeliveryRoute />} />

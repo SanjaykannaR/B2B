@@ -4,6 +4,7 @@ import { StepPartner } from './StepPartner';
 import { StepCargo } from './StepCargo';
 import { StepRoute } from './StepRoute';
 import * as manifestApi from '../../../services/manifestApi';
+import { getErrorMessage } from '../../../services/errorMessage';
 
 const STEPS = [
   { id: 1, name: 'Partner & Route' },
@@ -15,6 +16,7 @@ export const WizardContainer: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
+    clientId: '',
     clientName: '',
     origin: { address: '', city: '', state: '', zipCode: '' },
     destination: { address: '', city: '', state: '', zipCode: '' },
@@ -31,13 +33,25 @@ export const WizardContainer: React.FC = () => {
   const update = (patch: Partial<typeof data>) => setData((d) => ({ ...d, ...patch }));
 
   const submit = async () => {
+    if (!data.clientId && !data.clientName.trim()) {
+      alert('Please select a client before creating the manifest.');
+      return;
+    }
+    if (!data.description.trim()) {
+      alert('Please enter a cargo description.');
+      return;
+    }
+    if (!data.weight || data.weight <= 0) {
+      alert('Please enter a cargo weight greater than 0 kg.');
+      return;
+    }
     try {
       setLoading(true);
       await manifestApi.createManifest(data as any);
       alert('Manifest created successfully!');
     } catch (e) {
       console.error(e);
-      alert('Error creating manifest');
+      alert(getErrorMessage(e, 'Error creating manifest'));
     } finally {
       setLoading(false);
     }

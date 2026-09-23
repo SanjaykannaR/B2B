@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiBell, FiArrowLeft, FiChevronDown, FiSend, FiX } from 'react-icons/fi';
 import {
@@ -42,6 +42,7 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
   const [notifications, setNotifications] = useState<DriverNotification[]>(() => getNotifications());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   if (!open && variant !== 'page') return null;
 
@@ -53,8 +54,14 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
   const unread = notifications.filter((n) => !n.isRead).length;
 
   const handleToggle = (id: string) => {
+    const expanding = expandedId !== id;
     refresh(markRead(id));
     setExpandedId((prev) => (prev === id ? null : id));
+    if (expanding) {
+      setTimeout(() => {
+        cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
+    }
   };
 
   const handleQuickReply = (id: string, text: string) => {
@@ -97,6 +104,7 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
         return (
           <div
             key={n.id}
+            ref={(el) => { cardRefs.current[n.id] = el; }}
             className="b2b-tap"
             onClick={() => handleToggle(n.id)}
             style={{
@@ -107,9 +115,10 @@ export default function NotificationsPanel({ open = false, onClose = () => {}, o
               borderRadius: '0.875rem',
               boxShadow: '0 1px 3px rgba(26, 29, 38, 0.06)',
               overflow: 'hidden',
+              flexShrink: 0,
             }}
           >
-            <div style={{ padding: '0.75rem 0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div style={{ padding: '1.25rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span
                   style={{

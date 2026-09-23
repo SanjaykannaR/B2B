@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import * as userApi from '../../../services/userApi';
 
 interface StepPartnerProps {
   data: any;
@@ -8,7 +9,45 @@ interface StepPartnerProps {
 const inputCls = `w-full px-4 py-2.5 rounded-xl text-sm outline-none transition-all duration-200
   focus:ring-2 focus:ring-[var(--color-accent)] border`;
 
+const DEMO_CLIENTS = [
+  { _id: 'c1', company: 'Acme Industries', firstName: 'Rajesh', lastName: 'Kumar' },
+  { _id: 'c2', company: 'GlobalTrade Exports', firstName: 'Priya', lastName: 'Sharma' },
+  { _id: 'c3', company: 'FastFreight Logistics', firstName: 'Amit', lastName: 'Patel' },
+  { _id: 'c4', company: 'QuickShip Solutions', firstName: 'Sneha', lastName: 'Reddy' },
+  { _id: 'c5', company: 'LogiPrime Transport', firstName: 'Vikram', lastName: 'Singh' },
+];
+
+const clientLabel = (c: any) =>
+  c.company || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Unknown Client';
+
 export const StepPartner: React.FC<StepPartnerProps> = ({ data, updateData }) => {
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await userApi.getUsers({ role: 'client', isActive: true });
+        const list = res.users || res || [];
+        setClients(list.length > 0 ? list : DEMO_CLIENTS);
+      } catch {
+        setClients(DEMO_CLIENTS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const onSelectClient = (clientId: string) => {
+    const selected = clients.find((c) => c._id === clientId);
+    updateData({
+      clientId,
+      clientName: selected ? clientLabel(selected) : '',
+    });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -18,10 +57,31 @@ export const StepPartner: React.FC<StepPartnerProps> = ({ data, updateData }) =>
         </p>
       </div>
 
+      {/* Client Selection */}
+      <div>
+        <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+          Client
+        </label>
+        <select
+          className={inputCls}
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+          value={data.clientId || ''}
+          onChange={(e) => onSelectClient(e.target.value)}
+          disabled={loading}
+        >
+          <option value="">{loading ? 'Loading clients…' : 'Select a client…'}</option>
+          {clients.map((c) => (
+            <option key={c._id} value={c._id}>
+              {clientLabel(c)}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Client Name */}
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
-          Client Name
+          Client Name (optional — for a client not listed above)
         </label>
         <input
           type="text"
