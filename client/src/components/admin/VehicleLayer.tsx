@@ -190,8 +190,14 @@ export const VehicleLayer: React.FC<VehicleLayerProps> = ({
   const isZoomingRef = useRef(false);
   const onSelectRef = useRef(onSelect);
   const selectedRef = useRef(selectedId);
-  onSelectRef.current = onSelect;
-  selectedRef.current = selectedId;
+
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
+
+  useEffect(() => {
+    selectedRef.current = selectedId;
+  }, [selectedId]);
 
   /* ---------- pause during zoom to prevent projection mismatch ---------- */
   useEffect(() => {

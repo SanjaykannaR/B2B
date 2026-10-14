@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { User, Globe, Shield, Key, Bell, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { updateProfile, changePassword } from '../../services/authApi';
 import { getErrorMessage } from '../../services/errorMessage';
+import { updateUser } from '../../store/authSlice';
 import type { RootState } from '../../store/store';
 
 export default function ClientSettings() {
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const [activeTab, setActiveTab] = useState('account');
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
@@ -23,7 +25,7 @@ export default function ClientSettings() {
     if (user) {
       setAccountData({
         companyName: user.company || '',
-        contactPerson: user.name || '',
+        contactPerson: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
         email: user.email || '',
         phone: user.phone || '',
       });
@@ -32,12 +34,20 @@ export default function ClientSettings() {
 
   const handleSaveAccount = async () => {
     try {
-      await updateProfile({
-        name: accountData.contactPerson,
+      const parts = accountData.contactPerson.trim().split(/\s+/).filter(Boolean);
+      const firstName = parts[0] || '';
+      const lastName = parts.slice(1).join(' ');
+
+      const payload = {
+        firstName,
+        lastName,
         company: accountData.companyName,
         email: accountData.email,
         phone: accountData.phone,
-      });
+      };
+
+      const saved = await updateProfile(payload);
+      dispatch(updateUser({ ...payload, ...(saved?.user || saved?.data?.user || {}) }));
       toast.success('Account details updated successfully.');
     } catch (err: any) {
       toast.error(getErrorMessage(err, 'Failed to update account.'));

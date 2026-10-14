@@ -27,7 +27,7 @@ export const AssignModal: React.FC<AssignModalProps> = ({ isOpen, onClose, manif
       api.get('/vehicles/available'),
     ]).then(([driversRes, vehiclesRes]) => {
       const d = driversRes.data?.users || driversRes.data?.data?.users || [];
-      let v = vehiclesRes.data?.vehicles || vehiclesRes.data?.data?.vehicles || [];
+      const v = vehiclesRes.data?.vehicles || vehiclesRes.data?.data?.vehicles || [];
       setDrivers(Array.isArray(d) ? d : []);
       if (Array.isArray(v) && v.length === 0) {
         return api.get('/vehicles').then((allRes) => {

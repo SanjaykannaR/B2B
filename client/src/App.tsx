@@ -22,6 +22,7 @@ import ClientDashboard from './pages/client/ClientDashboard';
 import ClientInvoices from './pages/client/ClientInvoices';
 import TrackShipment from './pages/client/TrackShipment';
 import PlaceOrder from './pages/client/PlaceOrder';
+import ClientSettings from './pages/client/ClientSettings';
 // Driver
 import DriverMobileLayout from './components/driver/DriverMobileLayout';
 import DriverDashboard from './pages/driver/DriverDashboard';
@@ -68,6 +69,7 @@ export default function App() {
             <Route path="/client/invoices" element={<ClientInvoices />} />
             <Route path="/client/track" element={<TrackShipment />} />
             <Route path="/client/order" element={<PlaceOrder />} />
+            <Route path="/client/settings" element={<ClientSettings />} />
           </Route>
         </Route>
       </Route>

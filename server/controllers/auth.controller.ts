@@ -56,6 +56,36 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user!._id);
+    if (!user) {
+      return sendError(res, 404, 'User not found');
+    }
+
+    const { firstName, lastName, email, phone, company } = req.body;
+
+    if (firstName !== undefined) user.firstName = String(firstName).trim();
+    if (lastName !== undefined) user.lastName = String(lastName).trim();
+    if (phone !== undefined) user.phone = phone ? String(phone) : undefined;
+    if (company !== undefined) user.company = company ? String(company) : undefined;
+
+    if (email !== undefined && String(email).toLowerCase() !== user.email) {
+      const dup = await User.findOne({
+        email: String(email).toLowerCase(),
+        _id: { $ne: user._id },
+      });
+      if (dup) return sendError(res, 409, 'A user with this email already exists');
+      user.email = String(email).toLowerCase();
+    }
+
+    await user.save();
+    return sendSuccess(res, { user: sanitizeUser(user) }, 'Profile updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { currentPassword, newPassword } = req.body;

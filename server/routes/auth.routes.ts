@@ -1,7 +1,13 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import rateLimit from 'express-rate-limit';
-import { login, getMe, refresh, changePassword } from '../controllers/auth.controller';
+import {
+  login,
+  getMe,
+  refresh,
+  changePassword,
+  updateProfile,
+} from '../controllers/auth.controller';
 import { auth } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 
@@ -28,6 +34,8 @@ router.post(
 
 router.get('/me', auth, getMe);
 router.post('/refresh', auth, refresh);
+
+router.put('/profile', auth, updateProfile);
 
 router.patch(
   '/change-password',

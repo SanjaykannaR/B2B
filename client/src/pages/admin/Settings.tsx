@@ -34,8 +34,7 @@ export const Settings: React.FC = () => {
   const handleProfileSave = async () => {
     try {
       const payload = { firstName, lastName, email, phone, company };
-      const userId = user?._id || user?.id;
-      const saved = await updateProfile(payload, userId);
+      const saved = await updateProfile(payload);
       // Persist updated fields into redux + localStorage (API returns user in response.user or response.data.user)
       dispatch(updateUser({ ...payload, ...(saved?.user || saved?.data?.user || {}) }));
       setProfileSaved(true);
